@@ -1,0 +1,10 @@
+{% extends './_base.html' %}
+{% load touglates_tags %}
+{% block content %}
+<script>
+  if(window.opener && window.opener.addOptionFromPopup) {
+    window.opener.addOptionFromPopup({{ object.pk }}, "{{ object|remove_linebreaks }}", 'VotingAddress' )
+    window.close()
+  }
+</script>
+{% endblock %}

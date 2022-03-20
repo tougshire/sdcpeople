@@ -1,0 +1,146 @@
+{% extends './_form.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>{{ object }}</h2>
+  {{ form.errors }}
+  <form method="POST">
+
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+
+      <input type="hidden" name='opener' id="input_opener">
+
+      <div id="div_name_first">
+        {% include './_form_field.html' with field=form.name_first %}
+      </div>
+      <div id="div_name_middles">
+        {% include './_form_field.html' with field=form.name_middles %}
+      </div>
+      <div id="div_name_last">
+        {% include './_form_field.html' with field=form.name_last %}
+      </div>
+      <div id="div_name_common">
+        {% include './_form_field.html' with field=form.name_common %}
+      </div>
+      <div id="div_membership_status">
+        {% include './_form_field.html' with field=form.membership_status %}
+      <div id="div_voting_address">
+        {% include './_form_field.html' with field=form.voting_address %}
+      </div>
+
+      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
+      <h3>Committee Memberships</h3>
+
+      {{ submemberships.management_form }}
+      {% for submembershipform in submemberships.forms %}
+        {% if submembershipform.id.value > 0 %}
+          <div id="div_submembershipform_{{ submembershipform.id.value }}" class="submembershipformsetform"  >
+            {% for hiddenfield in submembershipform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=submembershipform.subcommittee %}
+            {% include './_form_field.html' with field=submembershipform.title %}
+            {% include './_form_field.html' with field=submembershipform.rank %}
+            {% include './_form_field.html' with field=submembershipform.DELETE %}
+          </div>
+        {% else %}
+          <div class="submembershipformsetform submembershipnewform" >
+            {% for hiddenfield in submembershipform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=submembershipform.subcommittee %}
+            {% include './_form_field.html' with field=submembershipform.title %}
+            {% include './_form_field.html' with field=submembershipform.rank %}
+            {% include './_form_field.html' with field=submembershipform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <table>
+        <tr>
+          <td><button type="button" id="button_addsubmembership">Add</button></td><td span="*"></td>
+        </tr>
+        {% for submembership in object.submembership_set.all %}
+          <tr id="tr_submembership_{{ submembership.id }}">
+            <td><button type="button" id="button_editsubmembership_{{ submembership.id }}" data-formid="div_submembershipform_{{ submembership.id }}" data-displayid="tr_submembership_{{ submembership.id }}" class="submembership_edit_button">edit</button></td><td>{{ submembership.when }}</td><td>{{ submembership.text }}</td><td>{{ submembership.is_current }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
+    </div>
+
+  </form>
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+    addRelatedPopupButton( 'id_voting_address', 'VotingAddress', '{% url "sdcpeople:votingaddress-create-popup" %}', '{% url "sdcpeople:votingaddress-update-popup" 0 %}')
+    function getControlIdsForPopups(modelName) {
+      controlIds={
+        'VotingAddress': ['id_voting_address'],
+      }
+      return controlIds[modelName]
+    }
+
+  </script>
+
+  <script>
+    function enableFormsetForm(formid, displayid) {
+      let form = document.getElementById(formid)
+      document.getElementById(formid).style.display="block"
+      document.getElementById(displayid).style.display="none"
+    }
+    function enableAddFormsetForm(formclass) {
+      let newforms = document.getElementsByClassName(formclass)
+      if( newforms.length > 0) {
+        let newform = newforms[0]
+        newform.style.display="block"
+        newform.classList.remove(formclass)
+      } else {
+        alert('please save before adding more')
+      }
+    }
+  </script>
+
+  <script>
+
+    let submembershipEditButtons = document.getElementsByClassName('submembership_edit_button')
+    for( submembershipEditButton of submembershipEditButtons){
+      submembershipEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addsubmembership').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('submembershipnewform')
+    })
+    let submembershipforms = document.getElementsByClassName("submembershipformsetform")
+    for( submembershipform of submembershipforms ){
+      submembershipform.style.display="none"
+    }
+
+    let membershipEditButtons = document.getElementsByClassName('membership_edit_button')
+    for( membershipEditButton of membershipEditButtons){
+      membershipEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+  </script>
+
+  <script>
+    addFilterInput("{{ form.voting_address.id_for_label }}")
+
+  </script>
+
+{% endblock %}
+

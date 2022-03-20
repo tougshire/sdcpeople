@@ -1,0 +1,27 @@
+{% extends './_base.html' %}
+{% block content %}
+
+<div class="list">
+  <div><a href="{% url 'sdcpeople:votingaddress-create' %}">create</a></div>
+    <div class="row rowhead">
+      {% include './_list_head.html' with field='' %}
+      {% include './_list_head.html' with field=votingaddress_labels.brand %}
+      {% include './_list_head.html' with field=votingaddress_labels.model_name %}
+      {% include './_list_head.html' with field=votingaddress_labels.model_number %}
+      {% include './_list_head.html' with field=votingaddress_labels.category %}
+      {% include './_list_head.html' with field=votingaddress_labels.primary_id_field %}
+    </div>
+    {% for votingaddress in object_list %}
+      <div class="row">
+        <div class="listfield"><a href="{% url 'sdcpeople:votingaddress-detail' votingaddress.pk %}">view</a></div>
+        {% include './_list_field.html' with field=votingaddress.brand %}
+        {% include './_list_field.html' with field=votingaddress.model_name %}
+        {% include './_list_field.html' with field=votingaddress.model_number %}
+        {% include './_list_field.html' with field=votingaddress.category %}
+        {% include './_list_field.html' with field=votingaddress.primary_id_field %}
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

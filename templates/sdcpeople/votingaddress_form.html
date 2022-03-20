@@ -1,0 +1,49 @@
+{% extends './_form.html' %}
+{% load touglates_tags %}
+{% block content %}
+  {{ form.errors }}
+  <form method="POST">
+    <input type="hidden" name='opener' id="input_opener">
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+      <div id="div_locationcongress">
+        {% include './_form_field.html' with field=form.locationcongress %}
+      </div>
+      <div id="div_locationstatesenate">
+        {% include './_form_field.html' with field=form.locationstatesenate %}
+      </div>
+      <div id="div_locationstatehouse">
+        {% include './_form_field.html' with field=form.locationstatehouse %}
+      </div>
+      <div id="div_locationmagistrate">
+        {% include './_form_field.html' with field=form.locationmagistrate %}
+      </div>
+      <div id="div_locationborough">
+        {% include './_form_field.html' with field=form.locationborough %}
+      </div>
+      <div id="div_locationprecinct">
+        {% include './_form_field.html' with field=form.locationprecinct %}
+      </div>
+      <div id="div_street_address">
+        {% include './_form_field.html' with field=form.street_address %}
+      </div>
+
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+
+  <script>
+    if(window.opener) {
+      document.getElementById('input_opener').value = window.opener.location.href
+    }
+  </script>
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+  </script>
+
+{% endblock %}

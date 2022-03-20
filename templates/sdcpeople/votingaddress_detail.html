@@ -1,0 +1,12 @@
+{% extends './_base.html' %}
+{% block content %}
+
+  {% include './votingaddress_detail_include.html' %}
+
+  <div>
+  <a href="{% url 'sdcpeople:votingaddress-update' object.pk %}">Edit</a>
+  </div>
+  <div>
+  <a href="{% url 'sdcpeople:votingaddress-delete' object.pk %}">Delete</a>
+  </div>
+{% endblock %}

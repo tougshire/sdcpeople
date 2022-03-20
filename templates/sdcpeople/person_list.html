@@ -1,0 +1,390 @@
+{% extends './_base.html' %}
+{% load static %}
+{% block content %}
+  <button type="button" id='btn_showvista' class="show" data-showtext="Show the Sort Filter Form" data-hidetext="Hide the Sort Filter Form">Show Sort/Filter form</button>
+  <div id="div_vista">
+    <form id="frm_vista" name="entered_filter" method="POST">
+      <div class="vista">
+        {% csrf_token %}
+        <div class="rowlabel">
+          Sort By
+        </div>
+        <div class="controlset">
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.0 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.1 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.2 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="rowlabel">
+          Quick Search
+        </div>
+        <div class="controlset">
+          <input id="ctl_combined_text_search" name="combined_text_search" value="{{ combined_text_search }}">
+        </div>
+      </div>
+      <script>
+        var qty_searches = 10
+      </script>
+      {% for filterset in filter %}
+        <div id="div_fieldsearch__{{ forloop.counter0 }}" class="vista fieldsearch">
+          <div class="rowlabel">
+            Field Search
+          </div>
+          <div class="controlset filterselectfield">
+            <select id="ctl_filter__field__{{ forloop.counter0 }}" name="filter__fieldname__{{ forloop.counter0 }}" autocomplete="off">
+              <option value="">---</option>
+              <option value='name_middles'{% if filterset.fieldname == 'name_middles' %} selected="SELECTED"{% endif %}>{{ person_labels.name_middles }}</option>
+              <option value='voting_address__locationstateshouse'{% if filterset.fieldname == 'voting_address__location__stateshouse' %} selected="SELECTED"{% endif %}>{{ Congress }}</option>
+              <option value='voting_address__locationstatesenate'{% if filterset.fieldname == 'voting_address__location__statesenate' %} selected="SELECTED"{% endif %}>{{ Senate }}</option>
+              <option value='voting_address__locationstatehouse'{% if filterset.fieldname == 'voting_address__location__statehouse' %} selected="SELECTED"{% endif %}>{{ House }}</option>
+              <option value='voting_address__locationmagistrate'{% if filterset.fieldname == 'voting_address__location__magistrate' %} selected="SELECTED"{% endif %}>{{ Magistrate }}</option>
+              <option value='voting_address__locationborough'{% if filterset.fieldname == 'voting_address__location__borough' %} selected="SELECTED"{% endif %}>{{ Borough }}</option>
+              <option value='voting_address__locationprecinct'{% if filterset.fieldname == 'voting_address__location__precinct' %} selected="SELECTED"{% endif %}>{{Precinct }}</option>
+            </select>
+          </div>
+          <div id="div_filter__name_middles__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__name_middles__{{ forloop.counter0 }}" value="contains">
+            <input id="ctl_filter__value__name_middles__{{ forloop.counter0 }}" value="{{ filterset.value }}">
+          </div>
+          <div id="div_filter__voting_address__locationstateshouse__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__voting_address__locationstateshouse__{{ forloop.counter0 }}" value="in">
+            <select id="ctl_filter__value__voting_address__locationstateshouse__{{ forloop.counter0 }}" multiple="MULTIPLE">
+              <option value="" >-----</option>
+              {% for locationstateshouse in locationstatehouses %}
+                <option value="{{ locationstateshouse.pk }}"{% if locationstateshouse.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ locationstateshouse }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="div_filter__voting_address__locationstatesenate__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__voting_address__locationstatesenate__{{ forloop.counter0 }}" value="in">
+            <select id="ctl_filter__value__voting_address__locationstatesenate__{{ forloop.counter0 }}" multiple="MULTIPLE">
+              <option value="" >-----</option>
+              {% for locationstatesenate in locationstatesenates %}
+                <option value="{{ locationstatesenate.pk }}"{% if locationstatesenate.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ locationstatesenate }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="div_filter__voting_address__locationmagistrate__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__voting_address__locationmagistrate__{{ forloop.counter0 }}" value="in">
+            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
+              <option value="" >-----</option>
+              {% for role in roles %}
+                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="div_filter__voting_address__locationborough__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__role__{{ forloop.counter0 }}" value="in">
+            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
+              <option value="" >-----</option>
+              {% for role in roles %}
+                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="div_filter__voting_address__locationprecinct__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
+            <input type="hidden" id="ctl_filter__op__role__{{ forloop.counter0 }}" value="in">
+            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
+              <option value="" >-----</option>
+              {% for role in roles %}
+                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+
+        </div>
+      {% endfor %}
+
+      <div class="vista">
+        <div class="rowlabel">
+          Paginate By
+        </div>
+        <div class="controlset value">
+          <input name="paginate_by" value="{{ paginate_by }}">
+        </div>
+
+        <div class="rowlabel">
+          Show Fields
+        </div>
+        <div class="controlset value">
+          <select multiple="multiple" name="show_columns">
+            {% for field in showable_fields %}
+              <option value="{{ field.name }}"{% if field.name in show_columns %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="vista">
+        <div class="rowlabel">
+          Save Search
+        </div>
+        <div class="controlset">
+          <input name="vista_name" value="">
+        </div>
+        <div class="controlset">
+          <input type="checkbox" name="make_default" value="">
+        </div>
+        <div class="rowlabel">
+          &nbsp;
+        </div>
+        <div class="controlset">
+          <button type="submit" name="vista_query_submitted" value='True'>Search</button>
+        </div>
+        <div class="help_text">
+          &nbsp;
+        </div>
+      </div>
+    </form>
+    <script>
+
+      function showFilterField(select) {
+        let ctlNum = select.id.substring(19)
+        let val_control
+        for(opt of select.options) {
+          if(opt.value){
+            console.log('tp m3ia17', opt.value)
+            document.getElementById('div_filter__' + opt.value + '__' + ctlNum ).style.display="none"
+            document.getElementById('ctl_filter__op__' + opt.value + '__' + ctlNum ).removeAttribute('name')
+            val_control = document.getElementById('ctl_filter__value__' + opt.value + '__' + ctlNum )
+            val_control.removeAttribute('name')
+            if( val_control.dataset.siblings ) {
+              for(i=0; i < (val_control.dataset.siblings); i++) {
+                document.getElementById('ctl_filter__value__' + opt.value + '__' + ctlNum + '__' + i ).removeAttribute('name')
+              }
+            }
+          }
+        }
+        if(select.value) {
+          select.classList.remove('grayedout')
+          select.name="filter__fieldname__" + ctlNum
+          document.getElementById('div_filter__' + select.value  + '__' + ctlNum ).style.display="block"
+          document.getElementById('ctl_filter__op__' + select.value + '__' + ctlNum ).name="filter__op__" + ctlNum
+          val_control = document.getElementById('ctl_filter__value__' + select.value + '__' + ctlNum )
+          val_control.name="filter__value__" + ctlNum
+          if( val_control.dataset.siblings ) {
+            for(i=0; i < (val_control.dataset.siblings); i++) {
+              document.getElementById('ctl_filter__value__' + select.value + '__' + ctlNum + '__' + i ).name="filter__value__" + ctlNum
+            }
+          }
+        } else {
+          select.removeAttribute("name")
+        }
+      }
+      for( ctlNum = 0; ctlNum < qty_searches; ctlNum++ ) {
+        document.getElementById('ctl_filter__field__' + ctlNum).addEventListener('change', function(e) {
+          showFilterField(e.target)
+        })
+        showFilterField(document.getElementById('ctl_filter__field__' + ctlNum))
+        if( ctlNum < qty_searches - 1) {
+            let localCtlNum = ctlNum
+          document.getElementById('div_fieldsearch__' + ctlNum).addEventListener('click', function() {
+            document.getElementById('div_fieldsearch__' + ( localCtlNum + 1 )).style.removeProperty('display')
+          })
+        }
+      }
+    </script>
+
+
+    <h3>Default View</h3>
+    <form method="POST">
+      <div class="vista">
+        {% csrf_token %}
+        <div class="rowlabel">
+          Get Default
+        </div>
+        <div class="controlset">
+          <button type="submit" name="default_vista" value='True'>Default</button>
+        </div>
+      </div>
+    </form>
+
+
+    <h3>Saved View</h3>
+    <form method="POST">
+      <div class="vista">
+        {% csrf_token %}
+        <div class="rowlabel">
+          Get Saved View
+        </div>
+        <div class="controlset">
+          <select name="vista_name">
+            <option value=''>-----</option>
+            {% for vista in vistas%}
+              <option value="{{ vista.name }}">{{ vista.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="rowlabel">
+          Action
+        </div>
+        <div class="controlset">
+          <button type="submit" name="retrieve_vista" value="retrieve_vista">Get</button>
+          <button type="submit" name="delete_vista" value="delete">Delete</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="list">
+    <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>
+      <div class="row rowhead">
+        {% include './_list_head.html' with field='' %}
+        {% if 'name_first' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.name_first %}
+        {% endif %}
+        {% if 'name_middles' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.name_middles %}
+        {% endif %}
+        {% if 'name_last' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.name_last %}
+        {% endif %}
+        {% if 'name_common' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.name_common %}
+        {% endif %}
+        {% if 'is_quorum' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Quorum" %}
+        {% endif %}
+        {% if 'membership_status' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="membership.membership_status" %}
+        {% endif %}
+        {% if 'voting_address' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.voting_address %}
+        {% endif %}
+        {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Cong" %}
+        {% endif %}
+        {% if 'voting_address.locationstatesenate' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="SSen" %}
+        {% endif %}
+        {% if 'voting_address.locationstatehouse' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="HOD" %}
+        {% endif %}
+        {% if 'voting_address.locationmagistrate' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Mag" %}
+        {% endif %}
+        {% if 'voting_address.locationborough' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Bor" %}
+        {% endif %}
+        {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Pct" %}
+        {% endif %}
+
+
+
+      </div>
+
+      {% for person in object_list %}
+        <div class="row">
+          <div class="listfield"><a href="{% url 'sdcpeople:person-detail' person.pk %}">view</a></div>
+          {% if 'name_last' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.name_last %}
+          {% endif %}
+          {% if 'name_first' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.name_first %}
+          {% endif %}
+          {% if 'name_middles' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.name_middles %}
+          {% endif %}
+          {% if 'name_common' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.name_common %}
+          {% endif %}
+          {% if 'is_quorum' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.membership_status.is_quorum %}
+          {% endif %}
+          {% if 'voting_address' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address %}
+          {% endif %}
+          {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationcongress %}
+          {% endif %}
+          {% if 'voting_address.locationstatesenate' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationstatesenate %}
+          {% endif %}
+          {% if 'voting_address.locationstatehouse' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationcongress %}
+          {% endif %}
+          {% if 'voting_address.locationmagistrate' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationcongress %}
+          {% endif %}
+          {% if 'voting_address.locationborough' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationstatesenate %}
+          {% endif %}
+          {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationprecinct %}
+          {% endif %}
+
+        </div>
+      {% endfor %}
+
+    </div>
+  </div>
+  <div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a id="a_first" href="?page=1">&laquo; first</a>
+            <a id="a_previous" href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a id="a_next" href="?page={{ page_obj.next_page_number }}">next</a>
+            <a id="a_last" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+  </div>
+
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+
+  <script>
+
+    for( paginator of ['a_first', 'a_previous', 'a_next', 'a_last']) {
+      if(!(document.getElementById(paginator)==null) ) {
+        document.getElementById(paginator).addEventListener('click', function(e) {
+          e.preventDefault()
+          document.getElementById('frm_vista').action = e.target.href
+          document.getElementById('frm_vista').submit()
+        });
+      }
+    }
+  </script>
+
+
+  <script>
+    document.getElementById('btn_showvista').addEventListener('click', function(e){
+      e.preventDefault
+      toggleVisibility('div_vista', 'btn_showvista')
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if(e.ctrlKey) {
+        if(e.shiftKey) {
+          if(e.which==70) {
+            e.preventDefault();
+             toggleVisibility('div_vista', 'btn_showvista')
+          }
+        }
+      }
+    });
+    toggleVisibility('div_vista', 'btn_showvista', 0 )
+
+  </script>
+{% endblock %}
