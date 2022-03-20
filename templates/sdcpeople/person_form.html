@@ -44,8 +44,7 @@
               {{ hiddenfield }}
             {% endfor %}
             {% include './_form_field.html' with field=submembershipform.subcommittee %}
-            {% include './_form_field.html' with field=submembershipform.title %}
-            {% include './_form_field.html' with field=submembershipform.rank %}
+            {% include './_form_field.html' with field=submembershipform.position %}
             {% include './_form_field.html' with field=submembershipform.DELETE %}
           </div>
         {% else %}
@@ -54,8 +53,7 @@
               {{ hiddenfield }}
             {% endfor %}
             {% include './_form_field.html' with field=submembershipform.subcommittee %}
-            {% include './_form_field.html' with field=submembershipform.title %}
-            {% include './_form_field.html' with field=submembershipform.rank %}
+            {% include './_form_field.html' with field=submembershipform.position %}
             {% include './_form_field.html' with field=submembershipform.DELETE %}
           </div>
         {% endif %}

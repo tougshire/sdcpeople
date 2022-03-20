@@ -163,6 +163,7 @@ class SubMembershipForm(ModelForm):
         fields = [
             'person',
             'subcommittee',
+            'position',
         ]
 
 class MembershipApplicationForm(ModelForm):
