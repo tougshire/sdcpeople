@@ -1,17 +1,27 @@
   <h2>{{ object }}</h2>
 
   <div class="detail">
-    {% include './_detail_field.html' with label=person_labels.name_last field=object.name_last %}
-    {% include './_detail_field.html' with label=person_labels.name_first field=object.name_first %}
-    {% include './_detail_field.html' with label=person_labels.name_common field=object.name_common %}
-    {% include './_detail_field.html' with label=person_labels.name_middles field=object.name_middles %}
-    {% include './_detail_field.html' with label=person_labels.membership_status field=object.membership_status %}
-    {% include './_detail_field.html' with label=person_labels.voting_address field=object.voting_address %}
-    {% include './_detail_field.html' with label="Congress" field=object.voting_address.locationcongress %}
-    {% include './_detail_field.html' with label="State Senate" field=object.voting_address.locationstatesenate %}
-    {% include './_detail_field.html' with label="House of Delegates" field=object.voting_address.locationstatehouse %}
-    {% include './_detail_field.html' with label="Magistrate" field=object.voting_address.locationmagistrate %}
-    {% include './_detail_field.html' with label="Borough" field=object.voting_address.locationborough %}
-    {% include './_detail_field.html' with label="Precinct" field=object.voting_address.locationprecinct %}
+    {% include 'touglates/detail_field.html' with label=person_labels.name_last field=object.name_last %}
+    {% include 'touglates/detail_field.html' with label=person_labels.name_first field=object.name_first %}
+    {% include 'touglates/detail_field.html' with label=person_labels.name_common field=object.name_common %}
+    {% include 'touglates/detail_field.html' with label=person_labels.name_middles field=object.name_middles %}
+    {% include 'touglates/detail_field.html' with label=person_labels.membership_status field=object.membership_status %}
+    {% include 'touglates/detail_field.html' with label=person_labels.voting_address field=object.voting_address %}
+    {% include 'touglates/detail_field.html' with label="Congress" field=object.voting_address.locationcongress %}
+    {% include 'touglates/detail_field.html' with label="State Senate" field=object.voting_address.locationstatesenate %}
+    {% include 'touglates/detail_field.html' with label="House of Delegates" field=object.voting_address.locationstatehouse %}
+    {% include 'touglates/detail_field.html' with label="Magistrate" field=object.voting_address.locationmagistrate %}
+    {% include 'touglates/detail_field.html' with label="Borough" field=object.voting_address.locationborough %}
+    {% include 'touglates/detail_field.html' with label="Precinct" field=object.voting_address.locationprecinct %}
+    {% include 'touglates/detail_field.html' with label="Phones" field="" %}
+    {% for contactvoice in object.contactvoice_set.all %}
+      {% include 'touglates/detail_field.html' with label="" field=contactvoice.number %}
+      {% if contactvoice.extra > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.extra %}{% endif %}
+      {% if contactvoice.alert > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.alert %}{% endif %}
+    {% endfor %}
+    {% include 'touglates/detail_field.html' with label="Committees" field="" %}
+    {% for submembership in object.submembership_set.all %}
+      {% include 'touglates/detail_field.html' with label="" field=submembership.subcommittee field_2=submembership.position  %}
+    {% endfor %}
 
   </div>

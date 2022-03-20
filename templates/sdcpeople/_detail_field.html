@@ -4,7 +4,38 @@
       {{ label }}
     </div>
     <div class="field">
-      {{ field }}
+      {{ before_field }}{{ before_fields }}
+      {% if field %}
+        {{ field }}
+        {% if field_2 %}
+          {{ between_fields }}
+          {{ field_2 }}
+          {% if field_3 %}
+            {{ between_fields }}
+            {{ field_3 }}
+            {% if field_4 %}
+              {{ between_fields }}
+              {{ field_4 }}
+              {% if field_5 %}
+                {{ between_fields }}
+                {{ field_5 }}
+                {% if field_6 %}
+                  {{ between_fields }}
+                  {{ field_6 }}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% elif fields %}
+        {% for field in fields %}
+          {% if not forloop.first %}
+            {{ between_fields }}
+          {% endif %}
+          {{ field }}
+        {% endfor %}
+      {% endif %}
+      {{ after_fields }}{{ after_field }}
     </div>
   </div>
 </div>

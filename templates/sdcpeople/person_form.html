@@ -28,11 +28,53 @@
       </div>
       <div id="div_membership_status">
         {% include './_form_field.html' with field=form.membership_status %}
+      </div>
       <div id="div_voting_address">
         {% include './_form_field.html' with field=form.voting_address %}
       </div>
 
+      <h4>Voice Phone</h4>
+
+      {{ contactvoices.management_form }}
+      {% for contactvoiceform in contactvoices.forms %}
+        {% if contactvoiceform.id.value > 0 %}
+          <div id="div_contactvoiceform_{{ contactvoiceform.id.value }}" class="contactvoiceformsetform"  >
+            {% for hiddenfield in contactvoiceform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=contactvoiceform.number %}
+            {% include './_form_field.html' with field=contactvoiceform.extra %}
+            {% include './_form_field.html' with field=contactvoiceform.alert %}
+            {% include './_form_field.html' with field=contactvoiceform.DELETE %}
+          </div>
+        {% else %}
+          <div class="contactvoiceformsetform contactvoicenewform" >
+            {% for hiddenfield in contactvoiceform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=contactvoiceform.number %}
+            {% include './_form_field.html' with field=contactvoiceform.extra %}
+            {% include './_form_field.html' with field=contactvoiceform.alert %}
+            {% include './_form_field.html' with field=contactvoiceform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <table>
+        <tr>
+          <td><button type="button" id="button_addcontactvoice">Add</button></td><td span="*"></td>
+        </tr>
+        {% for contactvoice in object.contactvoice_set.all %}
+          <tr id="tr_contactvoice_{{ contactvoice.id }}">
+            <td><button type="button" id="button_editcontactvoice_{{ contactvoice.id }}" data-formid="div_contactvoiceform_{{ contactvoice.id }}" data-displayid="tr_contactvoice_{{ contactvoice.id }}" class="contactvoice_edit_button">edit</button></td>
+            <td>{{ contactvoice.number }}</td>
+            <td>{{ contactvoice.extra }}</td>
+            <td>{{ contactvoice.alert }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
       {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
 
       <h3>Committee Memberships</h3>
 
@@ -127,15 +169,28 @@
       submembershipform.style.display="none"
     }
 
-    let membershipEditButtons = document.getElementsByClassName('membership_edit_button')
-    for( membershipEditButton of membershipEditButtons){
-      membershipEditButton.addEventListener('click', function(e){
+  </script>
+  <script>
+
+    let contactvoiceEditButtons = document.getElementsByClassName('contactvoice_edit_button')
+    for( contactvoiceEditButton of contactvoiceEditButtons){
+      contactvoiceEditButton.addEventListener('click', function(e){
         e.preventDefault()
         enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
       })
     }
 
+    document.getElementById('button_addcontactvoice').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('contactvoicenewform')
+    })
+    let contactvoiceforms = document.getElementsByClassName("contactvoiceformsetform")
+    for( contactvoiceform of contactvoiceforms ){
+      contactvoiceform.style.display="none"
+    }
+
   </script>
+
 
   <script>
     addFilterInput("{{ form.voting_address.id_for_label }}")

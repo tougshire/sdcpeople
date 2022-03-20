@@ -354,6 +354,18 @@ class ContactVoice(models.Model):
         max_length=50,
         help_text="The phone number"
     )
+    label = models.CharField(
+        'label',
+        max_length=50,
+        blank=True,
+        help_text="The label for this phone, such as \"Work\" or \"Home\""
+    )
+    is_mobile = models.IntegerField(
+        'is mobile',
+        default=0,
+        choices=[(0, 'Unknown'),(1, 'Not Mobile'), (2, 'Mobile')],
+        help_text="If this phone is mobile"
+    )
     extra = models.CharField(
         'extra',
         max_length=100,
