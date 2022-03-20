@@ -80,7 +80,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
         }
 
-        for formset_name in ['contactvoices', 'contacttexts', 'membershipapplications', 'duespayments']:
+        for formset_name in formset_data.keys():
 
             if(formset_data[formset_name]).is_valid():
                 formset_data[formset_name].save()
@@ -138,7 +138,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
         }
 
-        for formset_name in ['contactvoices', 'contacttexts', 'membershipapplications', 'duespayments']:
+        for formset_name in formset_data.keys():
 
             if(formset_data[formset_name]).is_valid():
                 formset_data[formset_name].save()

@@ -64,7 +64,9 @@
         </tr>
         {% for submembership in object.submembership_set.all %}
           <tr id="tr_submembership_{{ submembership.id }}">
-            <td><button type="button" id="button_editsubmembership_{{ submembership.id }}" data-formid="div_submembershipform_{{ submembership.id }}" data-displayid="tr_submembership_{{ submembership.id }}" class="submembership_edit_button">edit</button></td><td>{{ submembership.when }}</td><td>{{ submembership.text }}</td><td>{{ submembership.is_current }}</td>
+            <td><button type="button" id="button_editsubmembership_{{ submembership.id }}" data-formid="div_submembershipform_{{ submembership.id }}" data-displayid="tr_submembership_{{ submembership.id }}" class="submembership_edit_button">edit</button></td>
+            <td>{{ submembership.subcommittee }}</td>
+            <td>{{ submembership.position }}</td>
           </tr>
         {% endfor %}
       </table>

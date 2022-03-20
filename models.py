@@ -314,7 +314,7 @@ class Position(models.Model):
     def __str__(self):
 
         if self.rank < 1000:
-            return '{} ({})'.format(self.title, self.rank)
+            return self.title
 
         return self.title
 
