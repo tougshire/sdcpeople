@@ -318,6 +318,9 @@ class Position(models.Model):
 
         return self.title
 
+    class Meta:
+        ordering = ['rank', 'title']
+
 class SubMembership(models.Model):
 
     person = models.ForeignKey(
