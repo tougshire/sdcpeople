@@ -311,7 +311,7 @@ class Position(models.Model):
         help_text="A number representing the placement of this person in a list of subcommittee members - default 1000 and any lower number(0,1,2 etc) is higher on the list"
     )
 
-    def _str_(self):
+    def __str__(self):
 
         if self.rank < 1000:
             return '{} ({})'.format(self.title, self.rank)
