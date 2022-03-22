@@ -27,9 +27,10 @@ class ContactTextForm(ModelForm):
         fields = [
             'person',
             'number',
+            'label',
             'extra',
             'alert',
-            'is_primary',
+            'rank_number',
         ]
 
 class ContactVoiceForm(ModelForm):
@@ -42,7 +43,7 @@ class ContactVoiceForm(ModelForm):
             'is_mobile',
             'extra',
             'alert',
-            'is_primary',
+            'rank_number',
         ]
 
 class DuesPaymentForm(ModelForm):

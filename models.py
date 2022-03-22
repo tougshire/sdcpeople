@@ -379,11 +379,6 @@ class ContactVoice(models.Model):
         blank=True,
         help_text="Important information about calling, such as \"Don't call before 10:00am\""
     )
-    is_primary = models.BooleanField(
-        'is primary',
-        default=False,
-        help_text="If this is the primary number for voice"
-    )
 
     def __str__(self):
         return self.number
@@ -398,11 +393,21 @@ class ContactText(models.Model):
         on_delete = models.CASCADE,
         help_text="The person who is contaced with this number"
     )
-
     number = models.CharField(
         'number',
         max_length=50,
         help_text="The phone number"
+    )
+    label = models.CharField(
+        'label',
+        max_length=50,
+        blank=True,
+        help_text="The label for this phone, such as \"Work\" or \"Home\""
+    )
+    rank_number = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this phone on a list in descending order (ex: if you want this one first, give it a high number like 1000)"
     )
     extra = models.CharField(
         'extra',
@@ -416,11 +421,13 @@ class ContactText(models.Model):
         blank=True,
         help_text="Important information about texting, such as \"Don't text before 10:00am\""
     )
-    is_primary = models.BooleanField(
-        'is primary',
-        default=False,
-        help_text="If this is the primary number for text"
-    )
+
+    def __str__(self):
+        return self.number
+
+    class Meta:
+        ordering = ['-rank_number', 'number']
+
 
 class MembershipHistory(models.Model):
 
