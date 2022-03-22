@@ -38,6 +38,8 @@ class ContactVoiceForm(ModelForm):
         fields = [
             'person',
             'number',
+            'label',
+            'is_mobile',
             'extra',
             'alert',
             'is_primary',

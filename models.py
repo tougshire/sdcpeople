@@ -363,7 +363,7 @@ class ContactVoice(models.Model):
     is_mobile = models.IntegerField(
         'is mobile',
         default=0,
-        choices=[(0, 'Unknown'),(1, 'Not Mobile'), (2, 'Mobile')],
+        choices=[(0, ''),(1, 'Not Mobile'), (2, 'Mobile')],
         help_text="If this phone is mobile"
     )
     extra = models.CharField(

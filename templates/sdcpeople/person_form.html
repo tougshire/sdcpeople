@@ -15,22 +15,22 @@
       <input type="hidden" name='opener' id="input_opener">
 
       <div id="div_name_first">
-        {% include './_form_field.html' with field=form.name_first %}
+        {% include 'touglates/form_field.html' with field=form.name_first %}
       </div>
       <div id="div_name_middles">
-        {% include './_form_field.html' with field=form.name_middles %}
+        {% include 'touglates/form_field.html' with field=form.name_middles %}
       </div>
       <div id="div_name_last">
-        {% include './_form_field.html' with field=form.name_last %}
+        {% include 'touglates/form_field.html' with field=form.name_last %}
       </div>
       <div id="div_name_common">
-        {% include './_form_field.html' with field=form.name_common %}
+        {% include 'touglates/form_field.html' with field=form.name_common %}
       </div>
       <div id="div_membership_status">
-        {% include './_form_field.html' with field=form.membership_status %}
+        {% include 'touglates/form_field.html' with field=form.membership_status %}
       </div>
       <div id="div_voting_address">
-        {% include './_form_field.html' with field=form.voting_address %}
+        {% include 'touglates/form_field.html' with field=form.voting_address %}
       </div>
 
       <h4>Voice Phone</h4>
@@ -42,39 +42,39 @@
             {% for hiddenfield in contactvoiceform.hidden_fields %}
               {{ hiddenfield }}
             {% endfor %}
-            {% include './_form_field.html' with field=contactvoiceform.number %}
-            {% include './_form_field.html' with field=contactvoiceform.extra %}
-            {% include './_form_field.html' with field=contactvoiceform.alert %}
-            {% include './_form_field.html' with field=contactvoiceform.DELETE %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.number %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.label %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.extra %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.alert %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.DELETE %}
           </div>
         {% else %}
           <div class="contactvoiceformsetform contactvoicenewform" >
             {% for hiddenfield in contactvoiceform.hidden_fields %}
               {{ hiddenfield }}
             {% endfor %}
-            {% include './_form_field.html' with field=contactvoiceform.number %}
-            {% include './_form_field.html' with field=contactvoiceform.extra %}
-            {% include './_form_field.html' with field=contactvoiceform.alert %}
-            {% include './_form_field.html' with field=contactvoiceform.DELETE %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.number %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.label %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.extra %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.alert %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.DELETE %}
           </div>
         {% endif %}
       {% endfor %}
-      <table>
-        <tr>
-          <td><button type="button" id="button_addcontactvoice">Add</button></td><td span="*"></td>
-        </tr>
-        {% for contactvoice in object.contactvoice_set.all %}
-          <tr id="tr_contactvoice_{{ contactvoice.id }}">
-            <td><button type="button" id="button_editcontactvoice_{{ contactvoice.id }}" data-formid="div_contactvoiceform_{{ contactvoice.id }}" data-displayid="tr_contactvoice_{{ contactvoice.id }}" class="contactvoice_edit_button">edit</button></td>
-            <td>{{ contactvoice.number }}</td>
-            <td>{{ contactvoice.extra }}</td>
-            <td>{{ contactvoice.alert }}</td>
-          </tr>
-        {% endfor %}
-      </table>
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addcontactvoice">Add</button>' %}
+      {% for contactvoice in object.contactvoice_set.all %}
+        {% with cvid=contactvoice.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editcontactvoice_'|add:cvid|add:'" data-formid="div_contactvoiceform_'|add:cvid|add:'" data-displayid="tr_contactvoice_'|add:cvid|add:'" class="contactvoice_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_field.html' with label=button_as_label field_1=contactvoice.number field_2=contactvoice.label field_3=contactvoice.get_is_mobile_display %}
+            {% if contactvoice.extra %}{% include 'touglates/detail_field.html' with field=contactvoice.extra %}{% endif %}
+            {% if contactvoice.alert %}{% include 'touglates/detail_field.html' with field=contactvoice.alert %}{% endif %}
+            {% endwith %}
+        {% endwith %}
+      {% endfor %}
 
-      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
-
+      {% include 'touglates/form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
 
       <h3>Committee Memberships</h3>
 
@@ -85,35 +85,35 @@
             {% for hiddenfield in submembershipform.hidden_fields %}
               {{ hiddenfield }}
             {% endfor %}
-            {% include './_form_field.html' with field=submembershipform.subcommittee %}
-            {% include './_form_field.html' with field=submembershipform.position %}
-            {% include './_form_field.html' with field=submembershipform.DELETE %}
+            {% include 'touglates/form_field.html' with field=submembershipform.subcommittee %}
+            {% include 'touglates/form_field.html' with field=submembershipform.position %}
+            {% include 'touglates/form_field.html' with field=submembershipform.DELETE %}
           </div>
         {% else %}
           <div class="submembershipformsetform submembershipnewform" >
             {% for hiddenfield in submembershipform.hidden_fields %}
               {{ hiddenfield }}
             {% endfor %}
-            {% include './_form_field.html' with field=submembershipform.subcommittee %}
-            {% include './_form_field.html' with field=submembershipform.position %}
-            {% include './_form_field.html' with field=submembershipform.DELETE %}
+            {% include 'touglates/form_field.html' with field=submembershipform.subcommittee %}
+            {% include 'touglates/form_field.html' with field=submembershipform.position %}
+            {% include 'touglates/form_field.html' with field=submembershipform.DELETE %}
           </div>
         {% endif %}
       {% endfor %}
-      <table>
-        <tr>
-          <td><button type="button" id="button_addsubmembership">Add</button></td><td span="*"></td>
-        </tr>
-        {% for submembership in object.submembership_set.all %}
-          <tr id="tr_submembership_{{ submembership.id }}">
-            <td><button type="button" id="button_editsubmembership_{{ submembership.id }}" data-formid="div_submembershipform_{{ submembership.id }}" data-displayid="tr_submembership_{{ submembership.id }}" class="submembership_edit_button">edit</button></td>
-            <td>{{ submembership.subcommittee }}</td>
-            <td>{{ submembership.position }}</td>
-          </tr>
-        {% endfor %}
-      </table>
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addsubmembership">Add</button>' %}
+      {% for submembership in object.submembership_set.all %}
+        {% with cvid=submembership.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editsubmembership_'|add:cvid|add:'" data-formid="div_submembershipform_'|add:cvid|add:'" data-displayid="tr_submembership_'|add:cvid|add:'" class="submembership_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_field.html' with label=button_as_label field_1=submembership.subcommittee field_2=submembership.position  %}
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
 
-      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
+
+
+
+      {% include 'touglates/form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
 
     </div>
 

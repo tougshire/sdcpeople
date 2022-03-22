@@ -27,26 +27,27 @@
     padding: 1px 1px;
 }
 
-.form .formset {
+.formset {
     margin-left:2em;
 }
 
-.form .field-wrapper {
+.form-field-outer-wrapper {
     margin-top:.5em;
 }
 
-.control {
+.form-field-inner-wrapper {
     display:flex;
 }
 
-.form .label {
+.form-field-label {
     width:15%;
     flex-grow:0;
 }
 
-.form .help_text {
+.form-field-help-text {
     margin-left:15%;
 }
+
 .list {
     width:100%;
     display:table;
@@ -77,28 +78,21 @@
     width:15%;
 }
 
-.detail .detailset {
+..detailset {
     margin-left:2em;
 }
 
-.detail .field-wrapper {
+.detail-field-outer-wrapper {
     margin-top:.5em;
 }
 
-.detail .control {
+.detail-field-inner-wrapper {
     display:flex;
 }
 
-.detail .label {
+.detail-field-label {
     width:15%;
 }
-
-.detail .help_text {
-    margin-left:15%;
-}
-
-
-
 
 
 .relatedset {
