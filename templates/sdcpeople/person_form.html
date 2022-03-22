@@ -32,8 +32,11 @@
       <div id="div_voting_address">
         {% include 'touglates/form_field.html' with field=form.voting_address %}
       </div>
+      <div id="div_positions">
+        {% include 'touglates/form_field.html' with field=form.positions %}
+      </div>
 
-      <h4>Voice Phone</h4>
+      <h4>Voice Phones</h4>
 
       {{ contactvoices.management_form }}
       {% for contactvoiceform in contactvoices.forms %}
@@ -45,6 +48,7 @@
             {% include 'touglates/form_field.html' with field=contactvoiceform.number %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.label %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.rank_number %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.extra %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.alert %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.DELETE %}
@@ -57,6 +61,7 @@
             {% include 'touglates/form_field.html' with field=contactvoiceform.number %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.label %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contactvoiceform.rank_number %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.extra %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.alert %}
             {% include 'touglates/form_field.html' with field=contactvoiceform.DELETE %}
@@ -73,6 +78,50 @@
             {% endwith %}
         {% endwith %}
       {% endfor %}
+
+      <h4>Text Phones</h4>
+
+      {{ contacttexts.management_form }}
+      {% for contacttextform in contacttexts.forms %}
+        {% if contacttextform.id.value > 0 %}
+          <div id="div_contacttextform_{{ contacttextform.id.value }}" class="contacttextformsetform"  >
+            {% for hiddenfield in contacttextform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=contacttextform.number %}
+            {% include 'touglates/form_field.html' with field=contacttextform.label %}
+            {% include 'touglates/form_field.html' with field=contacttextform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contacttextform.rank_number %}
+            {% include 'touglates/form_field.html' with field=contacttextform.extra %}
+            {% include 'touglates/form_field.html' with field=contacttextform.alert %}
+            {% include 'touglates/form_field.html' with field=contacttextform.DELETE %}
+          </div>
+        {% else %}
+          <div class="contacttextformsetform contacttextnewform" >
+            {% for hiddenfield in contacttextform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=contacttextform.number %}
+            {% include 'touglates/form_field.html' with field=contacttextform.label %}
+            {% include 'touglates/form_field.html' with field=contacttextform.is_mobile %}
+            {% include 'touglates/form_field.html' with field=contacttextform.rank_number %}
+            {% include 'touglates/form_field.html' with field=contacttextform.extra %}
+            {% include 'touglates/form_field.html' with field=contacttextform.alert %}
+            {% include 'touglates/form_field.html' with field=contacttextform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addcontacttext">add</button>' %}
+      {% for contacttext in object.contacttext_set.all %}
+        {% with cvid=contacttext.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editcontacttext_'|add:cvid|add:'" data-formid="div_contacttextform_'|add:cvid|add:'" data-displayid="tr_contacttext_'|add:cvid|add:'" class="contacttext_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_field.html' with label=button_as_label field_1=contacttext.number field_2=contacttext.label field_3=contacttext.get_is_mobile_display %}
+            {% if contacttext.extra %}{% include 'touglates/detail_field.html' with field=contacttext.extra %}{% endif %}
+            {% if contacttext.alert %}{% include 'touglates/detail_field.html' with field=contacttext.alert %}{% endif %}
+            {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
 
       <h3>Committee Memberships</h3>
 
@@ -181,6 +230,26 @@
     let contactvoiceforms = document.getElementsByClassName("contactvoiceformsetform")
     for( contactvoiceform of contactvoiceforms ){
       contactvoiceform.style.display="none"
+    }
+
+  </script>
+  <script>
+
+    let contacttextEditButtons = document.getElementsByClassName('contacttext_edit_button')
+    for( contacttextEditButton of contacttextEditButtons){
+      contacttextEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addcontacttext').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('contacttextnewform')
+    })
+    let contacttextforms = document.getElementsByClassName("contacttextformsetform")
+    for( contacttextform of contacttextforms ){
+      contacttextform.style.display="none"
     }
 
   </script>

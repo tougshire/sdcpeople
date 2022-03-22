@@ -259,7 +259,13 @@
           {% include './_list_head.html' with field="Quorum" %}
         {% endif %}
         {% if 'membership_status' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field="membership.membership_status" %}
+          {% include './_list_head.html' with field="Status" %}
+        {% endif %}
+        {% if 'contactvoice' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Voice Phones" %}
+        {% endif %}
+        {% if 'contacttext' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Text" %}
         {% endif %}
         {% if 'voting_address' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=person_labels.voting_address %}
@@ -303,7 +309,16 @@
             {% include './_list_field.html' with field=person.name_common %}
           {% endif %}
           {% if 'is_quorum' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.membership_status.is_quorum %}
+            {% include './_list_field.html' with field=person.membership_status.is_quorum|yesno:"Y,N" %}
+          {% endif %}
+          {% if 'membership_status' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.membership_status %}
+          {% endif %}
+          {% if 'contactvoice' in show_columns or not show_columns %}
+              {% include 'touglates/list_field.html' with field_1=person.contactvoice_set.all.0.number field_2=person.contactvoice_set.all.1.number between_fields="," %}
+          {% endif %}
+          {% if 'contacttext' in show_columns or not show_columns %}
+              {% include 'touglates/list_field.html' with field_1=person.contacttext_set.all.0.number field_2=person.contacttext_set.all.1.number between_fields="," %}
           {% endif %}
           {% if 'voting_address' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.voting_address %}
@@ -315,13 +330,13 @@
             {% include './_list_field.html' with field=person.voting_address.locationstatesenate %}
           {% endif %}
           {% if 'voting_address.locationstatehouse' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.voting_address.locationcongress %}
+            {% include './_list_field.html' with field=person.voting_address.locationstatehouse %}
           {% endif %}
           {% if 'voting_address.locationmagistrate' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.voting_address.locationcongress %}
+            {% include './_list_field.html' with field=person.voting_address.locationmagistrate %}
           {% endif %}
           {% if 'voting_address.locationborough' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.voting_address.locationstatesenate %}
+            {% include './_list_field.html' with field=person.voting_address.locationborough %}
           {% endif %}
           {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.voting_address.locationprecinct %}

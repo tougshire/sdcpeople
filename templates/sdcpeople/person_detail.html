@@ -4,7 +4,7 @@
   {% include './person_detail_include.html' %}
 
   <div class="menu menu-bottom">
-    {% if perms.sdcpeople.change_item %}
+    {% if perms.sdcpeople.change_person %}
       <div class="menu-item">
       <a href="{% url 'sdcpeople:person-update' object.pk %}">Edit</a>
       </div>

@@ -147,6 +147,26 @@ class LocationPrecinct(models.Model):
         ordering = ['name']
         verbose_name = 'Precinct'
 
+class Position(models.Model):
+
+    title = models.CharField(
+        'title',
+        max_length=100,
+        blank=True,
+        help_text = "The title of this person's position"
+    )
+    rank_number = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this position on a list in descending order (ex if you want this one first, give it a high number like 1000)"
+    )
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-rank_number', 'title']
+
 
 class VotingAddress(models.Model):
 
@@ -270,6 +290,10 @@ class Person(models.Model):
         on_delete=models.SET_NULL,
         help_text="The person's current membership"
     )
+    positions = models.ManyToManyField(
+        Position,
+        help_text="The person's position in the committee"
+    )
 
     class Meta:
         ordering = ('membership_status__is_quorum', 'name_last', 'name_first')
@@ -290,26 +314,6 @@ class Person(models.Model):
 
         if make_history:
             MembershipHistory.objects.create(person=self, membership_status=self.membership_status, effective_date=date.today())
-
-class Position(models.Model):
-
-    title = models.CharField(
-        'title',
-        max_length=100,
-        blank=True,
-        help_text = "The title of this person's position"
-    )
-    rank_number = models.IntegerField(
-        'rank',
-        default=0,
-        help_text="A number representing the placement of this position on a list in descending order (ex if you want this one first, give it a high number like 1000)"
-    )
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        ordering = ['-rank_number', 'title']
 
 class SubMembership(models.Model):
 
@@ -440,6 +444,34 @@ class MembershipHistory(models.Model):
         'effective date',
         default = date.today,
         help_text="The starting date for this membership"
+    )
+
+    def __str__(self):
+        return '{}: {} {} {}'.format(self.person, self.membership_status , self.membership_type, self.effective_date)
+
+class PositionHistory(models.Model):
+
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text="The person to whom this membership applies"
+    )
+    position = models.ForeignKey(
+        Position,
+        on_delete = models.SET_NULL,
+        null=True,
+        help_text="The position for this period"
+    )
+    effective_date = models.DateField(
+        'effective date',
+        default = date.today,
+        help_text="The starting date for this positon"
+    )
+    ending_date = models.DateField(
+        'ending date',
+        null=True,
+        blank=True,
+        help_text="The ending date for this positon"
     )
 
     def __str__(self):

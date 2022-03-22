@@ -117,8 +117,6 @@ class MembershipStatusForm(ModelForm):
             'pays_dues',
         ]
 
-
-
 class VotingAddressForm(ModelForm):
     class Meta:
         model=VotingAddress
@@ -150,6 +148,7 @@ class PersonForm(ModelForm):
             'name_common',
             'voting_address',
             'membership_status',
+            'positions',
         ]
 
 class PositionForm(ModelForm):
