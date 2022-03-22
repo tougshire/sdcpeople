@@ -15,13 +15,13 @@
     {% include 'touglates/detail_field.html' with label="Precinct" field=object.voting_address.locationprecinct %}
     {% include 'touglates/detail_field.html' with label="Phones" field="" %}
     {% for contactvoice in object.contactvoice_set.all %}
-      {% include 'touglates/detail_field.html' with label="" field=contactvoice.number %}
+      {% include 'touglates/detail_field.html' with label="" field_1=contactvoice.number field_2=contactvoice.label %}
       {% if contactvoice.extra > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.extra %}{% endif %}
       {% if contactvoice.alert > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.alert %}{% endif %}
     {% endfor %}
     {% include 'touglates/detail_field.html' with label="Committees" field="" %}
     {% for submembership in object.submembership_set.all %}
-      {% include 'touglates/detail_field.html' with label="" field=submembership.subcommittee field_2=submembership.position  %}
+      {% include 'touglates/detail_field.html' with label="" field_1=submembership.subcommittee field_2=submembership.position  %}
     {% endfor %}
 
   </div>

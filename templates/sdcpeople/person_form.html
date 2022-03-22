@@ -63,7 +63,7 @@
           </div>
         {% endif %}
       {% endfor %}
-      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addcontactvoice">Add</button>' %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addcontactvoice">add</button>' %}
       {% for contactvoice in object.contactvoice_set.all %}
         {% with cvid=contactvoice.id|stringformat:"s" %}
           {% with button_as_label='<button type="button" id="button_editcontactvoice_'|add:cvid|add:'" data-formid="div_contactvoiceform_'|add:cvid|add:'" data-displayid="tr_contactvoice_'|add:cvid|add:'" class="contactvoice_edit_button">edit</button>'|safe %}
@@ -73,8 +73,6 @@
             {% endwith %}
         {% endwith %}
       {% endfor %}
-
-      {% include 'touglates/form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
 
       <h3>Committee Memberships</h3>
 
@@ -100,7 +98,7 @@
           </div>
         {% endif %}
       {% endfor %}
-      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addsubmembership">Add</button>' %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addsubmembership">add</button>' %}
       {% for submembership in object.submembership_set.all %}
         {% with cvid=submembership.id|stringformat:"s" %}
           {% with button_as_label='<button type="button" id="button_editsubmembership_'|add:cvid|add:'" data-formid="div_submembershipform_'|add:cvid|add:'" data-displayid="tr_submembership_'|add:cvid|add:'" class="submembership_edit_button">edit</button>'|safe %}
@@ -109,11 +107,7 @@
         {% endwith %}
       {% endfor %}
 
-
-
-
-
-      {% include 'touglates/form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+      {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
 
     </div>
 
