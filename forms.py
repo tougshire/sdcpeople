@@ -126,7 +126,7 @@ class VotingAddressForm(ModelForm):
             'locationcongress',
             'locationstatesenate',
             'locationstatehouse',
-            'locationmagestrate',
+            'locationmagistrate',
             'locationborough',
             'locationprecinct',
             'street_address',

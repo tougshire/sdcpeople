@@ -1,24 +1,18 @@
 <h2>{{ object }}</h2>
 <div class="detail">
-  {% include './_detail_field.html' with label=votingaddress_labels.brand field=object.brand %}
-  {% include './_detail_field.html' with label=votingaddress_labels.model_name field=object.model_name %}
-  {% include './_detail_field.html' with label=votingaddress_labels.model_number field=object.model_number %}
-  {% include './_detail_field.html' with label=votingaddress_labels.category field=object.category %}
-  {% include './_detail_field.html' with label=votingaddress_labels.primary_id_field field=object.primary_id_field %}
+  {% include './_detail_field.html' with label=votingaddress_labels.street_address field=object.street_address %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationcongress field=object.locationcongress %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationstatehouse field=object.locationstatehouse %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationstatesenate field=object.locationstatesenate %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationmagistrate field=object.locationmagistrate %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationborough field=object.locationborough %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationprecinct field=object.locationprecinct %}
 
-  <h3>Items</h3>
-  {% for item in object.item_set.all %}
-    <div class="relatedset relateditem" id="div_item-{{ forloop.counter0 }}">
-      <div class="fieldWrapper">
-        <div class="control">
-          <div class="label">
-            {{ item_labels.common_name }}
-          </div>
-          <div class="field">
-            {{ item.common_name }}
-          </div>
-        </div>
-      </div>
+  <h3>People</h3>
+  {% for person in object.person_set.all %}
+    <div class="relatedset relatedperson" id="div_person-{{ forloop.counter0 }}">
+      {% url 'sdcpeople:person-detail' person.id as detail_url %}
+      {% include 'touglates/detail_field.html' with field_1='<a href="'|add:detail_url|add:'">'|add:person.name_first|add:'</a>'|safe field_2='<a href="'|add:detail_url|add:'">'|add:person.name_last|add:'</a>'|safe  %}
     </div>
   {% endfor %}
 </div>

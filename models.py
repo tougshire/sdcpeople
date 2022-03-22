@@ -150,6 +150,11 @@ class LocationPrecinct(models.Model):
 
 class VotingAddress(models.Model):
 
+    street_address = models.TextField(
+        'street address',
+        blank=True,
+        help_text="The street address"
+    )
     locationcongress = models.ForeignKey(
         LocationCongress,
         verbose_name="Congressional District",
@@ -174,7 +179,7 @@ class VotingAddress(models.Model):
         on_delete=models.SET_NULL,
         help_text = "The person's house of delegates district"
     )
-    locationmagestrate = models.ForeignKey(
+    locationmagistrate = models.ForeignKey(
         LocationMagistrate,
         verbose_name="Magisterial District",
         blank=True,
@@ -197,17 +202,6 @@ class VotingAddress(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         help_text = "The person's precinct"
-    )
-    street_address = models.CharField(
-        'street address',
-        max_length=100,
-        blank=True,
-        help_text="The street address"
-    )
-    street_address = models.TextField(
-        'street address',
-        blank=True,
-        help_text="The street address"
     )
 
     def __str__(self):
