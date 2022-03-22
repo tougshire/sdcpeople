@@ -222,16 +222,16 @@ class SubCommittee(models.Model):
         help_text="The committee name"
     )
     rank = models.IntegerField(
-        'list rank',
-        default=1000,
-        help_text="A number representing the placement of this committee on a list - default 1000 and any lower number(0,1,2 etc) is higher on the list"
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this committee on a list in descending order (ex if you want this one first, give it a high number like 1000)"
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ['rank', 'name']
+        ordering = ['-rank', 'name']
 
 class Person(models.Model):
 
@@ -306,20 +306,16 @@ class Position(models.Model):
         help_text = "The title of this person's position"
     )
     rank = models.IntegerField(
-        'list rank',
-        default=1000,
-        help_text="A number representing the placement of this person in a list of subcommittee members - default 1000 and any lower number(0,1,2 etc) is higher on the list"
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this position on a list in descending order (ex if you want this one first, give it a high number like 1000)"
     )
 
     def __str__(self):
-
-        if self.rank < 1000:
-            return self.title
-
         return self.title
 
     class Meta:
-        ordering = ['rank', 'title']
+        ordering = ['-rank', 'title']
 
 class SubMembership(models.Model):
 
@@ -366,6 +362,11 @@ class ContactVoice(models.Model):
         choices=[(0, ''),(1, 'Not Mobile'), (2, 'Mobile')],
         help_text="If this phone is mobile"
     )
+    rank = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this phone on a list in descending order (ex: if you want this one first, give it a high number like 1000)"
+    )
     extra = models.CharField(
         'extra',
         max_length=100,
@@ -383,6 +384,12 @@ class ContactVoice(models.Model):
         default=False,
         help_text="If this is the primary number for voice"
     )
+
+    def __str__(self):
+        return self.number
+
+    class Meta:
+        ordering = ['-rank', 'number']
 
 class ContactText(models.Model):
 
