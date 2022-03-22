@@ -221,7 +221,7 @@ class SubCommittee(models.Model):
         max_length=100,
         help_text="The committee name"
     )
-    rank = models.IntegerField(
+    rank_number = models.IntegerField(
         'rank',
         default=0,
         help_text="A number representing the placement of this committee on a list in descending order (ex if you want this one first, give it a high number like 1000)"
@@ -231,7 +231,7 @@ class SubCommittee(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['-rank', 'name']
+        ordering = ['-rank_number', 'name']
 
 class Person(models.Model):
 
@@ -305,7 +305,7 @@ class Position(models.Model):
         blank=True,
         help_text = "The title of this person's position"
     )
-    rank = models.IntegerField(
+    rank_number = models.IntegerField(
         'rank',
         default=0,
         help_text="A number representing the placement of this position on a list in descending order (ex if you want this one first, give it a high number like 1000)"
@@ -315,7 +315,7 @@ class Position(models.Model):
         return self.title
 
     class Meta:
-        ordering = ['-rank', 'title']
+        ordering = ['-rank_number', 'title']
 
 class SubMembership(models.Model):
 
@@ -362,7 +362,7 @@ class ContactVoice(models.Model):
         choices=[(0, ''),(1, 'Not Mobile'), (2, 'Mobile')],
         help_text="If this phone is mobile"
     )
-    rank = models.IntegerField(
+    rank_number = models.IntegerField(
         'rank',
         default=0,
         help_text="A number representing the placement of this phone on a list in descending order (ex: if you want this one first, give it a high number like 1000)"
@@ -389,7 +389,7 @@ class ContactVoice(models.Model):
         return self.number
 
     class Meta:
-        ordering = ['-rank', 'number']
+        ordering = ['-rank_number', 'number']
 
 class ContactText(models.Model):
 

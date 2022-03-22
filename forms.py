@@ -136,7 +136,7 @@ class SubCommitteeForm(ModelForm):
         model=SubCommittee
         fields = [
             'name',
-            'rank',
+            'rank_number',
         ]
 
 class PersonForm(ModelForm):
@@ -156,7 +156,7 @@ class PositionForm(ModelForm):
         model=Position
         fields = [
             'title',
-            'rank',
+            'rank_number',
         ]
 
 class SubMembershipForm(ModelForm):

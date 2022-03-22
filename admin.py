@@ -61,7 +61,10 @@ admin.site.register(PaymentMethod)
 
 admin.site.register(Person)
 
-admin.site.register(Position)
+class PositionAdmin(admin.ModelAdmin):
+    list_display=('title', 'rank_number')
+
+admin.site.register(Position, PositionAdmin)
 
 admin.site.register(SubCommittee)
 
