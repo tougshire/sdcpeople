@@ -255,6 +255,12 @@ class NonDeletedPersonManager(models.Manager):
 
 class Person(models.Model):
 
+    name_prefix = models.CharField(
+        'prefix',
+        blank=True,
+        max_length=10,
+        help_text="The person's name prefix or title"
+    )
     name_last = models.CharField(
         'last name',
         max_length=100,
@@ -277,6 +283,12 @@ class Person(models.Model):
         max_length=100,
         blank=True,
         help_text = "The name that this person uses in place of a first name"
+    )
+    name_suffix = models.CharField(
+        'suffix',
+        blank=True,
+        max_length=10,
+        help_text="The person's name suffix"
     )
     voting_address = models.ForeignKey(
         VotingAddress,
