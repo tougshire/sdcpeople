@@ -59,7 +59,14 @@ admin.site.register(MembershipType)
 
 admin.site.register(PaymentMethod)
 
-admin.site.register(Person)
+class PersonManager(admin.ModelAdmin):
+
+    def get_queryset(self, request):
+        return Person.all_objects.all()
+
+
+
+admin.site.register(Person, PersonManager)
 
 class PositionAdmin(admin.ModelAdmin):
     list_display=('title', 'rank_number')

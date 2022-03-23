@@ -248,8 +248,10 @@ class SubCommittee(models.Model):
         ordering = ['-rank_number', 'name']
 
 class NonDeletedPersonManager(models.Manager):
+
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
+
 
 class Person(models.Model):
 
@@ -306,9 +308,11 @@ class Person(models.Model):
     )
 
     class Meta:
-        ordering = ('membership_status__is_quorum', 'name_last', 'name_first')
+        ordering = ('is_deleted', 'membership_status__is_quorum', 'name_last', 'name_first')
 
     def __str__(self):
+        if(self.is_deleted):
+            return '--deleted-- {} {}'.format(self.name_common if self.name_common else self.name_first, self.name_last)
         return '{} {}'.format(self.name_common if self.name_common else self.name_first, self.name_last)
 
     def save(self, *args, **kwargs):
@@ -326,9 +330,14 @@ class Person(models.Model):
             MembershipHistory.objects.create(person=self, membership_status=self.membership_status, effective_date=date.today())
 
     def delete(self):
-        self.is_deleted = True
+        if(self.is_deleted):
+            super().delete()
+        else:
+            self.is_deleted = True
+            self.save()
 
-    objects = NonDeletedPersonManager
+    objects = NonDeletedPersonManager()
+    all_objects = models.Manager()
 
 class SubMembership(models.Model):
 
@@ -523,7 +532,7 @@ class MembershipHistory(models.Model):
     )
 
     def __str__(self):
-        return '{}: {} {} {}'.format(self.person, self.membership_status , self.membership_type, self.effective_date)
+        return '{}: {} {}'.format(self.person, self.membership_status , self.effective_date)
 
 class PositionHistory(models.Model):
 

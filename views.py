@@ -185,7 +185,7 @@ class PersonDetail(PermissionRequiredMixin, DetailView):
         return context_data
 
 
-class PersonDelete(PermissionRequiredMixin, UpdateView):
+class PersonDelete(PermissionRequiredMixin, DeleteView):
     permission_required = 'sdcpeople.delete_person'
     model = Person
     template_name = 'sdcpeople/person_confirm_delete.html'
