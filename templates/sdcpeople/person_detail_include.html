@@ -13,18 +13,28 @@
     {% include 'touglates/detail_field.html' with label="Magistrate" field=object.voting_address.locationmagistrate %}
     {% include 'touglates/detail_field.html' with label="Borough" field=object.voting_address.locationborough %}
     {% include 'touglates/detail_field.html' with label="Precinct" field=object.voting_address.locationprecinct %}
+
     {% include 'touglates/detail_field.html' with label="Voice Phones" field="" %}
     {% for contactvoice in object.contactvoice_set.all %}
-      {% include 'touglates/detail_field.html' with label="" field_1=contactvoice.number field_2=contactvoice.label %}
+      {% include 'touglates/detail_fields.html' with label="" field_1=contactvoice.number field_2=contactvoice.label %}
       {% if contactvoice.extra > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.extra %}{% endif %}
       {% if contactvoice.alert > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactvoice.alert %}{% endif %}
     {% endfor %}
+
     {% include 'touglates/detail_field.html' with label="Text Phones" field="" %}
     {% for contacttext in object.contacttext_set.all %}
-      {% include 'touglates/detail_field.html' with label="" field_1=contacttext.number field_2=contacttext.label %}
+      {% include 'touglates/detail_fields.html' with label="" field_1=contacttext.number field_2=contacttext.label %}
       {% if contacttext.extra > "" %}{% include 'touglates/detail_field.html' with label=" " field=contacttext.extra %}{% endif %}
       {% if contacttext.alert > "" %}{% include 'touglates/detail_field.html' with label=" " field=contacttext.alert %}{% endif %}
     {% endfor %}
+
+    {% include 'touglates/detail_field.html' with label="Emails" field="" %}
+    {% for contactemail in object.contactemail_set.all %}
+      {% include 'touglates/detail_fields.html' with label="" field_1=contactemail.address field_2=contactemail.label %}
+      {% if contactemail.extra > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactemail.extra %}{% endif %}
+      {% if contactemail.alert > "" %}{% include 'touglates/detail_field.html' with label=" " field=contactemail.alert %}{% endif %}
+    {% endfor %}
+
     {% include 'touglates/detail_field.html' with label="Positions" field="" %}
     {% for position in object.positions.all %}
       {% include 'touglates/detail_field.html' with label="" field=position %}

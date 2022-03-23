@@ -1,8 +1,11 @@
 from dataclasses import field
+from os import link
 from .models import (
+    ContactEmail,
     ContactText,
     ContactVoice,
     DuesPayment,
+    Link,
     LocationBorough,
     LocationCongress,
     LocationMagistrate,
@@ -45,6 +48,19 @@ class ContactVoiceForm(ModelForm):
             'alert',
             'rank_number',
         ]
+
+class ContactEmailForm(ModelForm):
+    class Meta:
+        model=ContactEmail
+        fields = [
+            'person',
+            'address',
+            'label',
+            'extra',
+            'alert',
+            'rank_number',
+        ]
+
 
 class DuesPaymentForm(ModelForm):
     class Meta:
@@ -151,6 +167,15 @@ class PersonForm(ModelForm):
             'positions',
         ]
 
+class LinkForm(ModelForm):
+    class Meta:
+        model=Link
+        fields = [
+            'person',
+            'title',
+            'href',
+        ]
+
 class PositionForm(ModelForm):
     class Meta:
         model=Position
@@ -184,6 +209,8 @@ class PaymentMethodForm(ModelForm):
 
 PersonContactVoiceFormset = inlineformset_factory(Person, ContactVoice, form=ContactVoiceForm, extra=10)
 PersonContactTextFormset = inlineformset_factory(Person, ContactText, form=ContactTextForm, extra=10)
+PersonContactEmailFormset = inlineformset_factory(Person, ContactEmail, form=ContactEmailForm, extra=10)
 PersonMembershipApplicationFormset = inlineformset_factory(Person, MembershipApplication, form=MembershipApplicationForm, extra=10)
 PersonDuesPaymentFormset = inlineformset_factory(Person, DuesPayment, form=DuesPaymentForm, extra=10)
 PersonSubMembershipFormset = inlineformset_factory(Person, SubMembership, form=SubMembershipForm, extra=10)
+PersonLinkFormset = inlineformset_factory(Person, Link, form=LinkForm, extra=10)

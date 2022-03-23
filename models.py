@@ -247,6 +247,10 @@ class SubCommittee(models.Model):
     class Meta:
         ordering = ['-rank_number', 'name']
 
+class NonDeletedPersonManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 class Person(models.Model):
 
     name_last = models.CharField(
@@ -292,7 +296,13 @@ class Person(models.Model):
     )
     positions = models.ManyToManyField(
         Position,
+        blank=True,
         help_text="The person's position in the committee"
+    )
+    is_deleted = models.BooleanField(
+        'is_deleted',
+        default=False,
+        help_text='If this object is soft-deleted'
     )
 
     class Meta:
@@ -314,6 +324,11 @@ class Person(models.Model):
 
         if make_history:
             MembershipHistory.objects.create(person=self, membership_status=self.membership_status, effective_date=date.today())
+
+    def delete(self):
+        self.is_deleted = True
+
+    objects = NonDeletedPersonManager
 
 class SubMembership(models.Model):
 
@@ -426,6 +441,67 @@ class ContactText(models.Model):
     class Meta:
         ordering = ['-rank_number', 'number']
 
+class ContactEmail(models.Model):
+
+    person = models.ForeignKey(
+        Person,
+        on_delete = models.CASCADE,
+        help_text="The person who is contaced with this number"
+    )
+    address = models.CharField(
+        'address',
+        max_length=250,
+        help_text="The email address"
+    )
+    label = models.CharField(
+        'label',
+        max_length=50,
+        blank=True,
+        help_text="The label for this email account, such as \"Work\" or \"Home\""
+    )
+    rank_number = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this email on a list in descending order (ex: if you want this one first, give it a high number like 1000)"
+    )
+    extra = models.CharField(
+        'extra',
+        max_length=100,
+        blank=True,
+        help_text="Extra texting instructions, such as 'Respond to challange after sending the text'"
+    )
+    alert = models.CharField(
+        'alert',
+        max_length=100,
+        blank=True,
+        help_text="Important information about texting, such as \"Don't text before 10:00am\""
+    )
+
+    def __str__(self):
+        return self.address
+
+    class Meta:
+        ordering = ['-rank_number', 'address']
+
+
+class Link(models.Model):
+
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text="The person to whom this link applies"
+    )
+    title = models.CharField(
+        'title',
+        max_length=100,
+        blank=True,
+        help_text = "The title of this link"
+    )
+    href = models.URLField(
+        'href',
+        max_length=400,
+        help_text="The link"
+    )
 
 class MembershipHistory(models.Model):
 

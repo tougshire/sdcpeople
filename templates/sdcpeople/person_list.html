@@ -243,17 +243,8 @@
     <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>
       <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
-        {% if 'name_first' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=person_labels.name_first %}
-        {% endif %}
-        {% if 'name_middles' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=person_labels.name_middles %}
-        {% endif %}
-        {% if 'name_last' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=person_labels.name_last %}
-        {% endif %}
-        {% if 'name_common' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=person_labels.name_common %}
+        {% if 'name' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Name" %}
         {% endif %}
         {% if 'is_quorum' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Quorum" %}
@@ -261,11 +252,20 @@
         {% if 'membership_status' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Status" %}
         {% endif %}
+        {% if 'positions' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=person_labels.positions %}
+        {% endif %}
+        {% if 'submemberships' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Committees" %}
+        {% endif %}
         {% if 'contactvoice' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Voice Phones" %}
         {% endif %}
         {% if 'contacttext' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Text" %}
+        {% endif %}
+        {% if 'contactemail' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="Emails" %}
         {% endif %}
         {% if 'voting_address' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=person_labels.voting_address %}
@@ -288,25 +288,13 @@
         {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Pct" %}
         {% endif %}
-
-
-
       </div>
 
       {% for person in object_list %}
         <div class="row">
           <div class="listfield"><a href="{% url 'sdcpeople:person-detail' person.pk %}">view</a></div>
           {% if 'name_last' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.name_last %}
-          {% endif %}
-          {% if 'name_first' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.name_first %}
-          {% endif %}
-          {% if 'name_middles' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.name_middles %}
-          {% endif %}
-          {% if 'name_common' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=person.name_common %}
+            {% include './_list_field.html' with field=person  %}
           {% endif %}
           {% if 'is_quorum' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.membership_status.is_quorum|yesno:"Y,N" %}
@@ -314,11 +302,20 @@
           {% if 'membership_status' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.membership_status %}
           {% endif %}
+          {% if 'positions' in show_columns or not show_columns %}
+            {% include 'touglates/list_fields.html' with field_1=person.positions.all.0 field_2=person.positions.all.1 field_3=person.positions.all.2 between_fields=','%}
+          {% endif %}
+          {% if 'submemberships' in show_columns or not show_columns %}
+            {% include 'touglates/list_fields.html' with field_1=person.submembership_set.all.0.subcommittee field_2=person.submembership_set.all.1.subcommittee field_3=person.submembership_set.all.2.subcommittee between_fields=','%}
+          {% endif %}
           {% if 'contactvoice' in show_columns or not show_columns %}
-              {% include 'touglates/list_field.html' with field_1=person.contactvoice_set.all.0.number field_2=person.contactvoice_set.all.1.number between_fields="," %}
+              {% include 'touglates/list_fields.html' with field_1=person.contactvoice_set.all.0.number field_2=person.contactvoice_set.all.1.number between_fields="," %}
           {% endif %}
           {% if 'contacttext' in show_columns or not show_columns %}
-              {% include 'touglates/list_field.html' with field_1=person.contacttext_set.all.0.number field_2=person.contacttext_set.all.1.number between_fields="," %}
+              {% include 'touglates/list_fields.html' with field_1=person.contacttext_set.all.0.number field_2=person.contacttext_set.all.1.number between_fields="," %}
+          {% endif %}
+          {% if 'contactemail' in show_columns or not show_columns %}
+              {% include 'touglates/list_fields.html' with field_1=person.contactemail_set.all.0.address field_2=person.contactemail_set.all.1.address between_fields="," %}
           {% endif %}
           {% if 'voting_address' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.voting_address %}

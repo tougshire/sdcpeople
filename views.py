@@ -15,8 +15,8 @@ from tougshire_vistas.views import (default_vista, delete_vista, get_global_vist
                                     retrieve_vista)
 
 from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, PersonContactTextFormset, PersonContactVoiceFormset,
-                    PersonDuesPaymentFormset, PersonForm, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
+                    LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
+                    PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
                      LocationPrecinct, LocationStateHouse, LocationStateSenate, Person, VotingAddress)
 
@@ -51,16 +51,20 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
         if self.request.POST:
             context_data['contactvoices'] = PersonContactVoiceFormset(self.request.POST)
             context_data['contacttexts'] = PersonContactTextFormset(self.request.POST)
+            context_data['contactemails'] = PersonContactEmailFormset(self.request.POST)
             context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST)
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST )
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST)
+            context_data['links'] = PersonLinkFormset(self.request.POST)
 
         else:
             context_data['contactvoices'] = PersonContactVoiceFormset()
             context_data['contacttexts'] = PersonContactTextFormset()
+            context_data['contactemails'] = PersonContactEmailFormset()
             context_data['membershipapplications'] = PersonMembershipApplicationFormset()
             context_data['submemberships'] = PersonSubMembershipFormset()
             context_data['duespayments'] = PersonDuesPaymentFormset()
+            context_data['links'] = PersonLinkFormset()
 
         return context_data
 
@@ -75,9 +79,12 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
         formset_data = {
             'contactvoices':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contacttexts':PersonContactTextFormset( self.request.POST, instance=self.object ),
+            'contactemails':PersonContactEmailFormset( self.request.POST, instance=self.object ),
             'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
+            'links':PersonLinkFormset( self.request.POST, instance=self.object ),
+
         }
 
         for formset_name in formset_data.keys():
@@ -109,16 +116,20 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
         if self.request.POST:
             context_data['contactvoices'] = PersonContactVoiceFormset(self.request.POST, instance=self.object )
             context_data['contacttexts'] = PersonContactTextFormset(self.request.POST, instance=self.object )
+            context_data['contactemails'] = PersonContactEmailFormset(self.request.POST, instance=self.object )
             context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST, instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST, instance=self.object )
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
+            context_data['links'] = PersonLinkFormset(self.request.POST, instance=self.object )
 
         else:
             context_data['contactvoices'] = PersonContactVoiceFormset( instance=self.object )
             context_data['contacttexts'] = PersonContactTextFormset( instance=self.object )
+            context_data['contactemails'] = PersonContactEmailFormset( instance=self.object )
             context_data['membershipapplications'] = PersonMembershipApplicationFormset( instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset( instance=self.object )
             context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
+            context_data['links'] = PersonLinkFormset( instance=self.object )
 
         return context_data
 
@@ -133,9 +144,12 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
         formset_data = {
             'contactvoices':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contacttexts':PersonContactTextFormset( self.request.POST, instance=self.object ),
+            'contactemails':PersonContactEmailFormset( self.request.POST, instance=self.object ),
             'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
+            'links':PersonLinkFormset( self.request.POST, instance=self.object ),
+
         }
 
         for formset_name in formset_data.keys():
@@ -174,14 +188,8 @@ class PersonDetail(PermissionRequiredMixin, DetailView):
 class PersonDelete(PermissionRequiredMixin, UpdateView):
     permission_required = 'sdcpeople.delete_person'
     model = Person
-    success_url = reverse_lazy('sdcpeople:person-list')
-
-class PersonSoftDelete(PermissionRequiredMixin, UpdateView):
-    permission_required = 'sdcpeople.delete_person'
-    model = Person
     template_name = 'sdcpeople/person_confirm_delete.html'
     success_url = reverse_lazy('sdcpeople:person-list')
-    fields = ['is_deleted']
 
     def get_context_data(self, **kwargs):
 
@@ -190,6 +198,21 @@ class PersonSoftDelete(PermissionRequiredMixin, UpdateView):
         context_data['voting_address_labels'] = { field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
 
         return context_data
+
+# class PersonSoftDelete(PermissionRequiredMixin, UpdateView):
+#     permission_required = 'sdcpeople.delete_person'
+#     model = Person
+#     template_name = 'sdcpeople/person_confirm_delete.html'
+#     success_url = reverse_lazy('sdcpeople:person-list')
+#     fields = ['is_deleted']
+
+#     def get_context_data(self, **kwargs):
+
+#         context_data = super().get_context_data(**kwargs)
+#         context_data['person_labels'] = { field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+#         context_data['voting_address_labels'] = { field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+#         return context_data
 
 class PersonList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_person'
@@ -659,15 +682,8 @@ class VotingAddressDetail(PermissionRequiredMixin, DetailView):
 class VotingAddressDelete(PermissionRequiredMixin, UpdateView):
     permission_required = 'sdcpeople.delete_votingaddress'
     model = VotingAddress
-    success_url = reverse_lazy('sdcpeople:votingaddress-list')
-
-class VotingAddressSoftDelete(PermissionRequiredMixin, UpdateView):
-    permission_required = 'sdcpeople.delete_votingaddress'
-    model = VotingAddress
     template_name = 'sdcpeople/votingaddress_confirm_delete.html'
     success_url = reverse_lazy('sdcpeople:votingaddress-list')
-    fields = ['is_deleted']
-
 
 class VotingAddressList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_votingaddress'

@@ -72,7 +72,7 @@
       {% for contactvoice in object.contactvoice_set.all %}
         {% with cvid=contactvoice.id|stringformat:"s" %}
           {% with button_as_label='<button type="button" id="button_editcontactvoice_'|add:cvid|add:'" data-formid="div_contactvoiceform_'|add:cvid|add:'" data-displayid="tr_contactvoice_'|add:cvid|add:'" class="contactvoice_edit_button">edit</button>'|safe %}
-            {% include 'touglates/detail_field.html' with label=button_as_label field_1=contactvoice.number field_2=contactvoice.label field_3=contactvoice.get_is_mobile_display %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=contactvoice.number field_2="contactvoice.label" field_3=contactvoice.get_is_mobile_display %}
             {% if contactvoice.extra %}{% include 'touglates/detail_field.html' with field=contactvoice.extra %}{% endif %}
             {% if contactvoice.alert %}{% include 'touglates/detail_field.html' with field=contactvoice.alert %}{% endif %}
             {% endwith %}
@@ -115,9 +115,50 @@
       {% for contacttext in object.contacttext_set.all %}
         {% with cvid=contacttext.id|stringformat:"s" %}
           {% with button_as_label='<button type="button" id="button_editcontacttext_'|add:cvid|add:'" data-formid="div_contacttextform_'|add:cvid|add:'" data-displayid="tr_contacttext_'|add:cvid|add:'" class="contacttext_edit_button">edit</button>'|safe %}
-            {% include 'touglates/detail_field.html' with label=button_as_label field_1=contacttext.number field_2=contacttext.label field_3=contacttext.get_is_mobile_display %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=contacttext.number field_2=contacttext.label field_3=contacttext.get_is_mobile_display %}
             {% if contacttext.extra %}{% include 'touglates/detail_field.html' with field=contacttext.extra %}{% endif %}
             {% if contacttext.alert %}{% include 'touglates/detail_field.html' with field=contacttext.alert %}{% endif %}
+            {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
+      <h4>Emails</h4>
+
+      {{ contactemails.management_form }}
+      {% for contactemailform in contactemails.forms %}
+        {% if contactemailform.id.value > 0 %}
+          <div id="div_contactemailform_{{ contactemailform.id.value }}" class="contactemailformsetform"  >
+            {% for hiddenfield in contactemailform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=contactemailform.address %}
+            {% include 'touglates/form_field.html' with field=contactemailform.label %}
+            {% include 'touglates/form_field.html' with field=contactemailform.rank_number %}
+            {% include 'touglates/form_field.html' with field=contactemailform.extra %}
+            {% include 'touglates/form_field.html' with field=contactemailform.alert %}
+            {% include 'touglates/form_field.html' with field=contactemailform.DELETE %}
+          </div>
+        {% else %}
+          <div class="contactemailformsetform contactemailnewform" >
+            {% for hiddenfield in contactemailform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=contactemailform.address %}
+            {% include 'touglates/form_field.html' with field=contactemailform.label %}
+            {% include 'touglates/form_field.html' with field=contactemailform.rank_number %}
+            {% include 'touglates/form_field.html' with field=contactemailform.extra %}
+            {% include 'touglates/form_field.html' with field=contactemailform.alert %}
+            {% include 'touglates/form_field.html' with field=contactemailform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addcontactemail">add</button>' %}
+      {% for contactemail in object.contactemail_set.all %}
+        {% with cvid=contactemail.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editcontactemail_'|add:cvid|add:'" data-formid="div_contactemailform_'|add:cvid|add:'" data-displayid="tr_contactemail_'|add:cvid|add:'" class="contactemail_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=contactemail.address field_2=contactemail.label field_3=contactemail.get_is_mobile_display %}
+            {% if contactemail.extra %}{% include 'touglates/detail_field.html' with field=contactemail.extra %}{% endif %}
+            {% if contactemail.alert %}{% include 'touglates/detail_field.html' with field=contactemail.alert %}{% endif %}
             {% endwith %}
         {% endwith %}
       {% endfor %}
@@ -151,10 +192,45 @@
       {% for submembership in object.submembership_set.all %}
         {% with cvid=submembership.id|stringformat:"s" %}
           {% with button_as_label='<button type="button" id="button_editsubmembership_'|add:cvid|add:'" data-formid="div_submembershipform_'|add:cvid|add:'" data-displayid="tr_submembership_'|add:cvid|add:'" class="submembership_edit_button">edit</button>'|safe %}
-            {% include 'touglates/detail_field.html' with label=button_as_label field_1=submembership.subcommittee field_2=submembership.position  %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=submembership.subcommittee field_2=submembership.position  %}
           {% endwith %}
         {% endwith %}
       {% endfor %}
+
+
+      <h4>Links</h4>
+
+      {{ links.management_form }}
+      {% for linkform in links.forms %}
+        {% if linkform.id.value > 0 %}
+          <div id="div_linkform_{{ linkform.id.value }}" class="linkformsetform"  >
+            {% for hiddenfield in linkform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=linkform.title %}
+            {% include 'touglates/form_field.html' with field=linkform.href %}
+            {% include 'touglates/form_field.html' with field=linkform.DELETE %}
+          </div>
+        {% else %}
+          <div class="linkformsetform linknewform" >
+            {% for hiddenfield in linkform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=linkform.title %}
+            {% include 'touglates/form_field.html' with field=linkform.href %}
+            {% include 'touglates/form_field.html' with field=linkform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addlink">add</button>' %}
+      {% for link in object.link_set.all %}
+        {% with cvid=link.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editlink_'|add:cvid|add:'" data-formid="div_linkform_'|add:cvid|add:'" data-displayid="tr_link_'|add:cvid|add:'" class="link_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_field.html' with label=button_as_label field=link.title href=link.href href_atts="target='_blank'" %}
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
 
       {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
 
@@ -250,6 +326,48 @@
     let contacttextforms = document.getElementsByClassName("contacttextformsetform")
     for( contacttextform of contacttextforms ){
       contacttextform.style.display="none"
+    }
+
+  </script>
+  <script>
+
+    let contactemailEditButtons = document.getElementsByClassName('contactemail_edit_button')
+    for( contactemailEditButton of contactemailEditButtons){
+      contactemailEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addcontactemail').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('contactemailnewform')
+    })
+    let contactemailforms = document.getElementsByClassName("contactemailformsetform")
+    for( contactemailform of contactemailforms ){
+      contactemailform.style.display="none"
+    }
+
+  </script>
+
+
+  <script>
+
+    let linkEditButtons = document.getElementsByClassName('link_edit_button')
+    for( linkEditButton of linkEditButtons){
+      linkEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addlink').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('linknewform')
+    })
+    let linkforms = document.getElementsByClassName("linkformsetform")
+    for( linkform of linkforms ){
+      linkform.style.display="none"
     }
 
   </script>
