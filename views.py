@@ -230,8 +230,40 @@ class PersonList(PermissionRequiredMixin, ListView):
             'text_fields_available':[],
             'filter_fields_available':{},
             'order_by_fields_available':[],
-            'columns_available':[]
+            'columns_available':[],
         }
+
+        derived_field_labels={ field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        more_field_labels={
+            'voting_address__locationborough__name':'Borough',
+            'voting_address__locationborough':'Borough',
+            'voting_address__locationcongress__name':'Congress',
+            'voting_address__locationcongress':'Congress',
+            'voting_address__locationmagistrate__name':'Magistrate',
+            'voting_address__locationmagistrate':'Magistrate',
+            'voting_address__locationprecinct__name':'Precinct',
+            'voting_address__locationprecinct':'Precinct',
+            'voting_address__locationstatesenate__name':'Senate',
+            'voting_address__locationstatesenate':'Senate',
+            'voting_address__locationstathouse__name':'HOD',
+            'voting_address__locationstathouse':'HOD',
+        }
+        field_types={
+            'voting_address__locationborough__name':'model',
+            'voting_address__locationborough':'model',
+            'voting_address__locationcongress__name':'model',
+            'voting_address__locationcongress':'model',
+            'voting_address__locationmagistrate__name':'model',
+            'voting_address__locationmagistrate':'model',
+            'voting_address__locationprecinct__name':'model',
+            'voting_address__locationprecinct':'model',
+            'voting_address__locationstatesenate__name':'model',
+            'voting_address__locationstatesenate':'model',
+            'voting_address__locationstathouse__name':'model',
+            'voting_address__locationstathouse':'model',
+        }
+
+        self.field_labels={**derived_field_labels, **more_field_labels}
 
         self.vista_settings['text_fields_available']=[
             'name_last',
@@ -260,29 +292,36 @@ class PersonList(PermissionRequiredMixin, ListView):
         ]
 
         for fieldname in [
-            'membership_status',
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
+            'voting_address__locationcongress',
+            'voting_address__locationstatesenate',
+            'voting_address__locationborough',
+            'voting_address__locationprecinct',
+            'voting_address__locationborough',
+            'voting_address__locationmagistrate',
+
         ]:
             self.vista_settings['order_by_fields_available'].append(fieldname)
             self.vista_settings['order_by_fields_available'].append('-' + fieldname)
 
-        for fieldname in [
+        self.vista_settings['columns_available'] = [
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
-        ]:
-            self.vista_settings['columns_available'].append(fieldname)
-
-        self.vista_settings['field_types'] = {
-            'latest_inventory':'date',
-        }
+            'voting_address__locationcongress',
+            'voting_address__locationstatesenate',
+            'voting_address__locationborough',
+            'voting_address__locationprecinct',
+            'voting_address__locationborough',
+            'voting_address__locationmagistrate',
+        ]
 
         self.vista_defaults = {
-            'order_by': Person._meta.ordering,
+            'order_by': ('name_first'),                           #Person._meta.ordering,
             'paginate_by':self.paginate_by,
         }
 
@@ -352,21 +391,26 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         context_data = super().get_context_data(**kwargs)
 
-        context_data['locationcongresss'] = LocationCongress.objects.all()
-        context_data['locationstatesenate'] = LocationStateSenate.objects.all()
-        context_data['locationstatehouse'] = LocationStateHouse.objects.all()
-        context_data['locationprecinct'] = LocationPrecinct.objects.all()
-        context_data['locationborough'] = LocationBorough.objects.all()
-        context_data['locationmagistrate'] = LocationMagistrate.objects.all()
 
         context_data['order_by_fields_available'] = []
         for fieldname in self.vista_settings['order_by_fields_available']:
             if fieldname > '' and fieldname[0] == '-':
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':Person._meta.get_field(fieldname[1:]).verbose_name.title() + ' [Reverse]'})
+                context_data['order_by_fields_available'].append({ 'name':fieldname[1:], 'label':self.field_labels[fieldname[1:]] + ' [Reverse]'})
             else:
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':Person._meta.get_field(fieldname).verbose_name.title()})
+                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':self.field_labels[fieldname]})
 
-        context_data['columns_available'] = [{ 'name':fieldname, 'label':Person._meta.get_field(fieldname).verbose_name.title() } for fieldname in self.vista_settings['columns_available']]
+        context_data['columns_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname] } for fieldname in self.vista_settings['columns_available']]
+
+        options={
+            'voting_address__locationcongress': {'type':'model', 'values':LocationCongress.objects.all() },
+            'voting_address__locationstatesenate': {'type':'model', 'values':LocationStateSenate.objects.all() },
+            'voting_address__locationstatehouse': {'type':'model', 'values':LocationStateHouse.objects.all() },
+            'voting_address__locationprecinct': {'type':'model', 'values':LocationPrecinct.objects.all() },
+            'voting_address__locationborough': {'type':'model', 'values':LocationBorough.objects.all() },
+            'voting_address__locationmagistrate': {'type':'model', 'values':LocationMagistrate.objects.all() },
+        }
+
+        context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
 
         context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
 
@@ -701,8 +745,20 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'text_fields_available':[],
             'filter_fields_available':{},
             'order_by_fields_available':[],
-            'columns_available':[]
+            'columns_available':[],
         }
+
+        derived_field_labels={ field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        more_field_labels={
+            'voting_address__locationcongress__name':'Congress',
+            'voting_address__locationstatesenate__name':'Senate',
+            'voting_address__locationborough__name':'Borough',
+            'voting_address__locationprecinct__name':'Precinct',
+            'voting_address__locationstathouse__name':'HOD',
+            'voting_address__locationmagistrate__name':'Magistrate',
+        }
+
+        self.field_labels={**derived_field_labels, **more_field_labels}
 
         self.vista_settings['text_fields_available']=[
             'name_last',
@@ -730,25 +786,30 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'voting_address__locationmagistrate',
         ]
 
-        for fieldname in [
+        for field in [
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
         ]:
-            self.vista_settings['order_by_fields_available'].append(fieldname)
-            self.vista_settings['order_by_fields_available'].append('-' + fieldname)
+            self.vista_settings['order_by_fields_available'].append((field[0], field[1]))
+            self.vista_settings['order_by_fields_available'].append(('-' + field[0], field[1] + " [Reverse]"))
 
-        for fieldname in [
+        self.vista_settings['columns_available'] =[
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
-        ]:
-            self.vista_settings['columns_available'].append(fieldname)
+            'voting_address__locationcongress',
+            'voting_address__locationstatesenate',
+            'voting_address__locationborough',
+            'voting_address__locationprecinct',
+            'voting_address__locationborough',
+            'voting_address__locationmagistrate',
+        ]
 
         self.vista_settings['field_types'] = {
-            'latest_inventory':'date',
+
         }
 
         self.vista_defaults = {
@@ -837,6 +898,10 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
                 context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':VotingAddress._meta.get_field(fieldname).verbose_name.title()})
 
         context_data['columns_available'] = [{ 'name':fieldname, 'label':VotingAddress._meta.get_field(fieldname).verbose_name.title() } for fieldname in self.vista_settings['columns_available']]
+
+        context_data['filterfields_available'] = self.vista_settings['filter_fields_available']
+
+        context_data['field_labels'] = self.vista_settings['field_labels']
 
         context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.votingaddress').all() # for choosing saved vistas
 

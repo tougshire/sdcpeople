@@ -1,10 +1,12 @@
   <h2>{{ object }}</h2>
 
   <div class="detail">
+    {% include 'touglates/detail_field.html' with label=person_labels.name_prefix field=object.name_prefix %}
     {% include 'touglates/detail_field.html' with label=person_labels.name_last field=object.name_last %}
     {% include 'touglates/detail_field.html' with label=person_labels.name_first field=object.name_first %}
     {% include 'touglates/detail_field.html' with label=person_labels.name_common field=object.name_common %}
     {% include 'touglates/detail_field.html' with label=person_labels.name_middles field=object.name_middles %}
+    {% include 'touglates/detail_field.html' with label=person_labels.name_suffix field=object.name_suffix %}
     {% include 'touglates/detail_field.html' with label=person_labels.membership_status field=object.membership_status %}
     {% include 'touglates/detail_field.html' with label=person_labels.voting_address field=object.voting_address %}
     {% include 'touglates/detail_field.html' with label="Congress" field=object.voting_address.locationcongress %}

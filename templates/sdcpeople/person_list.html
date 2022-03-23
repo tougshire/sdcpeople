@@ -44,66 +44,29 @@
           <div class="controlset filterselectfield">
             <select id="ctl_filter__field__{{ forloop.counter0 }}" name="filter__fieldname__{{ forloop.counter0 }}" autocomplete="off">
               <option value="">---</option>
-              <option value='name_middles'{% if filterset.fieldname == 'name_middles' %} selected="SELECTED"{% endif %}>{{ person_labels.name_middles }}</option>
-              <option value='voting_address__locationstateshouse'{% if filterset.fieldname == 'voting_address__location__stateshouse' %} selected="SELECTED"{% endif %}>{{ Congress }}</option>
-              <option value='voting_address__locationstatesenate'{% if filterset.fieldname == 'voting_address__location__statesenate' %} selected="SELECTED"{% endif %}>{{ Senate }}</option>
-              <option value='voting_address__locationstatehouse'{% if filterset.fieldname == 'voting_address__location__statehouse' %} selected="SELECTED"{% endif %}>{{ House }}</option>
-              <option value='voting_address__locationmagistrate'{% if filterset.fieldname == 'voting_address__location__magistrate' %} selected="SELECTED"{% endif %}>{{ Magistrate }}</option>
-              <option value='voting_address__locationborough'{% if filterset.fieldname == 'voting_address__location__borough' %} selected="SELECTED"{% endif %}>{{ Borough }}</option>
-              <option value='voting_address__locationprecinct'{% if filterset.fieldname == 'voting_address__location__precinct' %} selected="SELECTED"{% endif %}>{{Precinct }}</option>
-            </select>
-          </div>
-          <div id="div_filter__name_middles__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__name_middles__{{ forloop.counter0 }}" value="contains">
-            <input id="ctl_filter__value__name_middles__{{ forloop.counter0 }}" value="{{ filterset.value }}">
-          </div>
-          <div id="div_filter__voting_address__locationstateshouse__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__voting_address__locationstateshouse__{{ forloop.counter0 }}" value="in">
-            <select id="ctl_filter__value__voting_address__locationstateshouse__{{ forloop.counter0 }}" multiple="MULTIPLE">
-              <option value="" >-----</option>
-              {% for locationstateshouse in locationstatehouses %}
-                <option value="{{ locationstateshouse.pk }}"{% if locationstateshouse.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ locationstateshouse }}</option>
+              {% for field in filter_fields_available %}
+                <option value='{{ field.name }}'{% if filterset.fieldname == field.name %} selected="SELECTED"{% endif %}>{{ field.label }}</option>
               {% endfor %}
             </select>
           </div>
-          <div id="div_filter__voting_address__locationstatesenate__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__voting_address__locationstatesenate__{{ forloop.counter0 }}" value="in">
-            <select id="ctl_filter__value__voting_address__locationstatesenate__{{ forloop.counter0 }}" multiple="MULTIPLE">
-              <option value="" >-----</option>
-              {% for locationstatesenate in locationstatesenates %}
-                <option value="{{ locationstatesenate.pk }}"{% if locationstatesenate.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ locationstatesenate }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div id="div_filter__voting_address__locationmagistrate__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__voting_address__locationmagistrate__{{ forloop.counter0 }}" value="in">
-            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
-              <option value="" >-----</option>
-              {% for role in roles %}
-                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div id="div_filter__voting_address__locationborough__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__role__{{ forloop.counter0 }}" value="in">
-            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
-              <option value="" >-----</option>
-              {% for role in roles %}
-                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div id="div_filter__voting_address__locationprecinct__{{ forloop.counter0 }}" class="controlset filter__value" style="display:none">
-            <input type="hidden" id="ctl_filter__op__role__{{ forloop.counter0 }}" value="in">
-            <select id="ctl_filter__value__role__{{ forloop.counter0 }}" multiple="MULTIPLE">
-              <option value="" >-----</option>
-              {% for role in roles %}
-                <option value="{{ role.pk }}"{% if role.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ role }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-
+          {% for field in filter_fields_available %}
+            {% if field.options.type == 'model' %}
+              <div id="div_filter__{{ field.name }}__{{ forloop.parentloop.counter0 }}" class="controlset filter__value" style="display:none">
+                <input type="hidden" id="ctl_filter__op__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="in">
+                <select id="ctl_filter__value__{{ field.name }}__{{ forloop.parentloop.counter0 }}" multiple="MULTIPLE">
+                  <option value="" >-----</option>
+                  {% for option in field.options.values %}
+                    <option value="{{ option.pk }}"{% if option.pk|lower in filterset.value %} selected="SELECTED"{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% else %}
+              <div id="div_filter__{{ field.name }}__{{ forloop.parentloop.counter0 }}" class="controlset filter__value" style="display:none">
+                <input type="hidden" id="ctl_filter__op__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="contains">
+                <input id="ctl_filter__value__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="{{ filterset.value }}">
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
       {% endfor %}
 
