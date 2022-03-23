@@ -4,10 +4,12 @@
   {% include './person_detail_include.html' %}
 
   <div class="menu menu-bottom">
-    {% if perms.sdcpeople.change_person %}
+    {% if perms.sdcpeople.change_person or is_this_user %}
       <div class="menu-item">
       <a href="{% url 'sdcpeople:person-update' object.pk %}">Edit</a>
       </div>
+    {% endif %}
+    {% if perms.sdcpeople.delete_person %}
       <div class="menu-item">
       <a href="{% url 'sdcpeople:person-delete' object.pk %}">Delete</a>
       </div>

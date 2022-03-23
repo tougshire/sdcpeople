@@ -18,7 +18,7 @@ from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctF
                     LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
-                     LocationPrecinct, LocationStateHouse, LocationStateSenate, Person, VotingAddress)
+                     LocationPrecinct, LocationStateHouse, LocationStateSenate, Person, PersonUser, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -110,6 +110,9 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
     model = Person
     form_class = PersonForm
 
+    def has_permission(self):
+        return super().has_permission() or PersonUser.objects.filter(user=self.request.user, person=self.get_object()).exists()
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
@@ -181,6 +184,7 @@ class PersonDetail(PermissionRequiredMixin, DetailView):
         context_data['person_labels'] = { field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
         context_data['voting_address_labels'] = { field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
 
+        context_data['is_this_user'] = PersonUser.objects.filter(user=self.request.user, person=self.get_object()).exists()
 
         return context_data
 

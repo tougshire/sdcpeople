@@ -336,6 +336,9 @@ class Person(models.Model):
             self.is_deleted = True
             self.save()
 
+    def is_user(self, user):
+        return PersonUser.objects.filter(person=self, user=user).exists()
+
     objects = NonDeletedPersonManager()
     all_objects = models.Manager()
 
@@ -613,6 +616,20 @@ class DuesPayment(models.Model):
         on_delete = models.SET_NULL,
         help_text = "The method of payment"
     )
+
+class PersonUser(models.Model):
+    user=models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        help_text="The user associated with the person"
+    )
+    person=models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text="The person associated with the user"
+    )
+    def __str__(self):
+        return '{} : {}'.format(self.person, self.user)
 
 class History(models.Model):
 

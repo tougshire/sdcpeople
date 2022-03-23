@@ -44,4 +44,10 @@
       {% include 'touglates/detail_field.html' with label="" field_1=submembership.subcommittee field_2=submembership.position  %}
     {% endfor %}
 
+    {% include 'touglates/detail_field.html' with label="Links" field="" %}
+    {% for link in object.link_set.all %}
+      {% include 'touglates/detail_field.html' with label="" field=link.title href=link.href href_atts="target='_new'"%}
+    {% endfor %}
+
+
   </div>

@@ -17,6 +17,7 @@ from .models import (
     MembershipType,
     PaymentMethod,
     Person,
+    PersonUser,
     Position,
     SubCommittee,
     SubMembership,
@@ -49,7 +50,6 @@ class MembershipHistoryAdmin(admin.ModelAdmin):
 
 admin.site.register(MembershipHistory, MembershipHistoryAdmin)
 
-
 class MembershipStatusAdmin(admin.ModelAdmin):
     list_display=('membership_type', 'name', 'is_quorum')
 
@@ -64,8 +64,6 @@ class PersonManager(admin.ModelAdmin):
     def get_queryset(self, request):
         return Person.all_objects.all()
 
-
-
 admin.site.register(Person, PersonManager)
 
 class PositionAdmin(admin.ModelAdmin):
@@ -79,3 +77,4 @@ admin.site.register(SubMembership)
 
 admin.site.register(VotingAddress)
 
+admin.site.register(PersonUser)
