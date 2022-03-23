@@ -158,10 +158,12 @@ class PersonForm(ModelForm):
     class Meta:
         model=Person
         fields = [
+            'name_prefix',
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
+            'name_suffix',
             'voting_address',
             'membership_status',
             'positions',
