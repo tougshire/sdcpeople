@@ -60,6 +60,11 @@
                   {% endfor %}
                 </select>
               </div>
+            {% elif field.options.type == 'boolean' %}
+              <div id="div_filter__{{ field.name }}__{{ forloop.parentloop.counter0 }}" class="controlset filter__value" style="display:none">
+                <input type="hidden" id="ctl_filter__op__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="exact">
+                <input type="checkbox" id="ctl_filter__value__{{ field.name }}__{{ forloop.parentloop.counter0 }}" {% if filterset.value %} checked="CHECKED"{% endif %}>
+              </div>
             {% else %}
               <div id="div_filter__{{ field.name }}__{{ forloop.parentloop.counter0 }}" class="controlset filter__value" style="display:none">
                 <input type="hidden" id="ctl_filter__op__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="contains">

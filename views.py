@@ -1,4 +1,5 @@
 import urllib
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -18,7 +19,7 @@ from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctF
                     LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
-                     LocationPrecinct, LocationStateHouse, LocationStateSenate, Person, PersonUser, VotingAddress)
+                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -233,6 +234,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'columns_available':[],
         }
 
+
         derived_field_labels={ field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
         more_field_labels={
             'voting_address__locationborough__name':'Borough',
@@ -247,35 +249,33 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationstatesenate':'Senate',
             'voting_address__locationstathouse__name':'HOD',
             'voting_address__locationstathouse':'HOD',
+            'membership_status':'Status',
+            'membership_status__is_quorum':'Quorum',
         }
-        field_types={
-            'voting_address__locationborough__name':'model',
-            'voting_address__locationborough':'model',
-            'voting_address__locationcongress__name':'model',
-            'voting_address__locationcongress':'model',
-            'voting_address__locationmagistrate__name':'model',
-            'voting_address__locationmagistrate':'model',
-            'voting_address__locationprecinct__name':'model',
-            'voting_address__locationprecinct':'model',
-            'voting_address__locationstatesenate__name':'model',
-            'voting_address__locationstatesenate':'model',
-            'voting_address__locationstathouse__name':'model',
-            'voting_address__locationstathouse':'model',
-        }
-
         self.field_labels={**derived_field_labels, **more_field_labels}
+
+        self.vista_settings['field_types']={
+            'voting_address__locationborough__name':'text',
+            'voting_address__locationborough':'model',
+            'voting_address__locationcongress__name':'text',
+            'voting_address__locationcongress':'model',
+            'voting_address__locationmagistrate__name':'text',
+            'voting_address__locationmagistrate':'model',
+            'voting_address__locationprecinct__name':'text',
+            'voting_address__locationprecinct':'model',
+            'voting_address__locationstatesenate__name':'text',
+            'voting_address__locationstatesenate':'model',
+            'voting_address__locationstathouse__name':'text',
+            'voting_address__locationstathouse':'model',
+            'membership_status':'model',
+            'membership_status__is_quorum':'boolean',
+        }
 
         self.vista_settings['text_fields_available']=[
             'name_last',
             'name_first',
             'name_middles',
             'name_common',
-            'voting_address__locationcongress__name',
-            'voting_address__locationstatesenate__name',
-            'voting_address__locationborough__name',
-            'voting_address__locationprecinct__name',
-            'voting_address__locationborough__name',
-            'voting_address__locationmagistrate__name',
         ]
 
         self.vista_settings['filter_fields_available'] = [
@@ -289,6 +289,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationprecinct',
             'voting_address__locationborough',
             'voting_address__locationmagistrate',
+            'membership_status',
+            'membership_status__is_quorum',
         ]
 
         for fieldname in [
@@ -302,6 +304,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationprecinct',
             'voting_address__locationborough',
             'voting_address__locationmagistrate',
+            'membership_status',
 
         ]:
             self.vista_settings['order_by_fields_available'].append(fieldname)
@@ -318,12 +321,16 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationprecinct',
             'voting_address__locationborough',
             'voting_address__locationmagistrate',
+            'membership_status',
+            'membership_status__is_quorum',
         ]
 
-        self.vista_defaults = {
-            'order_by': ('name_first'),                           #Person._meta.ordering,
-            'paginate_by':self.paginate_by,
-        }
+        self.vista_defaults = QueryDict(urlencode([
+            ('order_by', ['name_last', 'name_first']),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        print('tp m3nj48', self.vista_defaults)
 
         return super().setup(request, *args, **kwargs)
 
@@ -374,7 +381,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             self.vistaobj = default_vista(
                 self.request.user,
                 queryset,
-                QueryDict(urllib.parse.urlencode(self.vista_defaults)),
+                self.vista_defaults,
                 self.vista_settings
             )
 
@@ -408,6 +415,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationprecinct': {'type':'model', 'values':LocationPrecinct.objects.all() },
             'voting_address__locationborough': {'type':'model', 'values':LocationBorough.objects.all() },
             'voting_address__locationmagistrate': {'type':'model', 'values':LocationMagistrate.objects.all() },
+            'membership_status': {'type':'model', 'values':MembershipStatus.objects.all() },
+            'membership_status__is_quorum':{'type':'boolean'}
         }
 
         context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
@@ -429,8 +438,6 @@ class PersonList(PermissionRequiredMixin, ListView):
             if cdfilter['op'] in ['in', 'range']:
                 cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
             context_data['filter'].append(cdfilter)
-
-        print('tp m3bf26', context_data['filter'])
 
         context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Person._meta.ordering
 
@@ -920,8 +927,6 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             if cdfilter['op'] in ['in', 'range']:
                 cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
             context_data['filter'].append(cdfilter)
-
-        print('tp m3bf26', context_data['filter'])
 
         context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else VotingAddress._meta.ordering
 
