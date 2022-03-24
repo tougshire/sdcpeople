@@ -43,7 +43,7 @@
     {% endfor %}
     {% include 'touglates/detail_field.html' with label="Committees" field="" %}
     {% for submembership in object.submembership_set.all %}
-      {% include 'touglates/detail_field.html' with label="" field_1=submembership.subcommittee field_2=submembership.position  %}
+      {% include 'touglates/detail_fields.html' with label="" field_1=submembership.subcommittee field_2=submembership.position  %}
     {% endfor %}
 
     {% include 'touglates/detail_field.html' with label="Links" field="" %}

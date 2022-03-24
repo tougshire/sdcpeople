@@ -19,7 +19,7 @@ from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctF
                     LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
-                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, VotingAddress)
+                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, SubCommittee, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -234,7 +234,6 @@ class PersonList(PermissionRequiredMixin, ListView):
             'columns_available':[],
         }
 
-
         derived_field_labels={ field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
         more_field_labels={
             'voting_address__locationborough__name':'Borough',
@@ -251,6 +250,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationstathouse':'HOD',
             'membership_status':'Status',
             'membership_status__is_quorum':'Quorum',
+            'membership_status__is_member':'Member',
+            'submembership__subcommittee':'Committees'
         }
         self.field_labels={**derived_field_labels, **more_field_labels}
 
@@ -269,6 +270,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationstathouse':'model',
             'membership_status':'model',
             'membership_status__is_quorum':'boolean',
+            'membership_status__is_member':'boolean',
+            'submembership__subcommittee':'model',
         }
 
         self.vista_settings['text_fields_available']=[
@@ -291,6 +294,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationmagistrate',
             'membership_status',
             'membership_status__is_quorum',
+            'membership_status__is_member',
+            'submembership__subcommittee',
         ]
 
         for fieldname in [
@@ -323,9 +328,13 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationmagistrate',
             'membership_status',
             'membership_status__is_quorum',
+            'submembership__subcommittee',
         ]
 
         self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname', ['membership_status__is_member']),
+            ('filter__op', ['exact']),
+            ('filter__value', [True]),
             ('order_by', ['name_last', 'name_first']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
@@ -377,7 +386,7 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.vista_settings
 
             )
-        elif 'default_vista' in self.request.POST:
+        else: #elif 'default_vista' in self.request.POST:
             self.vistaobj = default_vista(
                 self.request.user,
                 queryset,
@@ -416,7 +425,9 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationborough': {'type':'model', 'values':LocationBorough.objects.all() },
             'voting_address__locationmagistrate': {'type':'model', 'values':LocationMagistrate.objects.all() },
             'membership_status': {'type':'model', 'values':MembershipStatus.objects.all() },
-            'membership_status__is_quorum':{'type':'boolean'}
+            'membership_status__is_quorum':{'type':'boolean'},
+            'membership_status__is_member':{'type':'boolean'},
+            'submembership__subcommittee':{'type':'model', 'values':SubCommittee.objects.all() }
         }
 
         context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
