@@ -251,7 +251,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'membership_status':'Status',
             'membership_status__is_quorum':'Quorum',
             'membership_status__is_member':'Member',
-            'submembership__subcommittee':'Committees'
+            'submembership__subcommittee':'Committees',
         }
         self.field_labels={**derived_field_labels, **more_field_labels}
 
@@ -310,6 +310,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address__locationborough',
             'voting_address__locationmagistrate',
             'membership_status',
+            'submembership__subcommittee',
 
         ]:
             self.vista_settings['order_by_fields_available'].append(fieldname)
@@ -427,7 +428,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'membership_status': {'type':'model', 'values':MembershipStatus.objects.all() },
             'membership_status__is_quorum':{'type':'boolean'},
             'membership_status__is_member':{'type':'boolean'},
-            'submembership__subcommittee':{'type':'model', 'values':SubCommittee.objects.all() }
+            'submembership__subcommittee':{'type':'model', 'values':SubCommittee.objects.all() },
+
         }
 
         context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
