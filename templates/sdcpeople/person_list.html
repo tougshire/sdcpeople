@@ -61,8 +61,10 @@
                 </select>
               </div>
             {% elif field.options.type == 'boolean' %}
+            <script>console.log('tp m3pe54')</script>
               <div id="div_filter__{{ field.name }}__{{ forloop.parentloop.counter0 }}" class="controlset filter__value" style="display:none">
                 <input type="hidden" id="ctl_filter__op__{{ field.name }}__{{ forloop.parentloop.counter0 }}" value="exact">
+                <script> console.log('tp m3pe30', '{% if filterset.value %}{{ filterset.value }}{% else %}False{% endif %}')</script>
                 <input type="checkbox" id="ctl_filter__value__{{ field.name }}__{{ forloop.parentloop.counter0 }}" {% if filterset.value %} checked="CHECKED"{% endif %}>
               </div>
             {% else %}

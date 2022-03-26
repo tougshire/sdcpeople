@@ -828,10 +828,6 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'voting_address__locationmagistrate',
         ]
 
-        self.vista_settings['field_types'] = {
-
-        }
-
         self.vista_defaults = {
             'order_by': VotingAddress._meta.ordering,
             'paginate_by':self.paginate_by,
