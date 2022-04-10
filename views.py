@@ -240,6 +240,27 @@ class PersonList(PermissionRequiredMixin, ListView):
                 'fieldsearch',
             ]
         }
+        self.vista_settings['fields']['voting_address__locationborough'] = {
+            'label':LocationBorough._meta.verbose_name,
+            'type':'model',
+            'queryset': LocationBorough.objects.all(),
+            'available_for':[
+                'fieldsearch',
+                'columns',
+                'order_by'
+            ]
+        }
+        self.vista_settings['fields']['voting_address__locationprecinct'] = {
+            'label':LocationPrecinct._meta.verbose_name,
+            'type':'model',
+            'queryset': LocationPrecinct.objects.all(),
+            'available_for':[
+                'fieldsearch',
+                'columns',
+                'order_by'
+            ]
+        }
+
         self.vista_settings['fields']['membership_status__is_quorum'] = {
             'label':'Is Quroum',
             'type':'boolean',
