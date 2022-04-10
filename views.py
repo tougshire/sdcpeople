@@ -232,6 +232,9 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         self.vista_settings['fields'] = vista_fields(Person, rels=False)
         del(self.vista_settings['fields']['subcommittees'])
+        del(self.vista_settings['fields']['name_suffix'])
+        del(self.vista_settings['fields']['name_middles'])
+        del(self.vista_settings['fields']['voting_address'])
         self.vista_settings['fields']['submembership__subcommittee'] = {
             'label':'Subcommittee',
             'type':'model',
@@ -260,7 +263,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 'order_by'
             ]
         }
-
         self.vista_settings['fields']['membership_status__is_quorum'] = {
             'label':'Is Quroum',
             'type':'boolean',
@@ -271,7 +273,14 @@ class PersonList(PermissionRequiredMixin, ListView):
                 'order_by'
             ]
         }
-
+        self.vista_settings['fields']['voting_address'] = {
+            'label':VotingAddress._meta.verbose_name,
+            'type':'model',
+            'queryset': VotingAddress.objects.all(),
+            'available_for':[
+                'columns',
+            ]
+        }
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname', ['membership_status__is_member']),
             ('filter__op', ['exact']),
