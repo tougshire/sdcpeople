@@ -222,7 +222,7 @@ class PersonDelete(PermissionRequiredMixin, DeleteView):
 class PersonList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_person'
     model = Person
-    paginate_by = 30
+    # paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
         self.vista_settings={
@@ -256,7 +256,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             ('filter__op', ['exact']),
             ('filter__value', [True]),
             ('order_by', ['membership_status__is_quorum', 'name_last']),
-            ('paginate_by',self.paginate_by),
+            # ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
 
@@ -315,12 +315,12 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
-    def get_paginate_by(self, queryset):
+    # def get_paginate_by(self, queryset):
 
-        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-            return self.vistaobj['querydict']['paginate_by']
+    #     if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+    #         return self.vistaobj['querydict']['paginate_by']
 
-        return super().get_paginate_by(self)
+    #     return super().get_paginate_by(self)
 
     def get_context_data(self, **kwargs):
 
@@ -634,7 +634,7 @@ class VotingAddressDelete(PermissionRequiredMixin, UpdateView):
 class VotingAddressList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_votingaddress'
     model = VotingAddress
-    paginate_by = 30
+    # paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
 
@@ -708,7 +708,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         self.vista_defaults = {
             'order_by': VotingAddress._meta.ordering,
-            'paginate_by':self.paginate_by,
+            # 'paginate_by':self.paginate_by,
         }
 
         return super().setup(request, *args, **kwargs)
@@ -766,12 +766,12 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
-    def get_paginate_by(self, queryset):
+    # def get_paginate_by(self, queryset):
 
-        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-            return self.vistaobj['querydict']['paginate_by']
+    #     if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+    #         return self.vistaobj['querydict']['paginate_by']
 
-        return super().get_paginate_by(self)
+    #     return super().get_paginate_by(self)
 
     def get_context_data(self, **kwargs):
 
