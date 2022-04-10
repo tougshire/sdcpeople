@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateVi
 from django.views.generic.list import ListView
 from tougshire_vistas.models import Vista
 from tougshire_vistas.views import (default_vista, delete_vista, get_global_vista, get_latest_vista, make_vista,
-                                    retrieve_vista)
+                                    retrieve_vista, vista_context_data, vista_fields)
 
 from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctForm, LocationStateHouseForm,
                     LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
@@ -225,122 +225,40 @@ class PersonList(PermissionRequiredMixin, ListView):
     paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
-
         self.vista_settings={
             'max_search_keys':10,
-            'text_fields_available':[],
-            'filter_fields_available':{},
-            'order_by_fields_available':[],
-            'columns_available':[],
+            'fields':[],
         }
 
-        derived_field_labels={ field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-        more_field_labels={
-            'voting_address__locationborough__name':'Borough',
-            'voting_address__locationborough':'Borough',
-            'voting_address__locationcongress__name':'Congress',
-            'voting_address__locationcongress':'Congress',
-            'voting_address__locationmagistrate__name':'Magistrate',
-            'voting_address__locationmagistrate':'Magistrate',
-            'voting_address__locationprecinct__name':'Precinct',
-            'voting_address__locationprecinct':'Precinct',
-            'voting_address__locationstatesenate__name':'Senate',
-            'voting_address__locationstatesenate':'Senate',
-            'voting_address__locationstathouse__name':'HOD',
-            'voting_address__locationstathouse':'HOD',
-            'membership_status':'Status',
-            'membership_status__is_quorum':'Quorum',
-            'membership_status__is_member':'Member',
-            'submembership__subcommittee':'Committees',
+        self.vista_settings['fields'] = vista_fields(Person, rels=False)
+        del(self.vista_settings['fields']['subcommittees'])
+        self.vista_settings['fields']['submembership__subcommittee'] = {
+            'label':'Subcommittee',
+            'type':'model',
+            'queryset': SubCommittee.objects.all(),
+            'available_for':[
+                'fieldsearch',
+            ]
         }
-        self.field_labels={**derived_field_labels, **more_field_labels}
-
-        self.vista_settings['field_types']={
-            'voting_address__locationborough__name':'text',
-            'voting_address__locationborough':'model',
-            'voting_address__locationcongress__name':'text',
-            'voting_address__locationcongress':'model',
-            'voting_address__locationmagistrate__name':'text',
-            'voting_address__locationmagistrate':'model',
-            'voting_address__locationprecinct__name':'text',
-            'voting_address__locationprecinct':'model',
-            'voting_address__locationstatesenate__name':'text',
-            'voting_address__locationstatesenate':'model',
-            'voting_address__locationstathouse__name':'text',
-            'voting_address__locationstathouse':'model',
-            'membership_status':'model',
-            'membership_status__is_quorum':'boolean',
-            'membership_status__is_member':'boolean',
-            'submembership__subcommittee':'model',
+        self.vista_settings['fields']['membership_status__is_quorum'] = {
+            'label':'Is Quroum',
+            'type':'boolean',
+            'choices': [(True, 'True'), (False, 'False')],
+            'available_for':[
+                'fieldsearch',
+                'columns',
+                'order_by'
+            ]
         }
-
-        self.vista_settings['text_fields_available']=[
-            'name_last',
-            'name_first',
-            'name_middles',
-            'name_common',
-        ]
-
-        self.vista_settings['filter_fields_available'] = [
-            'name_last',
-            'name_first',
-            'name_middles',
-            'name_common',
-            'voting_address__locationcongress',
-            'voting_address__locationstatesenate',
-            'voting_address__locationborough',
-            'voting_address__locationprecinct',
-            'voting_address__locationborough',
-            'voting_address__locationmagistrate',
-            'membership_status',
-            'membership_status__is_quorum',
-            'membership_status__is_member',
-            'submembership__subcommittee',
-        ]
-
-        for fieldname in [
-            'name_last',
-            'name_first',
-            'name_middles',
-            'name_common',
-            'voting_address__locationcongress',
-            'voting_address__locationstatesenate',
-            'voting_address__locationborough',
-            'voting_address__locationprecinct',
-            'voting_address__locationborough',
-            'voting_address__locationmagistrate',
-            'membership_status',
-            'submembership__subcommittee',
-
-        ]:
-            self.vista_settings['order_by_fields_available'].append(fieldname)
-            self.vista_settings['order_by_fields_available'].append('-' + fieldname)
-
-        self.vista_settings['columns_available'] = [
-            'name_last',
-            'name_first',
-            'name_middles',
-            'name_common',
-            'voting_address__locationcongress',
-            'voting_address__locationstatesenate',
-            'voting_address__locationborough',
-            'voting_address__locationprecinct',
-            'voting_address__locationborough',
-            'voting_address__locationmagistrate',
-            'membership_status',
-            'membership_status__is_quorum',
-            'submembership__subcommittee',
-        ]
 
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname', ['membership_status__is_member']),
             ('filter__op', ['exact']),
             ('filter__value', [True]),
-            ('order_by', ['name_last', 'name_first']),
+            ('order_by', ['membership_status__is_quorum', 'name_last']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
-        print('tp m3nj48', self.vista_defaults)
 
         return super().setup(request, *args, **kwargs)
 
@@ -408,55 +326,15 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         context_data = super().get_context_data(**kwargs)
 
-
-        context_data['order_by_fields_available'] = []
-        for fieldname in self.vista_settings['order_by_fields_available']:
-            if fieldname > '' and fieldname[0] == '-':
-                context_data['order_by_fields_available'].append({ 'name':fieldname[1:], 'label':self.field_labels[fieldname[1:]] + ' [Reverse]'})
-            else:
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':self.field_labels[fieldname]})
-
-        context_data['columns_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname] } for fieldname in self.vista_settings['columns_available']]
-
-        options={
-            'voting_address__locationcongress': {'type':'model', 'values':LocationCongress.objects.all() },
-            'voting_address__locationstatesenate': {'type':'model', 'values':LocationStateSenate.objects.all() },
-            'voting_address__locationstatehouse': {'type':'model', 'values':LocationStateHouse.objects.all() },
-            'voting_address__locationprecinct': {'type':'model', 'values':LocationPrecinct.objects.all() },
-            'voting_address__locationborough': {'type':'model', 'values':LocationBorough.objects.all() },
-            'voting_address__locationmagistrate': {'type':'model', 'values':LocationMagistrate.objects.all() },
-            'membership_status': {'type':'model', 'values':MembershipStatus.objects.all() },
-            'membership_status__is_quorum':{'type':'boolean'},
-            'membership_status__is_member':{'type':'boolean'},
-            'submembership__subcommittee':{'type':'model', 'values':SubCommittee.objects.all() },
-
-        }
-
-        context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+        context_data = {**context_data, **vista_data}
 
         context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
 
         if self.request.POST.get('vista_name'):
             context_data['vista_name'] = self.request.POST.get('vista_name')
 
-        vista_querydict = self.vistaobj['querydict']
-
-        #putting the index before person name to make it easier for the template to iterate
-        context_data['filter'] = []
-        for indx in range( self.vista_settings['max_search_keys']):
-            cdfilter = {}
-            cdfilter['fieldname'] = vista_querydict.get('filter__fieldname__' + str(indx)) if 'filter__fieldname__' + str(indx) in vista_querydict else ''
-            cdfilter['op'] = vista_querydict.get('filter__op__' + str(indx) ) if 'filter__op__' + str(indx) in vista_querydict else ''
-            cdfilter['value'] = vista_querydict.get('filter__value__' + str(indx)) if 'filter__value__' + str(indx) in vista_querydict else ''
-            if cdfilter['op'] in ['in', 'range']:
-                cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
-            context_data['filter'].append(cdfilter)
-
-        context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Person._meta.ordering
-
-        context_data['combined_text_search'] = vista_querydict.get('combined_text_search') if 'combined_text_search' in vista_querydict else ''
-
-        context_data['person_labels'] = { field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        context_data['count'] = self.object_list.count()
 
         return context_data
 

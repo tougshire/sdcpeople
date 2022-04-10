@@ -375,6 +375,9 @@ class SubMembership(models.Model):
         help_text="The person's position on the committee"
     )
 
+    def __str__(self):
+        return '{} {} {}'.format(self.person, self.position, self.subcommittee)
+
 class ContactVoice(models.Model):
 
     person = models.ForeignKey(
