@@ -639,7 +639,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
     def setup(self, request, *args, **kwargs):
 
         self.vista_settings={
-            'max_search_keys':10,
+            'max_search_keys':5,
             'text_fields_available':[],
             'filter_fields_available':{},
             'order_by_fields_available':[],
