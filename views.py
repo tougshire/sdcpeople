@@ -235,6 +235,8 @@ class PersonList(PermissionRequiredMixin, ListView):
         del(self.vista_settings['fields']['name_suffix'])
         del(self.vista_settings['fields']['name_middles'])
         del(self.vista_settings['fields']['voting_address'])
+        del(self.vista_settings['fields']['name_prefix'])
+
         self.vista_settings['fields']['submembership__subcommittee'] = {
             'label':'Subcommittee',
             'type':'model',
