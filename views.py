@@ -19,7 +19,7 @@ from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctF
                     LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
-                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, SubCommittee, VotingAddress)
+                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, Position, SubCommittee, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -169,7 +169,6 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
 
 
     def get_success_url(self):
-        print('tp m3ja04', self.kwargs)
         if 'popup' in self.kwargs:
             return reverse_lazy('sdcpeople:person-close', kwargs={'pk': self.object.pk})
         else:
@@ -222,7 +221,7 @@ class PersonDelete(PermissionRequiredMixin, DeleteView):
 class PersonList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_person'
     model = Person
-    # paginate_by = 30
+    paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
         self.vista_settings={
@@ -283,12 +282,21 @@ class PersonList(PermissionRequiredMixin, ListView):
                 'columns',
             ]
         }
+        self.vista_settings['fields']['positions'] = {
+            'label':Position._meta.verbose_name,
+            'type':'model',
+            'queryset': Position.objects.all(),
+            'available_for':[
+                'columns',
+            ]
+        }
+
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname', ['membership_status__is_member']),
             ('filter__op', ['exact']),
             ('filter__value', [True]),
             ('order_by', ['membership_status__is_quorum', 'name_last']),
-            # ('paginate_by',self.paginate_by),
+            ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
 
@@ -347,12 +355,13 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
-    # def get_paginate_by(self, queryset):
+    def get_paginate_by(self, queryset):
 
-    #     if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-    #         return self.vistaobj['querydict']['paginate_by']
+        if 'paginate_by' in self.vistaobj['querydict'] and isinstance(self.vistaobj['querydict']['paginate_by'], int):
 
-    #     return super().get_paginate_by(self)
+            return self.vistaobj['querydict']['paginate_by']
+
+        return super().get_paginate_by(self)
 
     def get_context_data(self, **kwargs):
 
@@ -666,7 +675,7 @@ class VotingAddressDelete(PermissionRequiredMixin, UpdateView):
 class VotingAddressList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_votingaddress'
     model = VotingAddress
-    # paginate_by = 30
+    paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
 
@@ -740,7 +749,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         self.vista_defaults = {
             'order_by': VotingAddress._meta.ordering,
-            # 'paginate_by':self.paginate_by,
+            'paginate_by':self.paginate_by,
         }
 
         return super().setup(request, *args, **kwargs)
@@ -798,12 +807,12 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
-    # def get_paginate_by(self, queryset):
+    def get_paginate_by(self, queryset):
 
-    #     if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-    #         return self.vistaobj['querydict']['paginate_by']
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
 
-    #     return super().get_paginate_by(self)
+        return super().get_paginate_by(self)
 
     def get_context_data(self, **kwargs):
 

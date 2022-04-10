@@ -109,40 +109,46 @@
         <div>Count: {{ count }}</div>
     </div>
   </div>
-  {% comment %} <div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a id="a_first" href="?page=1">&laquo; first</a>
-            <a id="a_previous" href="?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
+  <div class="pagination">
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
+      <span class="step-links">
+          {% if page_obj.has_previous %}
+              <a id="a_first" href="?page=1">&laquo; first</a>
+              <a id="a_previous" href="?page={{ page_obj.previous_page_number }}">previous</a>
+          {% endif %}
 
-        {% if page_obj.has_next %}
-            <a id="a_next" href="?page={{ page_obj.next_page_number }}">next</a>
-            <a id="a_last" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </span>
-  </div> {% endcomment %}
+          <span class="current">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+          </span>
+
+          {% if page_obj.has_next %}
+              <a id="a_next" href="?page={{ page_obj.next_page_number }}">next</a>
+              <a id="a_last" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+          {% endif %}
+      </span>
+  </div>
 
 {% endblock %}
 {% block bottomscript %}
   {{ block.super }}
 
-  {% comment %} <script>
+  <script>
 
     for( paginator of ['a_first', 'a_previous', 'a_next', 'a_last']) {
       if(!(document.getElementById(paginator)==null) ) {
         document.getElementById(paginator).addEventListener('click', function(e) {
           e.preventDefault()
-          document.getElementById('frm_vista').action = e.target.href
-          document.getElementById('frm_vista').submit()
+          var frm_vista = document.getElementById('frm_vista')
+          frm_vista.action = e.target.href
+          let input_submitted = document.createElement('input')
+          input_submitted.name='vista_query_submitted'
+          input_submitted.value = 'true'
+          frm_vista.appendChild(input_submitted)
+          frm_vista.submit()
         });
       }
     }
-  </script> {% endcomment %}
+  </script>
 
 
   <script>
