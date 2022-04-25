@@ -1,3 +1,4 @@
+import sys
 import urllib
 from urllib.parse import urlencode
 
@@ -9,17 +10,26 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, FormView,
+                                       UpdateView)
 from django.views.generic.list import ListView
 from tougshire_vistas.models import Vista
-from tougshire_vistas.views import (default_vista, delete_vista, get_global_vista, get_latest_vista, make_vista,
-                                    retrieve_vista, vista_context_data, vista_fields)
+from tougshire_vistas.views import (default_vista, delete_vista,
+                                    get_global_vista, get_latest_vista,
+                                    make_vista, retrieve_vista,
+                                    vista_context_data, make_vista_fields)
 
-from .forms import (LocationBoroughForm, LocationCongressForm, LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, PersonContactEmailFormset, PersonContactTextFormset, PersonContactVoiceFormset,
-                    PersonDuesPaymentFormset, PersonForm, PersonLinkFormset, PersonMembershipApplicationFormset, PersonSubMembershipFormset, VotingAddressForm)
-from .models import (ContactText, ContactVoice, History, LocationBorough, LocationCongress, LocationMagistrate,
-                     LocationPrecinct, LocationStateHouse, LocationStateSenate, MembershipStatus, Person, PersonUser, Position, SubCommittee, VotingAddress)
+from .forms import (LocationBoroughForm, LocationCongressForm,
+                    LocationPrecinctForm, LocationStateHouseForm,
+                    LocationStateSenateForm, PersonContactEmailFormset,
+                    PersonContactTextFormset, PersonContactVoiceFormset,
+                    PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
+                    PersonMembershipApplicationFormset,
+                    PersonSubMembershipFormset, VotingAddressForm)
+from .models import (ContactText, ContactVoice, History, LocationBorough,
+                     LocationCongress, LocationMagistrate, LocationPrecinct,
+                     LocationStateHouse, LocationStateSenate, MembershipStatus,
+                     Person, PersonUser, Position, SubCommittee, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -203,104 +213,44 @@ class PersonDelete(PermissionRequiredMixin, DeleteView):
 
         return context_data
 
-# class PersonSoftDelete(PermissionRequiredMixin, UpdateView):
-#     permission_required = 'sdcpeople.delete_person'
-#     model = Person
-#     template_name = 'sdcpeople/person_confirm_delete.html'
-#     success_url = reverse_lazy('sdcpeople:person-list')
-#     fields = ['is_deleted']
-
-#     def get_context_data(self, **kwargs):
-
-#         context_data = super().get_context_data(**kwargs)
-#         context_data['person_labels'] = { field.name: field.verbose_name.title() for field in Person._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-#         context_data['voting_address_labels'] = { field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-
-#         return context_data
-
 class PersonList(PermissionRequiredMixin, ListView):
     permission_required = 'sdcpeople.view_person'
     model = Person
     paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
+
         self.vista_settings={
             'max_search_keys':5,
             'fields':[],
         }
 
-        self.vista_settings['fields'] = vista_fields(Person, rels=False)
-        del(self.vista_settings['fields']['subcommittees'])
-        del(self.vista_settings['fields']['name_suffix'])
-        del(self.vista_settings['fields']['name_middles'])
-        del(self.vista_settings['fields']['voting_address'])
-        del(self.vista_settings['fields']['name_prefix'])
-
-        self.vista_settings['fields']['submembership__subcommittee'] = {
-            'label':'Subcommittee',
-            'type':'model',
-            'queryset': SubCommittee.objects.all(),
-            'available_for':[
-                'fieldsearch',
-            ]
-        }
-        self.vista_settings['fields']['voting_address__locationborough'] = {
-            'label':LocationBorough._meta.verbose_name,
-            'type':'model',
-            'queryset': LocationBorough.objects.all(),
-            'available_for':[
-                'fieldsearch',
-                'columns',
-                'order_by'
-            ]
-        }
-        self.vista_settings['fields']['voting_address__locationprecinct'] = {
-            'label':LocationPrecinct._meta.verbose_name,
-            'type':'model',
-            'queryset': LocationPrecinct.objects.all(),
-            'available_for':[
-                'fieldsearch',
-                'columns',
-                'order_by'
-            ]
-        }
-        self.vista_settings['fields']['membership_status__is_quorum'] = {
-            'label':'Is Quroum',
-            'type':'boolean',
-            'choices': [(True, 'True'), (False, 'False')],
-            'available_for':[
-                'fieldsearch',
-                'columns',
-                'order_by'
-            ]
-        }
-        self.vista_settings['fields']['voting_address'] = {
-            'label':VotingAddress._meta.verbose_name,
-            'type':'model',
-            'queryset': VotingAddress.objects.all(),
-            'available_for':[
-                'columns',
-            ]
-        }
-        self.vista_settings['fields']['positions'] = {
-            'label':Position._meta.verbose_name,
-            'type':'model',
-            'queryset': Position.objects.all(),
-            'available_for':[
-                'columns',
-            ]
-        }
+        self.vista_settings['fields'] = make_vista_fields(Person, field_names=[
+            'name_prefix',
+            'name_last',
+            'name_first',
+            'name_middles',
+            'name_common',
+            'name_suffix',
+            'voting_address',
+            'subcommittees',
+            'membership_status',
+            'positions',
+            'is_deleted',
+        ])
 
         self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname', ['membership_status__is_member']),
-            ('filter__op', ['exact']),
-            ('filter__value', [True]),
-            ('order_by', ['membership_status__is_quorum', 'name_last']),
+            ('filter__fieldname__0', ['membership_status__is_member']),
+            ('filter__op__0', ['exact']),
+            ('filter__value__0', True),
+            ('order_by', ['name_last', 'name_common']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
-
         return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -315,6 +265,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
+            print('tp 224bc49', 'query in self.request.session')
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -327,6 +278,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
+            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -337,23 +289,37 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
+            print('tp 224bc51', 'retrieve_vista')
+
             self.vistaobj = retrieve_vista(
                 self.request.user,
                 queryset,
-                'sdcpeople.person',
+                'libtekin.item',
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
             )
-        else: #elif 'default_vista' in self.request.POST:
+        elif 'default_vista' in self.request.POST:
+            print('tp 224bc52', 'default_vista')
+
             self.vistaobj = default_vista(
                 self.request.user,
                 queryset,
                 self.vista_defaults,
                 self.vista_settings
             )
+        else:
+            self.vistaobj = get_latest_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+            print('tp 224bc53', 'else')
 
         return self.vistaobj['queryset']
+
 
     def get_paginate_by(self, queryset):
 
@@ -368,9 +334,10 @@ class PersonList(PermissionRequiredMixin, ListView):
         context_data = super().get_context_data(**kwargs)
 
         vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
         context_data = {**context_data, **vista_data}
 
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
 
         if self.request.POST.get('vista_name'):
             context_data['vista_name'] = self.request.POST.get('vista_name')
