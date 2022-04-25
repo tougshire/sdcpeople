@@ -235,6 +235,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'voting_address',
             'subcommittees',
             'membership_status',
+            'membership_status__is_member',
             'positions',
             'is_deleted',
         ])
@@ -242,8 +243,8 @@ class PersonList(PermissionRequiredMixin, ListView):
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname__0', ['membership_status__is_member']),
             ('filter__op__0', ['exact']),
-            ('filter__value__0', True),
-            ('order_by', ['name_last', 'name_common']),
+            ('filter__value__0', ['True']),
+            ('order_by', ['name_last', 'name_common', ]),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
@@ -294,7 +295,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             self.vistaobj = retrieve_vista(
                 self.request.user,
                 queryset,
-                'libtekin.item',
+                'sdcpeople.person',
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
