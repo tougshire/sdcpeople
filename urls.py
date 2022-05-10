@@ -13,6 +13,17 @@ urlpatterns = [
     path('person/<int:pk>/delete/', views.PersonDelete.as_view(), name='person-delete'),
     path('person/list/', views.PersonList.as_view(), name='person-list'),
     path('person/<int:pk>/close/', views.PersonClose.as_view(), name="person-close"),
+
+    path('subcommittee/', RedirectView.as_view(url=reverse_lazy('sdcpeople:subcommittee-list'))),
+    path('subcommittee/create/', views.SubCommitteeCreate.as_view(), name='subcommittee-create'),
+    path('subcommittee/<int:pk>/update/', views.SubCommitteeUpdate.as_view(), name='subcommittee-update'),
+    path('subcommittee/<int:pk>/detail/', views.SubCommitteeDetail.as_view(), name='subcommittee-detail'),
+    path('subcommittee/<int:pk>/delete/', views.SubCommitteeDelete.as_view(), name='subcommittee-delete'),
+    path('subcommittee/list/', views.SubCommitteeList.as_view(), name='subcommittee-list'),
+    path('subcommittee/<int:pk>/close/', views.SubCommitteeClose.as_view(), name="subcommittee-close"),
+
+
+
     path('locationcongress/', RedirectView.as_view(url=reverse_lazy('sdcpeople:locationcongress-list'))),
     path('locationcongress/create/', views.LocationCongressCreate.as_view(), name='locationcongress-create'),
     path('locationcongress/<int:pk>/update/', views.LocationCongressUpdate.as_view(), name='locationcongress-update'),

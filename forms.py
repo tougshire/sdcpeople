@@ -154,6 +154,7 @@ class SubCommitteeForm(ModelForm):
             'rank_number',
         ]
 
+
 class PersonForm(ModelForm):
     class Meta:
         model=Person
@@ -216,3 +217,5 @@ PersonMembershipApplicationFormset = inlineformset_factory(Person, MembershipApp
 PersonDuesPaymentFormset = inlineformset_factory(Person, DuesPayment, form=DuesPaymentForm, extra=10)
 PersonSubMembershipFormset = inlineformset_factory(Person, SubMembership, form=SubMembershipForm, extra=10)
 PersonLinkFormset = inlineformset_factory(Person, Link, form=LinkForm, extra=10)
+
+SubCommitteeSubMembershipFormset = inlineformset_factory(SubCommittee, SubMembership, form=SubMembershipForm, extra=10)

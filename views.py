@@ -25,11 +25,11 @@ from .forms import (LocationBoroughForm, LocationCongressForm,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset,
-                    PersonSubMembershipFormset, VotingAddressForm)
+                    PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
                      LocationStateHouse, LocationStateSenate, MembershipStatus,
-                     Person, PersonUser, Position, SubCommittee, VotingAddress)
+                     Person, PersonUser, Position, SubCommittee, SubMembership, VotingAddress)
 
 
 def update_history(form, modelname, object, user):
@@ -253,9 +253,6 @@ class PersonList(PermissionRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(self, **kwargs):
 
         queryset = super().get_queryset()
@@ -321,6 +318,255 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
+    def get_paginate_by(self, queryset):
+
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        context_data = {**context_data, **vista_data}
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
+
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
+
+        context_data['count'] = self.object_list.count()
+
+        return context_data
+
+class PersonClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_person'
+    model = Person
+    template_name = 'sdcpeople/person_closer.html'
+
+class SubCommitteeCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_subcommittee'
+    model = SubCommittee
+    form_class = SubCommitteeForm
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        if self.request.POST:
+            context_data['submemberships'] = SubCommitteeSubMembershipFormset(self.request.POST)
+
+        else:
+            context_data['submemberships'] = SubCommitteeSubMembershipFormset()
+
+        return context_data
+
+    def form_valid(self, form):
+
+        response = super().form_valid(form)
+
+        update_history(form, 'SubCommittee', form.instance, self.request.user)
+
+        self.object = form.save()
+
+        formset_data = {
+            'contactvoices':SubCommitteeSubMembershipFormset( self.request.POST, instance=self.object ),
+
+        }
+
+        for formset_name in formset_data.keys():
+
+            if(formset_data[formset_name]).is_valid():
+                formset_data[formset_name].save()
+            else:
+                messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
+                print('error saving ' + formset_name + ': ' )
+                print(formset_data[formset_name].errors)
+
+        return response
+
+    def get_success_url(self):
+
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:subcommittee-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:subcommittee-detail', kwargs={'pk': self.object.pk})
+
+class SubCommitteeUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_subcommittee'
+    model = SubCommittee
+    form_class = SubCommitteeForm
+
+    def has_permission(self):
+        return super().has_permission() or SubCommitteeUser.objects.filter(user=self.request.user, subcommittee=self.get_object()).exists()
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        if self.request.POST:
+            context_data['submemberships'] = SubCommitteeSubMembershipFormset(self.request.POST, instance=self.object )
+
+        else:
+            context_data['submemberships'] = SubCommitteeSubMembershipFormset( instance=self.object )
+
+        return context_data
+
+    def form_valid(self, form):
+
+        update_history(form, 'SubCommittee', form.instance, self.request.user)
+
+        response = super().form_valid(form)
+
+        self.object = form.save()
+
+        formset_data = {
+            'subcommittees':SubCommitteeSubMembershipFormset( self.request.POST, instance=self.object ),
+        }
+
+        for formset_name in formset_data.keys():
+
+            if(formset_data[formset_name]).is_valid():
+                formset_data[formset_name].save()
+            else:
+                messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
+                print('error saving ' + formset_name + ': ')
+                print(formset_data[formset_name].errors)
+
+        return response
+
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:subcommittee-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:subcommittee-detail', kwargs={'pk': self.object.pk})
+
+class SubCommitteeDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_subcommittee'
+    model = SubCommittee
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+        context_data['subcommittee_labels'] = { field.name: field.verbose_name.title() for field in SubCommittee._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        context_data['submembership_labels'] = { field.name: field.verbose_name.title() for field in SubMembership._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+        return context_data
+
+
+class SubCommitteeDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_subcommittee'
+    model = SubCommittee
+    template_name = 'sdcpeople/subcommittee_confirm_delete.html'
+    success_url = reverse_lazy('sdcpeople:subcommittee-list')
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+        context_data['subcommittee_labels'] = { field.name: field.verbose_name.title() for field in SubCommittee._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        context_data['submembership_labels'] = { field.name: field.verbose_name.title() for field in SubMembership._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+        return context_data
+
+class SubCommitteeList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_subcommittee'
+    model = SubCommittee
+    paginate_by = 30
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':2,
+            'fields':[],
+        }
+
+        self.vista_settings['fields'] = make_vista_fields(SubCommittee, field_names=[
+            'name',
+            'submembership__person',
+        ])
+
+        self.vista_defaults = QueryDict(urlencode([
+            # ('filter__fieldname__0', ['membership_status__is_member']),
+            # ('filter__op__0', ['exact']),
+            # ('filter__value__0', ['True']),
+            ('order_by', ['rank', 'name', ]),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        if 'delete_vista' in self.request.POST:
+            delete_vista(self.request)
+
+        if 'query' in self.request.session:
+            print('tp 224bc49', 'query in self.request.session')
+            querydict = QueryDict(self.request.session.get('query'))
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                querydict,
+                '',
+                False,
+                self.vista_settings
+            )
+            del self.request.session['query']
+
+        elif 'vista_query_submitted' in self.request.POST:
+            print('tp 224bc50', 'vista_query_submitted')
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
+        elif 'retrieve_vista' in self.request.POST:
+            print('tp 224bc51', 'retrieve_vista')
+
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'sdcpeople.subcommittee',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
+
+            )
+        elif 'default_vista' in self.request.POST:
+            print('tp 224bc52', 'default_vista')
+
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+        else:
+            self.vistaobj = get_latest_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+            print('tp 224bc53', 'else')
+
+        return self.vistaobj['queryset']
+
 
     def get_paginate_by(self, queryset):
 
@@ -347,10 +593,12 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return context_data
 
-class PersonClose(PermissionRequiredMixin, DetailView):
-    permission_required = 'sdcpeople.view_person'
-    model = Person
-    template_name = 'sdcpeople/person_closer.html'
+class SubCommitteeClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_subcommittee'
+    model = SubCommittee
+    template_name = 'sdcpeople/subcommittee_closer.html'
+
+
 
 class LocationBoroughCreate(PermissionRequiredMixin, CreateView):
     permission_required = 'sdcpeople.add_locationborough'
