@@ -51,7 +51,7 @@ class MembershipHistoryAdmin(admin.ModelAdmin):
 admin.site.register(MembershipHistory, MembershipHistoryAdmin)
 
 class MembershipStatusAdmin(admin.ModelAdmin):
-    list_display=('membership_type', 'name', 'is_quorum')
+    list_display=('membership_type', 'name', 'is_quorum', 'is_member')
 
 admin.site.register(MembershipStatus, MembershipStatusAdmin)
 
