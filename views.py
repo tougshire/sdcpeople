@@ -236,6 +236,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'subcommittees',
             'membership_status',
             'membership_status__is_member',
+            'membership_status__is_quorum',
             'positions',
             'is_deleted',
         ])
