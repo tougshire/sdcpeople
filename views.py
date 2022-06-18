@@ -354,9 +354,70 @@ class PersonCSV(PersonList):
         )
 
         writer = csv.writer(response)
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
 
         for object in self.object_list:
-            writer.writerow([object, 'Foo', 'Bar', 'Baz'])
+            row=[]
+            if not 'show_columns' in vista_data or 'name_last' in vista_data['show_columns']:
+                row.append(object.name_last)
+            if not 'show_columns' in vista_data or 'name_first' in vista_data['show_columns']:
+                row.append(object.name_first)
+            if not 'show_columns' in vista_data or 'is_quorum' in vista_data['show_columns']:
+                row.append(object.membership_status.is_quorum)
+            if not 'show_columns' in vista_data or 'membership_status' in vista_data['show_columns']:
+                row.append(object.membership_status)
+            if not 'show_columns' in vista_data or 'positions' in vista_data['show_columns']:
+                positions=''
+                if object.positions.all().exists():
+                    for position in object.positions.all():
+                        positions = positions + position.title + ', '
+                    positions = positions[:-2]
+                row.append(positions)
+            if not 'show_columns' in vista_data or 'submemberships' in vista_data['show_columns']:
+                submemberships=''
+                if object.submembership_set.all().exists():
+                    for submembership in object.submembership_set.all():
+                        submemberships = submemberships + str(submembership.subcommittee) + ', '
+                    submemberships=submemberships[:-2]
+                row.append(submemberships)
+            if not 'show_columns' in vista_data or 'contactvoice' in vista_data['show_columns']:
+                contactvoices=''
+                if object.contactvoice_set.all().exists():
+                    for contactvoice in object.contactvoice_set.all():
+                        contactvoices = contactvoices + str(contactvoice.number) + ', '
+                    contactvoices=contactvoices[:-2]
+                row.append(contactvoices)
+            if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
+                contacttexts=''
+                if object.contacttext_set.all().exists():
+                    for contacttext in object.contacttext_set.all():
+                        contacttexts = contacttexts + str(contacttext.number) + ', '
+                    contacttexts=contacttexts[:-2]
+                row.append(contacttexts)
+            if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+                contactemails=''
+                if object.contactemail_set.all().exists():
+                    for contactemail in object.contactemail_set.all():
+                        contactemails = contactemails + str(contactemail.address) + ', '
+                    contactemails=contactemails[:-2]
+                row.append(contactemails)
+            if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
+                row.append(str(object.voting_address).replace("\n", " "))
+            if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
+                row.append(object.voting_address.locationcongress)
+            if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
+                row.append(object.voting_address.locationstatesenate)
+            if not 'show_columns' in vista_data or 'voting_address.locationstatehouse' in vista_data['show_columns']:
+                row.append(object.voting_address.locationstatehouse)
+            if not 'show_columns' in vista_data or 'voting_address.locationmagistrate' in vista_data['show_columns']:
+                row.append(object.voting_address.locationmagistrate)
+            if not 'show_columns' in vista_data or 'voting_address.locationborough' in vista_data['show_columns']:
+                row.append(object.voting_address.locationborough)
+            if not 'show_columns' in vista_data or 'voting_address.locationprecinct' in vista_data['show_columns']:
+                row.append(object.voting_address.locationprecinct)
+
+
+            writer.writerow(row)
 
         return response
 
