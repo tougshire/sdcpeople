@@ -6,7 +6,8 @@
 
   <div class="list">
     <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>
-      <div class="row rowhead">
+    <div><a href="{% url 'sdcpeople:person-csv' %}">export</a></div>
+    <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
         {% if 'name' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Name" %}

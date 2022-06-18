@@ -1,6 +1,8 @@
 import sys
 import urllib
+import csv
 from urllib.parse import urlencode
+
 
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -315,8 +317,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
 
-            print('tp 224bc53', 'else')
-
         return self.vistaobj['queryset']
 
     def get_paginate_by(self, queryset):
@@ -340,6 +340,107 @@ class PersonList(PermissionRequiredMixin, ListView):
         context_data['count'] = self.object_list.count()
 
         return context_data
+
+class PersonCSV(PersonList):
+    template_name = 'sdcpeople/person_csv.html'
+    content_type='text/csv'
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="sdcvirginia_people.csv"'},
+        )
+
+        writer = csv.writer(response)
+
+        for object in self.object_list:
+            writer.writerow([object, 'Foo', 'Bar', 'Baz'])
+
+        return response
+
+class xPersonCSV(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_person'
+    model = Person
+    template_name = 'sdcpeople/person_csv.html'
+    content_type='text/csv'
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':5,
+            'fields':[],
+        }
+
+        self.vista_settings['fields'] = make_vista_fields(Person, field_names=[
+            'name_prefix',
+            'name_last',
+            'name_first',
+            'name_middles',
+            'name_common',
+            'name_suffix',
+            'voting_address',
+            'subcommittees',
+            'membership_status',
+            'membership_status__is_member',
+            'membership_status__is_quorum',
+            'positions',
+            'is_deleted',
+        ])
+
+        self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname__0', ['membership_status__is_member']),
+            ('filter__op__0', ['exact']),
+            ('filter__value__0', [True]),
+            ('order_by', ['name_last', 'name_common', ]),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        self.vistaobj = get_latest_vista(
+            self.request.user,
+            queryset,
+            self.vista_defaults,
+            self.vista_settings
+        )
+
+        return self.vistaobj['queryset']
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        context_data = {**context_data, **vista_data}
+
+        context_data['count'] = self.object_list.count()
+
+        return context_data
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
+        )
+
+        writer = csv.writer(response)
+
+        for object in self.object_list:
+            writer.writerow([object, 'Foo', 'Bar', 'Baz'])
+
+        return response
 
 class PersonClose(PermissionRequiredMixin, DetailView):
     permission_required = 'sdcpeople.view_person'
