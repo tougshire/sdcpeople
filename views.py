@@ -2,8 +2,6 @@ import sys
 import urllib
 import csv
 from urllib.parse import urlencode
-
-
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import FieldError, ObjectDoesNotExist
@@ -342,12 +340,10 @@ class PersonList(PermissionRequiredMixin, ListView):
         return context_data
 
 class PersonCSV(PersonList):
-    template_name = 'sdcpeople/person_csv.html'
-    content_type='text/csv'
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
-
+        context = self.get_context_data()
         response = HttpResponse(
             content_type='text/csv',
             headers={'Content-Disposition': 'attachment; filename="sdcvirginia_people.csv"'},
@@ -356,8 +352,47 @@ class PersonCSV(PersonList):
         writer = csv.writer(response)
         vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
 
+        row=[]
+
+        if not 'show_columns' in vista_data or 'name_last' in vista_data['show_columns']:
+            row.append(context["labels"]["name_last"])
+        if not 'show_columns' in vista_data or 'name_first' in vista_data['show_columns']:
+            row.append(context["labels"]["name_first"])
+        if not 'show_columns' in vista_data or 'is_quorum' in vista_data['show_columns']:
+            row.append("Quorum")
+        if not 'show_columns' in vista_data or 'membership_status' in vista_data['show_columns']:
+            row.append(context["labels"]["membership_status"])
+        if not 'show_columns' in vista_data or 'positions' in vista_data['show_columns']:
+            row.append("Positions")
+        if not 'show_columns' in vista_data or 'submemberships' in vista_data['show_columns']:
+            row.append("SubCommittees")
+        if not 'show_columns' in vista_data or 'contactvoice' in vista_data['show_columns']:
+            row.append("Voice")
+        if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
+            row.append("Text")
+        if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+            row.append("Email")
+        if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
+            row.append("voting address")
+        if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
+            row.append("Congress")
+        if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
+            row.append("Senate")
+        if not 'show_columns' in vista_data or 'voting_address.locationstatehouse' in vista_data['show_columns']:
+            row.append("house")
+        if not 'show_columns' in vista_data or 'voting_address.locationmagistrate' in vista_data['show_columns']:
+            row.append("Magistrate")
+        if not 'show_columns' in vista_data or 'voting_address.locationborough' in vista_data['show_columns']:
+            row.append("Borough")
+        if not 'show_columns' in vista_data or 'voting_address.locationprecinct' in vista_data['show_columns']:
+            row.append("precinct")
+
+        writer.writerow(row)
+
         for object in self.object_list:
+
             row=[]
+
             if not 'show_columns' in vista_data or 'name_last' in vista_data['show_columns']:
                 row.append(object.name_last)
             if not 'show_columns' in vista_data or 'name_first' in vista_data['show_columns']:
@@ -416,92 +451,10 @@ class PersonCSV(PersonList):
             if not 'show_columns' in vista_data or 'voting_address.locationprecinct' in vista_data['show_columns']:
                 row.append(object.voting_address.locationprecinct)
 
-
             writer.writerow(row)
 
         return response
 
-class xPersonCSV(PermissionRequiredMixin, ListView):
-    permission_required = 'sdcpeople.view_person'
-    model = Person
-    template_name = 'sdcpeople/person_csv.html'
-    content_type='text/csv'
-
-    def setup(self, request, *args, **kwargs):
-
-        self.vista_settings={
-            'max_search_keys':5,
-            'fields':[],
-        }
-
-        self.vista_settings['fields'] = make_vista_fields(Person, field_names=[
-            'name_prefix',
-            'name_last',
-            'name_first',
-            'name_middles',
-            'name_common',
-            'name_suffix',
-            'voting_address',
-            'subcommittees',
-            'membership_status',
-            'membership_status__is_member',
-            'membership_status__is_quorum',
-            'positions',
-            'is_deleted',
-        ])
-
-        self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname__0', ['membership_status__is_member']),
-            ('filter__op__0', ['exact']),
-            ('filter__value__0', [True]),
-            ('order_by', ['name_last', 'name_common', ]),
-            ('paginate_by',self.paginate_by),
-        ],doseq=True) )
-
-        return super().setup(request, *args, **kwargs)
-
-    def get_queryset(self, **kwargs):
-
-        queryset = super().get_queryset()
-
-        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
-
-        self.vistaobj = get_latest_vista(
-            self.request.user,
-            queryset,
-            self.vista_defaults,
-            self.vista_settings
-        )
-
-        return self.vistaobj['queryset']
-
-    def get_context_data(self, **kwargs):
-
-        context_data = super().get_context_data(**kwargs)
-
-        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
-
-        context_data = {**context_data, **vista_data}
-
-        context_data['count'] = self.object_list.count()
-
-        return context_data
-
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data()
-
-        response = HttpResponse(
-            content_type='text/csv',
-            headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
-        )
-
-        writer = csv.writer(response)
-
-        for object in self.object_list:
-            writer.writerow([object, 'Foo', 'Bar', 'Baz'])
-
-        return response
 
 class PersonClose(PermissionRequiredMixin, DetailView):
     permission_required = 'sdcpeople.view_person'
@@ -562,7 +515,7 @@ class SubCommitteeUpdate(PermissionRequiredMixin, UpdateView):
     form_class = SubCommitteeForm
 
     def has_permission(self):
-        return super().has_permission() or SubCommitteeUser.objects.filter(user=self.request.user, subcommittee=self.get_object()).exists()
+        return super().has_permission() or SubCommittee.objects.filter(user=self.request.user, subcommittee=self.get_object()).exists()
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
