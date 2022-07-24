@@ -5,6 +5,8 @@ from .models import (
     ContactText,
     ContactVoice,
     DuesPayment,
+    EventType,
+    Event,
     LocationBorough,
     LocationCongress,
     LocationMagistrate,
@@ -30,6 +32,10 @@ admin.site.register(ContactText)
 admin.site.register(ContactVoice)
 
 admin.site.register(DuesPayment)
+
+admin.site.register(EventType)
+
+admin.site.register(Event)
 
 admin.site.register(LocationBorough)
 

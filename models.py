@@ -332,7 +332,7 @@ class Person(models.Model):
     )
 
     class Meta:
-        ordering = ('is_deleted', 'membership_status__is_quorum', 'name_last', 'name_first')
+        ordering = ['is_deleted', 'membership_status__is_quorum', 'name_last', 'name_first']
 
     def __str__(self):
         if(self.is_deleted):
@@ -644,6 +644,91 @@ class DuesPayment(models.Model):
         help_text = "The method of payment"
     )
 
+class EventType(models.Model):
+    name = models.CharField(
+        "Event Type",
+        max_length=40,
+        help_text='The name of the type of event'
+    )
+    rank_number = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this event type on a list in ascending order (ex if you want this one first, give it a low number like 0)"
+    )
+    class Meta:
+        ordering = ['rank_number']
+
+    def __str__(self):
+        return self.name
+
+class Event(models.Model):
+    name = models.CharField(
+        "Event Name/Title",
+        max_length=40,
+        help_text='The name or title of event'
+    )
+    event_type = models.ForeignKey(
+        EventType,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        help_text="The type of event"
+    )
+    when = models.DateField(
+        "when",
+        help_text = "The date of the event"
+    )
+
+    class Meta:
+        ordering = ['-when']
+
+    def __str__(self):
+        return '%s %s' % (self.name, self.when)
+
+class AttendanceLevel(models.Model):
+    name = models.CharField(
+        "Event Name/Title",
+        max_length=40,
+        help_text='The name or title of event'
+    )
+    action_name = models.CharField(
+        'Action Name',
+        max_length=60,
+        help_text='An action phrase for this '
+    )
+    rank_number = models.IntegerField(
+        'rank',
+        default=0,
+        help_text="A number representing the placement of this level on a list in ascending order (ex if you want this one first, give it a low number like 0)"
+    )
+    class Meta:
+        ordering = ['rank_number']
+
+    def __str__(self):
+        return self.name
+
+class Attendance(models.Model):
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text='The person who attended (or was otherwise associated with) the event',
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        help_text = 'The event that this person attended (or was othersize associated with)'
+    )
+    attendance_level = models.ForeignKey(
+        AttendanceLevel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text = 'The way in which this person is assocated with this event'
+    )
+
+    def __str__(self):
+        return '%s %s %s' % (self.person, self.attendance_level.action_phrase, self.event)
+
 class PersonUser(models.Model):
     user=models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -700,7 +785,7 @@ class History(models.Model):
     )
 
     class Meta:
-        ordering = ('-when', 'modelname', 'objectid')
+        ordering = ['-when', 'modelname', 'objectid']
 
     def __str__(self):
 
@@ -715,3 +800,4 @@ class History(models.Model):
             print (e)
 
         return f'{"mdy".format(self.when.strftime("%Y-%m-%d"))}: {self.modelname}: {self.objectid} [{self.fieldname}] changed to "{new_value_trunc}"'
+
