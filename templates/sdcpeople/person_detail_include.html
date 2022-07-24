@@ -15,6 +15,8 @@
     {% include 'touglates/detail_field.html' with label="Magistrate" field=object.voting_address.locationmagistrate %}
     {% include 'touglates/detail_field.html' with label="Borough" field=object.voting_address.locationborough %}
     {% include 'touglates/detail_field.html' with label="Precinct" field=object.voting_address.locationprecinct %}
+    {% include 'touglates/detail_field.html' with label="Voter File ID" field=object.vb_voter_id %}
+    {% include 'touglates/detail_field.html' with label="My Campaign ID" field=object.vb_campaign_id %}
 
     {% include 'touglates/detail_field.html' with label="Voice Phones" field="" %}
     {% for contactvoice in object.contactvoice_set.all %}

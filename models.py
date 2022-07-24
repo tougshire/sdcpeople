@@ -313,22 +313,22 @@ class Person(models.Model):
         blank=True,
         help_text="The person's position in the committee"
     )
-    is_deleted = models.BooleanField(
-        'is_deleted',
-        default=False,
-        help_text='If this object is soft-deleted'
-    )
     vb_voter_id = models.CharField(
         'voter file VANID',
-        max_len=20,
+        max_length=20,
         blank=True,
         help_text='The votebuilder "My Voters" van id'
     )
     vb_campaign_id = models.CharField(
         'campaign VANID',
-        max_len=20,
+        max_length=20,
         blank=True,
         help_text='The votebuilder "My Campaign" van id for this campaign or committee'
+    )
+    is_deleted = models.BooleanField(
+        'is_deleted',
+        default=False,
+        help_text='If this object is soft-deleted'
     )
 
     class Meta:

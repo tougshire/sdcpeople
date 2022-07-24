@@ -168,6 +168,8 @@ class PersonForm(ModelForm):
             'voting_address',
             'membership_status',
             'positions',
+            'vb_voter_id',
+            'vb_campaign_id',
         ]
 
 class LinkForm(ModelForm):
