@@ -318,6 +318,18 @@ class Person(models.Model):
         default=False,
         help_text='If this object is soft-deleted'
     )
+    vb_voter_id = models.CharField(
+        'voter file VANID',
+        max_len=20,
+        blank=True,
+        help_text='The votebuilder "My Voters" van id'
+    )
+    vb_campaign_id = models.CharField(
+        'campaign VANID',
+        max_len=20,
+        blank=True,
+        help_text='The votebuilder "My Campaign" van id for this campaign or committee'
+    )
 
     class Meta:
         ordering = ('is_deleted', 'membership_status__is_quorum', 'name_last', 'name_first')
