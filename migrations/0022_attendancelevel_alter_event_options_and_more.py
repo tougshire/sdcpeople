@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='event',
             name='when',
-            field=models.DateField(default='1/1/2000', help_text='The date of the event', verbose_name='when'),
+            field=models.DateField(default='2000-01-01', help_text='The date of the event', verbose_name='when'),
             preserve_default=False,
         ),
         migrations.AddField(

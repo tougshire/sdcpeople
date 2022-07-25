@@ -244,6 +244,40 @@
         {% endwith %}
       {% endfor %}
 
+      <h4>Participation</h4>
+
+      {{ participation.management_form }}
+      {% for participationform in participations.forms %}
+        {% if participationform.id.value > 0 %}
+          <div id="div_participationform_{{ participationform.id.value }}" class="participationformsetform"  >
+            {% for hiddenfield in participationform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=participationform.event %}
+            {% include 'touglates/form_field.html' with field=participationform.participation_level %}
+            {% include 'touglates/form_field.html' with field=participationform.DELETE %}
+          </div>
+        {% else %}
+          <div class="linkformsetform linknewform" >
+            {% for hiddenfield in participationform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=participationform.event %}
+            {% include 'touglates/form_field.html' with field=participationform.participation_level %}
+            {% include 'touglates/form_field.html' with field=participationform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addlink">add</button>' %}
+      {% for link in object.link_set.all %}
+        {% with cvid=link.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editlink_'|add:cvid|add:'" data-formid="div_linkform_'|add:cvid|add:'" data-displayid="tr_link_'|add:cvid|add:'" class="link_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_field.html' with label=button_as_label field=link.title href=link.href href_atts="target='_blank'" %}
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
+
 
       {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
 

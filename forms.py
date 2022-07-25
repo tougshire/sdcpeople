@@ -5,6 +5,7 @@ from .models import (
     ContactText,
     ContactVoice,
     DuesPayment,
+    Event,
     Link,
     LocationBorough,
     LocationCongress,
@@ -15,6 +16,7 @@ from .models import (
     MembershipApplication,
     MembershipStatus,
     MembershipType,
+    Participation,
     PaymentMethod,
     Person,
     Position,
@@ -71,6 +73,15 @@ class DuesPaymentForm(ModelForm):
             'method',
         ]
 
+class EventForm(ModelForm):
+    class Meta:
+        model=Event
+        fields = [
+            'name',
+            'event_type',
+            'when'
+        ]
+
 class LocationCongressForm(ModelForm):
     class Meta:
         model=LocationCongress
@@ -112,7 +123,6 @@ class LocationPrecinctForm(ModelForm):
         fields = [
             'name',
         ]
-
 
 class MembershipTypeForm(ModelForm):
     class Meta:
@@ -212,6 +222,15 @@ class PaymentMethodForm(ModelForm):
             'name',
         ]
 
+class ParticipationForm(ModelForm):
+    class Meta:
+        model=Participation
+        fields=[
+            'person',
+            'event',
+            'participation_level',
+        ]
+
 
 PersonContactVoiceFormset = inlineformset_factory(Person, ContactVoice, form=ContactVoiceForm, extra=10)
 PersonContactTextFormset = inlineformset_factory(Person, ContactText, form=ContactTextForm, extra=10)
@@ -220,5 +239,6 @@ PersonMembershipApplicationFormset = inlineformset_factory(Person, MembershipApp
 PersonDuesPaymentFormset = inlineformset_factory(Person, DuesPayment, form=DuesPaymentForm, extra=10)
 PersonSubMembershipFormset = inlineformset_factory(Person, SubMembership, form=SubMembershipForm, extra=10)
 PersonLinkFormset = inlineformset_factory(Person, Link, form=LinkForm, extra=10)
+PersonParticipationFormset = inlineformset_factory(Person, Participation, form=ParticipationForm, extra=10)
 
 SubCommitteeSubMembershipFormset = inlineformset_factory(SubCommittee, SubMembership, form=SubMembershipForm, extra=10)

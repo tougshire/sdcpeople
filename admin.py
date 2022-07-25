@@ -17,6 +17,8 @@ from .models import (
     MembershipHistory,
     MembershipStatus,
     MembershipType,
+    Participation,
+    ParticipationLevel,
     PaymentMethod,
     Person,
     PersonUser,
@@ -48,6 +50,10 @@ admin.site.register(LocationPrecinct)
 admin.site.register(LocationStateHouse)
 
 admin.site.register(LocationStateSenate)
+
+admin.site.register(Participation)
+
+admin.site.register(ParticipationLevel)
 
 admin.site.register(MembershipApplication)
 

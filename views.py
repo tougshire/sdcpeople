@@ -24,7 +24,7 @@ from .forms import (LocationBoroughForm, LocationCongressForm,
                     LocationStateSenateForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
-                    PersonMembershipApplicationFormset,
+                    PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
 from .models import (ContactText, ContactVoice, History, LocationBorough,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
@@ -67,6 +67,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST )
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST)
             context_data['links'] = PersonLinkFormset(self.request.POST)
+            context_data['participatins'] = PersonParticipationFormset(self.request.POST)
 
         else:
             context_data['contactvoices'] = PersonContactVoiceFormset()
@@ -76,6 +77,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             context_data['submemberships'] = PersonSubMembershipFormset()
             context_data['duespayments'] = PersonDuesPaymentFormset()
             context_data['links'] = PersonLinkFormset()
+            context_data['participations'] = PersonParticipationFormset()
 
         return context_data
 
@@ -95,6 +97,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
+            'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -135,6 +138,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST, instance=self.object )
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
             context_data['links'] = PersonLinkFormset(self.request.POST, instance=self.object )
+            context_data['participations]'] = PersonParticipationFormset(self.request.POST, instance=self.object )
 
         else:
             context_data['contactvoices'] = PersonContactVoiceFormset( instance=self.object )
@@ -144,6 +148,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['submemberships'] = PersonSubMembershipFormset( instance=self.object )
             context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
             context_data['links'] = PersonLinkFormset( instance=self.object )
+            context_data['participations'] = PersonParticipationFormset( instance=self.object )
 
         return context_data
 
@@ -163,6 +168,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
+            'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -239,6 +245,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'membership_status__is_quorum',
             'positions',
             'is_deleted',
+            'participation_event',
         ])
 
         self.vista_defaults = QueryDict(urlencode([
