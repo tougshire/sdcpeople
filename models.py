@@ -685,7 +685,7 @@ class Event(models.Model):
     def __str__(self):
         return '%s %s' % (self.name, self.when)
 
-class AttendanceLevel(models.Model):
+class ParticipationLevel(models.Model):
     name = models.CharField(
         "Event Name/Title",
         max_length=40,
@@ -707,7 +707,7 @@ class AttendanceLevel(models.Model):
     def __str__(self):
         return self.name
 
-class Attendance(models.Model):
+class Participation(models.Model):
     person = models.ForeignKey(
         Person,
         on_delete=models.CASCADE,
@@ -718,8 +718,8 @@ class Attendance(models.Model):
         on_delete=models.CASCADE,
         help_text = 'The event that this person attended (or was othersize associated with)'
     )
-    attendance_level = models.ForeignKey(
-        AttendanceLevel,
+    participation_level = models.ForeignKey(
+        ParticipationLevel,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -727,7 +727,7 @@ class Attendance(models.Model):
     )
 
     def __str__(self):
-        return '%s %s %s' % (self.person, self.attendance_level.action_phrase, self.event)
+        return '%s %s %s' % (self.person, self.participation_level.action_phrase, self.event)
 
 class PersonUser(models.Model):
     user=models.ForeignKey(

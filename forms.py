@@ -212,6 +212,7 @@ class PaymentMethodForm(ModelForm):
             'name',
         ]
 
+
 PersonContactVoiceFormset = inlineformset_factory(Person, ContactVoice, form=ContactVoiceForm, extra=10)
 PersonContactTextFormset = inlineformset_factory(Person, ContactText, form=ContactTextForm, extra=10)
 PersonContactEmailFormset = inlineformset_factory(Person, ContactEmail, form=ContactEmailForm, extra=10)
