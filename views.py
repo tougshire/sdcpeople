@@ -245,7 +245,7 @@ class PersonList(PermissionRequiredMixin, ListView):
             'membership_status__is_quorum',
             'positions',
             'is_deleted',
-            'participation_event',
+            'participation__event',
         ])
 
         self.vista_defaults = QueryDict(urlencode([
