@@ -75,7 +75,7 @@ class LocationCongress(models.Model):
         return self.name
 
     class Meta:
-#        ordering = ['name']
+        ordering = ['name']
         verbose_name = 'Congressional District'
 
 class LocationStateSenate(models.Model):
