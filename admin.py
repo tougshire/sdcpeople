@@ -50,6 +50,8 @@ admin.site.register(Link
 )
 admin.site.register(LocationBorough)
 
+admin.site.register(LocationCity)
+
 admin.site.register(LocationCongress)
 
 admin.site.register(LocationMagistrate)
