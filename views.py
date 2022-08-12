@@ -249,6 +249,8 @@ class PersonList(PermissionRequiredMixin, ListView):
             'participation__event',
         ])
 
+        self.vista_settings['fields']['participation__event']['label']="Participation in Event"
+
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname__0', ['membership_status__is_member']),
             ('filter__op__0', ['exact']),
