@@ -9,6 +9,7 @@
     {% include 'touglates/detail_field.html' with label=person_labels.name_suffix field=object.name_suffix %}
     {% include 'touglates/detail_field.html' with label=person_labels.membership_status field=object.membership_status %}
     {% include 'touglates/detail_field.html' with label=person_labels.voting_address field=object.voting_address %}
+    {% include 'touglates/detail_field.html' with label="City" field=object.voting_address.locationcity %}
     {% include 'touglates/detail_field.html' with label="Congress" field=object.voting_address.locationcongress %}
     {% include 'touglates/detail_field.html' with label="State Senate" field=object.voting_address.locationstatesenate %}
     {% include 'touglates/detail_field.html' with label="House of Delegates" field=object.voting_address.locationstatehouse %}

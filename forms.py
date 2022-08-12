@@ -7,6 +7,7 @@ from .models import (
     DuesPayment,
     Event,
     Link,
+    LocationCity,
     LocationBorough,
     LocationCongress,
     LocationMagistrate,
@@ -82,6 +83,14 @@ class EventForm(ModelForm):
             'when'
         ]
 
+class LocationCityForm(ModelForm):
+    class Meta:
+        model=LocationCity
+        fields = [
+            'name',
+        ]
+
+
 class LocationCongressForm(ModelForm):
     class Meta:
         model=LocationCongress
@@ -147,6 +156,7 @@ class VotingAddressForm(ModelForm):
     class Meta:
         model=VotingAddress
         fields = [
+            'locationcity',
             'locationcongress',
             'locationstatesenate',
             'locationstatehouse',

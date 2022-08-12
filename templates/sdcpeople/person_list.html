@@ -40,6 +40,9 @@
         {% if 'voting_address' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=person_labels.voting_address %}
         {% endif %}
+        {% if 'voting_address.locationcity' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="City" %}
+        {% endif %}
         {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Cong" %}
         {% endif %}
@@ -93,6 +96,9 @@
           {% endif %}
           {% if 'voting_address' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.voting_address %}
+          {% endif %}
+          {% if 'voting_address.locationcity' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=person.voting_address.locationcity %}
           {% endif %}
           {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person.voting_address.locationcongress %}

@@ -1,6 +1,7 @@
 <h2>{{ object }}</h2>
 <div class="detail">
   {% include './_detail_field.html' with label=votingaddress_labels.street_address field=object.street_address %}
+  {% include './_detail_field.html' with label=votingaddress_labels.locationcity field=object.locationcity %}
   {% include './_detail_field.html' with label=votingaddress_labels.locationcongress field=object.locationcongress %}
   {% include './_detail_field.html' with label=votingaddress_labels.locationstatehouse field=object.locationstatehouse %}
   {% include './_detail_field.html' with label=votingaddress_labels.locationstatesenate field=object.locationstatesenate %}

@@ -31,6 +31,13 @@ urlpatterns = [
     path('event/list/', views.EventList.as_view(), name='event-list'),
     path('event/<int:pk>/close/', views.EventClose.as_view(), name="event-close"),
 
+    path('locationcity/', RedirectView.as_view(url=reverse_lazy('sdcpeople:locationcity-list'))),
+    path('locationcity/create/', views.LocationCityCreate.as_view(), name='locationcity-create'),
+    path('locationcity/<int:pk>/update/', views.LocationCityUpdate.as_view(), name='locationcity-update'),
+    path('locationcity/<int:pk>/detail/', views.LocationCityDetail.as_view(), name='locationcity-detail'),
+    path('locationcity/<int:pk>/delete/', views.LocationCityDelete.as_view(), name='locationcity-delete'),
+    path('locationcity/list/', views.LocationCityList.as_view(), name='locationcity-list'),
+    path('locationcity/<int:pk>/close/', views.LocationCityClose.as_view(), name="locationcity-close"),
 
     path('locationcongress/', RedirectView.as_view(url=reverse_lazy('sdcpeople:locationcongress-list'))),
     path('locationcongress/create/', views.LocationCongressCreate.as_view(), name='locationcongress-create'),

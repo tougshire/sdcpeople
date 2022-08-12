@@ -19,14 +19,14 @@ from tougshire_vistas.views import (default_vista, delete_vista,
                                     make_vista, retrieve_vista,
                                     vista_context_data, make_vista_fields)
 
-from .forms import (EventForm, EventParticipationFormset, LocationBoroughForm, LocationCongressForm,
+from .forms import (EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
                     LocationStateSenateForm, ParticipationForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
-from .models import (ContactText, ContactVoice, Event, History, LocationBorough,
+from .models import (ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
                      LocationStateHouse, LocationStateSenate, MembershipStatus, Participation,
                      Person, PersonUser, Position, SubCommittee, SubMembership, VotingAddress)
@@ -384,6 +384,8 @@ class PersonCSV(PersonList):
             row.append("Email")
         if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
             row.append("voting address")
+        if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+            row.append("City")
         if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
             row.append("Congress")
         if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
@@ -449,6 +451,8 @@ class PersonCSV(PersonList):
             if object.voting_address is not None:
                 if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
                     row.append(str(object.voting_address).replace("\n", " "))
+                if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+                    row.append(object.voting_address.locationcity)
                 if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
                     row.append(object.voting_address.locationcongress)
                 if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
@@ -739,6 +743,8 @@ class EventCSV(EventList):
             row.append("Email")
         if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
             row.append("voting address")
+        if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+            row.append("City")
         if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
             row.append("Congress")
         if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
@@ -803,6 +809,8 @@ class EventCSV(EventList):
                 row.append(contactemails)
             if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
                 row.append(str(object.voting_address).replace("\n", " "))
+            if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+                row.append(object.voting_address.locationcity)
             if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
                 row.append(object.voting_address.locationcongress)
             if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
@@ -1190,6 +1198,60 @@ class LocationBoroughClose(PermissionRequiredMixin, DetailView):
     template_name = 'sdcpeople/locationborough_closer.html'
 
 
+class LocationCityCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_locationcity'
+    model = LocationCity
+    form_class = LocationCityForm
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:locationcity-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:locationcity-detail', kwargs={'pk': self.object.pk})
+
+class LocationCityUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_locationcity'
+    model = LocationCity
+    form_class = LocationCityForm
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:locationongress-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:locationcity-detail', kwargs={'pk': self.object.pk})
+
+
+class LocationCityDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_locationcity'
+    model = LocationCity
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+        context_data['locationcity_labels'] = { field.name: field.verbose_name.title() for field in LocationCity._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+        return context_data
+
+
+class LocationCityDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_locationcity'
+    model = LocationCity
+    success_url = reverse_lazy('sdcpeople:locationcity-list')
+
+class LocationCityList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_locationcity'
+    model = LocationCity
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['locationcity_labels'] = { field.name: field.verbose_name.title() for field in LocationCity._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        return context_data
+
+class LocationCityClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_locationcity'
+    model = LocationCity
+    template_name = 'sdcpeople/locationcity_closer.html'
+
 class LocationCongressCreate(PermissionRequiredMixin, CreateView):
     permission_required = 'sdcpeople.add_locationcongress'
     model = LocationCongress
@@ -1243,6 +1305,7 @@ class LocationCongressClose(PermissionRequiredMixin, DetailView):
     permission_required = 'sdcpeople.view_locationcongress'
     model = LocationCongress
     template_name = 'sdcpeople/locationcongress_closer.html'
+
 
 class LocationStateHouseCreate(PermissionRequiredMixin, CreateView):
     permission_required = 'sdcpeople.add_LocationStateHouse'
@@ -1439,6 +1502,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         derived_field_labels={ field.name: field.verbose_name.title() for field in VotingAddress._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
         more_field_labels={
+            'voting_address__locationcity__name':'City',
             'voting_address__locationcongress__name':'Congress',
             'voting_address__locationstatesenate__name':'Senate',
             'voting_address__locationborough__name':'Borough',
@@ -1454,6 +1518,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'name_first',
             'name_middles',
             'name_common',
+            'voting_address__locationcity__name',
             'voting_address__locationcongress__name',
             'voting_address__locationstatesenate__name',
             'voting_address__locationborough__name',
@@ -1467,6 +1532,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'name_first',
             'name_middles',
             'name_common',
+            'voting_address__locationcity',
             'voting_address__locationcongress',
             'voting_address__locationstatesenate',
             'voting_address__locationborough',
@@ -1489,6 +1555,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
             'name_first',
             'name_middles',
             'name_common',
+            'voting_address__locationcity',
             'voting_address__locationcongress',
             'voting_address__locationstatesenate',
             'voting_address__locationborough',
@@ -1568,6 +1635,7 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         context_data = super().get_context_data(**kwargs)
 
+        context_data['locationcity'] = LocationCity.objects.all()
         context_data['locationcongresss'] = LocationCongress.objects.all()
         context_data['locationstatesenate'] = LocationStateSenate.objects.all()
         context_data['locationstatehouse'] = LocationStateHouse.objects.all()

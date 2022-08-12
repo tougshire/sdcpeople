@@ -9,6 +9,9 @@
       {% for field in form.hidden_fields %}
         {{ field }}
       {% endfor %}
+      <div id="div_locationcity">
+        {% include './_form_field.html' with field=form.locationcity %}
+      </div>
       <div id="div_locationcongress">
         {% include './_form_field.html' with field=form.locationcongress %}
       </div>

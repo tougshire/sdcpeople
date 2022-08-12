@@ -10,6 +10,7 @@ from .models import (
     Event,
     History,
     Link,
+    LocationCity,
     LocationBorough,
     LocationCongress,
     LocationMagistrate,

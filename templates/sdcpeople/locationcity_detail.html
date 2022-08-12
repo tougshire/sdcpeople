@@ -1,0 +1,18 @@
+{% extends './_base.html' %}
+{% block content %}
+  <div class="object">
+    {{ object }}
+  </div>
+  {% for person in person_set.all %}
+    <div class="relatedset">
+      {{ person }}
+    </div>
+  {% endfor %}
+
+  <div>
+  <a href="{% url 'sdcpeople:locationcity-update' object.pk %}">Edit</a>
+  </div>
+  <div>
+  <a href="{% url 'sdcpeople:locationcity-delete' object.pk %}">Delete</a>
+  </div>
+{% endblock %}
