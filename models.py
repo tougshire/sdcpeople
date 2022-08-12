@@ -64,6 +64,20 @@ class MembershipStatus(models.Model):
     class Meta:
         ordering = ['-is_quorum', 'membership_type', 'name']
 
+class LocationCity(models.Model):
+
+    name = models.CharField(
+        'name',
+        max_length=100
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'City or County'
+
 class LocationCongress(models.Model):
 
     name = models.CharField(
@@ -176,6 +190,14 @@ class VotingAddress(models.Model):
         'street address',
         blank=True,
         help_text="The street address"
+    )
+    locationcity = models.ForeignKey(
+        LocationCity,
+        verbose_name="City or County",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text = "The person's city or county"
     )
     locationcongress = models.ForeignKey(
         LocationCongress,
