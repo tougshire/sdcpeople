@@ -13,4 +13,17 @@
     {% endif %}
   {% endif %}
 
+  {% if perms.sdcpeople.view_event %}
+    {% url 'sdcpeople:event-list' as event_url %}
+    {% if event_url == url_here %}
+      <div class="menu-item menu-here">
+        Events
+      </div>
+    {% else %}
+      <div class="menu-item">
+        <a href="{{ event_url }}">Events</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
 </div>

@@ -1,0 +1,13 @@
+  <h2>{{ object }}</h2>
+
+  <div class="detail">
+    {% include 'touglates/detail_field.html' with label=event_labels.name field=object.name %}
+    {% include 'touglates/detail_field.html' with label=event_labels.when field=object.when %}
+    {% include 'touglates/detail_field.html' with label=event_labels.event_type field=object.event_type %}
+
+    {% include 'touglates/detail_field.html' with label="Participants" field="" %}
+    {% for participant in object.participation_set.all %}
+      {% include 'touglates/detail_fields.html' with label="Particpant" field_1=participant.person field_2=participant.participation_level %}
+    {% endfor %}
+
+  </div>

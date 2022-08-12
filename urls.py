@@ -23,6 +23,13 @@ urlpatterns = [
     path('subcommittee/list/', views.SubCommitteeList.as_view(), name='subcommittee-list'),
     path('subcommittee/<int:pk>/close/', views.SubCommitteeClose.as_view(), name="subcommittee-close"),
 
+    path('event/', RedirectView.as_view(url=reverse_lazy('sdcpeople:event-list'))),
+    path('event/create/', views.EventCreate.as_view(), name='event-create'),
+    path('event/<int:pk>/update/', views.EventUpdate.as_view(), name='event-update'),
+    path('event/<int:pk>/detail/', views.EventDetail.as_view(), name='event-detail'),
+    path('event/<int:pk>/delete/', views.EventDelete.as_view(), name='event-delete'),
+    path('event/list/', views.EventList.as_view(), name='event-list'),
+    path('event/<int:pk>/close/', views.EventClose.as_view(), name="event-close"),
 
 
     path('locationcongress/', RedirectView.as_view(url=reverse_lazy('sdcpeople:locationcongress-list'))),
@@ -64,6 +71,19 @@ urlpatterns = [
     path('locationprecinct/<int:pk>/delete/', views.LocationPrecinctDelete.as_view(), name='locationprecinct-delete'),
     path('locationprecinct/list/', views.LocationPrecinctList.as_view(), name='locationprecinct-list'),
     path('locationprecinct/<int:pk>/close/', views.LocationPrecinctClose.as_view(), name="locationprecinct-close"),
+
+    path('participation/', RedirectView.as_view(url=reverse_lazy('sdcpeople:participation-list'))),
+    path('participation/create/', views.ParticipationCreate.as_view(), name='participation-create'),
+    path('participation/create/_/', views.ParticipationCreate.as_view(), name='participation-create-popup'),
+    path('participation/<int:pk>/update/', views.ParticipationUpdate.as_view(), name='participation-update'),
+    path('participation/<int:pk>/update/_/', views.ParticipationUpdate.as_view(), name='participation-update-popup'),
+    path('participation/<int:pk>/detail/', views.ParticipationDetail.as_view(), name='participation-detail'),
+    path('participation/<int:pk>/delete/', views.ParticipationDelete.as_view(), name='participation-delete'),
+    path('participation/list/', views.ParticipationList.as_view(), name='participation-list'),
+    path('participation/<int:pk>/close/', views.ParticipationClose.as_view(), name="participation-close"),
+
+
+
     path('votingaddress/', RedirectView.as_view(url=reverse_lazy('sdcpeople:votingaddress-list'))),
     path('votingaddress/create/', views.VotingAddressCreate.as_view(), name='votingaddress-create'),
     path('votingaddress/create/_/', views.VotingAddressCreate.as_view(), {'popup':True }, name='votingaddress-create-popup'),

@@ -1,4 +1,5 @@
 from bdb import effective
+import datetime
 from django.apps import apps
 from xmlrpc.client import Boolean
 from django.db import models
@@ -55,9 +56,10 @@ class MembershipStatus(models.Model):
     )
 
     def __str__(self):
+        membership_type_str = self.membership_type if hasattr(self, 'membership_type') else ''
         if self.name > '':
-            return '{}: {}'.format(self.membership_type, self.name)
-        return self.membership_type.name
+            return '{}: {}'.format(membership_type_str, self.name)
+        return membership_type_str
 
     class Meta:
         ordering = ['-is_quorum', 'membership_type', 'name']
@@ -73,7 +75,7 @@ class LocationCongress(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+#        ordering = ['name']
         verbose_name = 'Congressional District'
 
 class LocationStateSenate(models.Model):
@@ -388,7 +390,9 @@ class SubMembership(models.Model):
     )
 
     def __str__(self):
-        return '{} {} {}'.format(self.person, self.position, self.subcommittee)
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        subcommittee = self.subcommittee if hasattr(self, 'subcommittee') else '<no subcommittee>'
+        return '{} {} {}'.format(person, self.position, subcommittee)
 
 class ContactVoice(models.Model):
 
@@ -522,7 +526,6 @@ class ContactEmail(models.Model):
     class Meta:
         ordering = ['-rank_number', 'address']
 
-
 class Link(models.Model):
 
     person = models.ForeignKey(
@@ -541,6 +544,10 @@ class Link(models.Model):
         max_length=400,
         help_text="The link"
     )
+
+    def __str__(self):
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        return '%s: %s: %s' % (person, self.title, self.href)
 
 class MembershipHistory(models.Model):
 
@@ -562,7 +569,8 @@ class MembershipHistory(models.Model):
     )
 
     def __str__(self):
-        return '{}: {} {}'.format(self.person, self.membership_status , self.effective_date)
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        return '%s: %s %s' % (person, self.membership_status , self.effective_date)
 
 class PositionHistory(models.Model):
 
@@ -590,7 +598,11 @@ class PositionHistory(models.Model):
     )
 
     def __str__(self):
-        return '{}: {} {} {}'.format(self.person, self.membership_status , self.membership_type, self.effective_date)
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        membership_status = self.membership_status if hasattr(self, 'membership_status') else '<no membership_status>'
+        membership_type = self.membership_type if hasattr(self, 'membership_type') else '<no membership_type>'
+
+        return '%s: %s %s %s'.format(person, membership_status , membership_type, self.effective_date)
 
 
 class MembershipApplication(models.Model):
@@ -606,6 +618,10 @@ class MembershipApplication(models.Model):
         null=True,
         help_text = "The date that the application was signed or submitted"
     )
+
+    def __str__(self):
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        return '%s %s' % (person, self.application_date)
 
 class PaymentMethod(models.Model):
     name = models.CharField(
@@ -643,6 +659,11 @@ class DuesPayment(models.Model):
         on_delete = models.SET_NULL,
         help_text = "The method of payment"
     )
+
+    def __str__(self):
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        return '%s %s %s' % (person, self.effective_date, self.method)
+
 
 class EventType(models.Model):
     name = models.CharField(
@@ -683,7 +704,7 @@ class Event(models.Model):
         ordering = ['-when']
 
     def __str__(self):
-        return '%s %s' % (self.name, self.when)
+        return '%s: %s of %s' % (self.event_type, self.name, self.when)
 
 class ParticipationLevel(models.Model):
     name = models.CharField(
@@ -727,7 +748,11 @@ class Participation(models.Model):
     )
 
     def __str__(self):
-        return '%s %s %s' % (self.person, self.participation_level.action_phrase, self.event)
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        action_phrase = self.participation_level.action_phrase if self.participation_level is not None else ''
+        event = self.event if hasattr(self, 'event') else '<no event>'
+
+        return '%s %s %s' % (person, action_phrase, event)
 
 class PersonUser(models.Model):
     user=models.ForeignKey(
@@ -741,7 +766,10 @@ class PersonUser(models.Model):
         help_text="The person associated with the user"
     )
     def __str__(self):
-        return '{} : {}'.format(self.person, self.user)
+        person = self.person if hasattr(self, 'person') else '<no person>'
+        user = self.user if hasattr(self, 'user') else '<no user>'
+
+        return '%s : %s' % (person, user)
 
 class History(models.Model):
 
@@ -790,14 +818,15 @@ class History(models.Model):
     def __str__(self):
 
         new_value_trunc = self.new_value[:17:]+'...' if len(self.new_value) > 20 else self.new_value
+        when = self.when if self.when is not None else datetime.datetime.now()
 
         try:
             model = apps.get_model('sdcpeople', self.modelname)
             object = model.objects.get(pk=self.objectid)
-            return f'{self.when.strftime("%Y-%m-%d")}: {self.modelname}: [{object}] [{self.fieldname}] changed to "{new_value_trunc}"'
+            return f'{"mdy".format(when.strftime("%Y-%m-%d"))}: {self.modelname}: [{object}] [{self.fieldname}] changed to "{new_value_trunc}"'
 
         except Exception as e:
             print (e)
 
-        return f'{"mdy".format(self.when.strftime("%Y-%m-%d"))}: {self.modelname}: {self.objectid} [{self.fieldname}] changed to "{new_value_trunc}"'
+        return f'{"mdy".format(when.strftime("%Y-%m-%d"))}: {self.modelname}: {self.objectid} [{self.fieldname}] changed to "{new_value_trunc}"'
 

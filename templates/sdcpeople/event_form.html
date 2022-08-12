@@ -1,0 +1,207 @@
+{% extends './_form.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>{{ object }}</h2>
+  {{ form.errors }}
+  <form method="POST">
+
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+
+      <input type="hidden" name='opener' id="input_opener">
+
+      <div id="div_name">
+        {% include 'touglates/form_field.html' with field=form.name %}
+      </div>
+      <div id="div_when">
+        {% include 'touglates/form_field.html' with field=form.when %}
+      </div>
+      <div id="div_event_type">
+        {% include 'touglates/form_field.html' with field=form.event_type %}
+      </div>
+
+      <h4>Participants</h4>
+
+      {{ participations.management_form }}
+      {% for participationform in participations.forms %}
+        {% if participationform.id.value > 0 %}
+          <div id="div_participationform_{{ participationform.id.value }}" class="participationformsetform"  >
+            {% for hiddenfield in participationform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=participationform.person %}
+            {% include 'touglates/form_field.html' with field=participationform.participation_level %}
+          </div>
+        {% else %}
+          <div class="participationformsetform participationnewform" >
+            {% for hiddenfield in participationform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=participationform.person %}
+            {% include 'touglates/form_field.html' with field=participationform.participation_level %}
+            {% include 'touglates/form_field.html' with field=participationform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addparticipation">add</button>' %}
+      {% for participation in object.participation_set.all %}
+        {% with participationid=participation.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editparticipation_'|add:participationid|add:'" data-formid="div_participationform_'|add:participationid|add:'" data-displayid="tr_participation_'|add:participationid|add:'" class="participation_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=participation.person field_2="participation.participation_level"  %}
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
+
+      {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
+
+    </div>
+
+  </form>
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+    addRelatedPopupButton( 'id_participation', 'Participation', '{% url "sdcpeople:participation-create-popup" %}', '{% url "sdcpeople:participation-update-popup" 0 %}')
+    function getControlIdsForPopups(modelName) {
+      controlIds={
+        'Participation': ['id_participation'],
+      }
+      return controlIds[modelName]
+    }
+
+  </script>
+
+  <script>
+    function enableFormsetForm(formid, displayid) {
+      let form = document.getElementById(formid)
+      document.getElementById(formid).style.display="block"
+      document.getElementById(displayid).style.display="none"
+    }
+    function enableAddFormsetForm(formclass) {
+      let newforms = document.getElementsByClassName(formclass)
+      if( newforms.length > 0) {
+        let newform = newforms[0]
+        newform.style.display="block"
+        newform.classList.remove(formclass)
+      } else {
+        alert('please save before adding more')
+      }
+    }
+  </script>
+
+  <script>
+
+    let submembershipEditButtons = document.getElementsByClassName('submembership_edit_button')
+    for( submembershipEditButton of submembershipEditButtons){
+      submembershipEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addsubmembership').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('submembershipnewform')
+    })
+    let submembershipforms = document.getElementsByClassName("submembershipformsetform")
+    for( submembershipform of submembershipforms ){
+      submembershipform.style.display="none"
+    }
+
+  </script>
+  <script>
+
+    let participationEditButtons = document.getElementsByClassName('participation_edit_button')
+    for( participationEditButton of participationEditButtons){
+      participationEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addparticipation').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('participationnewform')
+    })
+    let participationforms = document.getElementsByClassName("participationformsetform")
+    for( participationform of participationforms ){
+      participationform.style.display="none"
+    }
+
+  </script>
+  <script>
+
+    let contacttextEditButtons = document.getElementsByClassName('contacttext_edit_button')
+    for( contacttextEditButton of contacttextEditButtons){
+      contacttextEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addcontacttext').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('contacttextnewform')
+    })
+    let contacttextforms = document.getElementsByClassName("contacttextformsetform")
+    for( contacttextform of contacttextforms ){
+      contacttextform.style.display="none"
+    }
+
+  </script>
+  <script>
+
+    let contactemailEditButtons = document.getElementsByClassName('contactemail_edit_button')
+    for( contactemailEditButton of contactemailEditButtons){
+      contactemailEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addcontactemail').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('contactemailnewform')
+    })
+    let contactemailforms = document.getElementsByClassName("contactemailformsetform")
+    for( contactemailform of contactemailforms ){
+      contactemailform.style.display="none"
+    }
+
+  </script>
+
+
+  <script>
+
+    let linkEditButtons = document.getElementsByClassName('link_edit_button')
+    for( linkEditButton of linkEditButtons){
+      linkEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addlink').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('linknewform')
+    })
+    let linkforms = document.getElementsByClassName("linkformsetform")
+    for( linkform of linkforms ){
+      linkform.style.display="none"
+    }
+
+  </script>
+
+
+  <script>
+    addFilterInput("{{ form.voting_address.id_for_label }}")
+
+  </script>
+
+{% endblock %}
+

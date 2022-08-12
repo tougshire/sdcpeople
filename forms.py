@@ -241,4 +241,6 @@ PersonSubMembershipFormset = inlineformset_factory(Person, SubMembership, form=S
 PersonLinkFormset = inlineformset_factory(Person, Link, form=LinkForm, extra=10)
 PersonParticipationFormset = inlineformset_factory(Person, Participation, form=ParticipationForm, extra=10)
 
+EventParticipationFormset = inlineformset_factory(Event, Participation, form=ParticipationForm, extra=10)
+
 SubCommitteeSubMembershipFormset = inlineformset_factory(SubCommittee, SubMembership, form=SubMembershipForm, extra=10)

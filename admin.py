@@ -2,11 +2,14 @@ from sys import displayhook
 from django.contrib import admin
 
 from .models import (
+    ContactEmail,
     ContactText,
     ContactVoice,
     DuesPayment,
     EventType,
     Event,
+    History,
+    Link,
     LocationBorough,
     LocationCongress,
     LocationMagistrate,
@@ -23,6 +26,7 @@ from .models import (
     Person,
     PersonUser,
     Position,
+    PositionHistory,
     SubCommittee,
     SubMembership,
     VotingAddress,
@@ -30,6 +34,8 @@ from .models import (
 
 
 admin.site.register(ContactText)
+
+admin.site.register(ContactEmail)
 
 admin.site.register(ContactVoice)
 
@@ -39,6 +45,8 @@ admin.site.register(EventType)
 
 admin.site.register(Event)
 
+admin.site.register(Link
+)
 admin.site.register(LocationBorough)
 
 admin.site.register(LocationCongress)
@@ -51,9 +59,13 @@ admin.site.register(LocationStateHouse)
 
 admin.site.register(LocationStateSenate)
 
+admin.site.register(History)
+
 admin.site.register(Participation)
 
 admin.site.register(ParticipationLevel)
+
+admin.site.register(PositionHistory)
 
 admin.site.register(MembershipApplication)
 

@@ -9,6 +9,10 @@
     <div><a href="{% url 'sdcpeople:person-csv' %}">export</a></div>
     <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
+        
+        {% if 'vb_voter_id' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field="VAN ID" %}
+        {% endif %}
         {% if 'name' in show_columns or not show_columns %}
           {% include './_list_head.html' with field="Name" %}
         {% endif %}
@@ -59,6 +63,10 @@
       {% for person in object_list %}
         <div class="row">
           <div class="listfield"><a href="{% url 'sdcpeople:person-detail' person.pk %}">view</a></div>
+        
+          {% if 'vb_voter_id' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=vb_voter_id  %}
+          {% endif %}
           {% if 'name_last' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=person  %}
           {% endif %}
