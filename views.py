@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, FormView,
-                                       UpdateView)
+                                       UpdateView,)
 from django.views.generic.list import ListView
 from tougshire_vistas.models import Vista
 from tougshire_vistas.views import (default_vista, delete_vista,
@@ -1686,3 +1686,5 @@ class VotingAddressClose(PermissionRequiredMixin, DetailView):
     permission_required = 'sdcpeople.view_votingaddress'
     model = VotingAddress
     template_name = 'sdcpeople/votingaddress_closer.html'
+
+    
