@@ -12,8 +12,12 @@ urlpatterns = [
     path('person/<int:pk>/detail/', views.PersonDetail.as_view(), name='person-detail'),
     path('person/<int:pk>/delete/', views.PersonDelete.as_view(), name='person-delete'),
     path('person/list/', views.PersonList.as_view(), name='person-list'),
+    path('person/list/by/<int:by_value>/<by_parameter>/', views.PersonList.as_view(), name='person-list-by'),
     path('person/csv/', views.PersonCSV.as_view(), name='person-csv'),
+    path('person/csvupload/', views.PersonCSVUpload.as_view(), name="person-csvupload"),
+    
     path('person/<int:pk>/close/', views.PersonClose.as_view(), name="person-close"),
+
 
     path('subcommittee/', RedirectView.as_view(url=reverse_lazy('sdcpeople:subcommittee-list'))),
     path('subcommittee/create/', views.SubCommitteeCreate.as_view(), name='subcommittee-create'),

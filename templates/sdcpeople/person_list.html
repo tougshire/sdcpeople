@@ -2,7 +2,8 @@
 {% load static %}
 {% block content %}
 
-  {% include 'tougshire_vistas/filter.html' %}
+  {% url 'sdcpeople:person-list' as vista_form_action %}
+  {% include 'tougshire_vistas/filter.html' with vista_form_action=vista_form_action %}
 
   <div class="list">
     <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>

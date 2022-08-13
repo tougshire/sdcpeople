@@ -1,0 +1,23 @@
+{% extends './_form.html' %}
+{% load static %}
+{% load touglates_tags %}
+
+{% block content %}
+    {{ form.errors }}
+    <form action="{% url 'sdcpeople:person-csvupload' %}" method="POST" enctype="multipart/form-data" > 
+
+    <div class="form">
+        {% csrf_token %}
+        <div id="div_csv_file">
+            {% include './_form_field.html' with field=form.csv_file %}
+        </div>
+        <div id="div_overwrite">
+            {% include './_form_field.html' with field=form.overwrite %}
+        </div>
+        <div id="div_submit">
+            {% include './_form_button.html' with button='<button type="Submit">Submit</button>' label="Submit" %}
+        </div>
+    </div>
+</form>
+
+{% endblock %}
