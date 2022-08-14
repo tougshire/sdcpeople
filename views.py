@@ -1,4 +1,3 @@
-from io import BytesIO
 import io
 import sys
 import urllib
@@ -31,7 +30,26 @@ from .forms import (EventForm, EventParticipationFormset, LocationBoroughForm, L
 from .models import (ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
                      LocationStateHouse, LocationStateSenate, MembershipStatus, Participation,
-                     Person, PersonUser, Position, SubCommittee, SubMembership, VotingAddress)
+                     Person, PersonUser, Position, RecordAction, RecordactPerson, SubCommittee, SubMembership, VotingAddress)
+
+
+def create_recordact(action_label, action_details, recordactmodel_class, object, user, recordact=None):
+
+    if recordact is None:
+        recordact = RecordAction.objects.create(
+            model_name=recordactmodel_class.__name__[len('Recordact'):],  
+            action_label=action_label, 
+            details=action_details,
+            user=user)
+
+    recordact_model = recordactmodel_class.objects.create(
+        object=object,
+        recordact=recordact,
+    )
+
+    recordact_model.save()
+
+    return recordact
 
 
 def update_history(form, modelname, object, user):
@@ -90,6 +108,12 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
         update_history(form, 'Person', form.instance, self.request.user)
 
         self.object = form.save()
+
+        details=''
+        for field in form.changed_data:
+            details = details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+
+        create_recordact('Created', details,RecordactPerson,self.object,self.request.user)
 
         formset_data = {
             'participations':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
@@ -1726,16 +1750,6 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
 
             print('tp228cl22')
 
-            existing_people = {person.vb_voter_id: {person.id} for person in Person.objects.all()}
-            existing_location_cities = {location_city.name: location_city.id for location_city in LocationCity.objects.all()}
-            existing_location_boroughs = {location_borough.name: location_borough.id for location_borough in LocationBorough.objects.all()}
-            existing_location_congresses = {location_congress.name: location_congress.id for location_congress in LocationCongress.objects.all()}
-            existing_location_magistrates = {location_magistrate.name: location_magistrate.id for location_magistrate in LocationMagistrate.objects.all()}
-            existing_location_precincts = {location_precinct.name: location_precinct.id for location_precinct in LocationPrecinct.objects.all()}
-            existing_location_statehouses = {location_statehouse.name: location_statehouse.id for location_statehouse in LocationStateHouse.objects.all()}
-            existing_location_statesenates = {location_statesenate.name: location_statesenate.id for location_statesenate in LocationStateSenate.objects.all()}
-
-            people_to_add = []
             columns_available=[
                 'full_name',
                 'name_prefix',
@@ -1756,7 +1770,7 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                 'borough',
                 'precinct',
                 'street_address',
-
+                'phone'
             ]
 
             data_columns={}
@@ -1794,6 +1808,7 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                         if write_person:
                             lazy_set = {}
                             voting_address = None
+                            phone = None
                             for col_name, col_num in data_columns.items():
                                 row[col_num]=row[col_num].strip()
                                 if(row[col_num])>"":
@@ -1811,6 +1826,8 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                                             if key[:8]=='location':
                                                 setattr(voting_address,key,value)
                                                 lazy_set.pop(key)
+                                    elif col_name == 'phone':
+                                        contact_voice,created = ContactVoice.objects.get_or_create(number=row[col_num], person=update_person)
                                     elif col_name in location_models:
                                         print('tp228ck16', col_name)
                                         try:
@@ -1836,6 +1853,9 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                             update_person.save()
 
 
+                            self.recordact = create_recordact_from_action('csv_upload',RecordactPerson, )
+
+            
         except Exception as e:
             print("Unable to upload file. "+repr(e))
             messages.error(request,"Unable to upload file. "+repr(e))
@@ -1846,165 +1866,3 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
         return reverse('sdcpeople:person-csvupload-success', 1)
 
 
-#     # def person_csvupload(request):
-#     form_data = {}
-#     if "GET" == request.method:
-#         return render(request, "sdcpeople/person_csvupload.html", form_data)
-#     # if not GET, then proceed
-#     try:
-#         print('tp228cl10')
-
-#         csv_file = request.FILES["csv_file"]
-#         print('tp228cl11')
-
-#         if not csv_file.name.endswith('.csv'):
-#             messages.error(request,'File is not CSV type')
-#             return HttpResponseRedirect(reverse("sdcpeople:person-csvupload"))
-#         #if file is too large, return
-#         if csv_file.multiple_chunks():
-#             messages.error(request,"Uploaded file is too big (%.2f MB)." % (uploaded_file.size/(1000*1000),))
-#             return HttpResponseRedirect(reverse("sdcpeople:person-csvupload"))
-
-#         print('tp228cl21')
-# #        data = list(csv.reader(open(csv_file, "r"), delimiter=","))
-#         csv_file.seek(0)
-#         data = list(csv.reader(io.StringIO(csv_file.read().decode('utf-8')), delimiter=","))
-
-#         print('tp228cl22')
-
-#         existing_people = {person.vb_voter_id: {person.id} for person in Person.objects.all()}
-#         existing_location_cities = {location_city.name: location_city.id for location_city in LocationCity.objects.all()}
-#         existing_location_boroughs = {location_borough.name: location_borough.id for location_borough in LocationBorough.objects.all()}
-#         existing_location_congresses = {location_congress.name: location_congress.id for location_congress in LocationCongress.objects.all()}
-#         existing_location_magistrates = {location_magistrate.name: location_magistrate.id for location_magistrate in LocationMagistrate.objects.all()}
-#         existing_location_precincts = {location_precinct.name: location_precinct.id for location_precinct in LocationPrecinct.objects.all()}
-#         existing_location_statehouses = {location_statehouse.name: location_statehouse.id for location_statehouse in LocationStateHouse.objects.all()}
-#         existing_location_statesenates = {location_statesenate.name: location_statesenate.id for location_statesenate in LocationStateSenate.objects.all()}
-
-#         people_to_add = []
-#         columns_available=[
-#             'full_name',
-#             'name_prefix',
-#             'name_last',
-#             'name_first',
-#             'name_middles',
-#             'name_common',
-#             'name_suffix',
-#             'voting_address',
-#             'membership_status',
-#             'positions',
-#             'vb_campaign_id',
-#             'city',
-#             'congress',
-#             'statesenate',
-#             'statehouse',
-#             'magistrate',
-#             'borough',
-#             'precinct',
-#             'street_address',
-
-#         ]
-
-#         data_columns={}
-#         header = data[0]
-#         for col in range(1,len(data[0])):
-#             if data[0][col] in columns_available:
-#                 data_columns[data[0][col]]=col
-
-#         print('tp228cf06', data_columns)
-#         data.pop(0)
-
-#         for row in data:
-#             update_person = None
-#             new_van_id = row[0]
-#             location_models={
-#                 'city':LocationCity,
-#                 'borough':LocationBorough,
-#                 'congress':LocationCongress,
-#                 'magistrate':LocationMagistrate,
-#                 'precinct':LocationPrecinct,
-#                 'statehouse':LocationStateHouse,
-#                 'statesenate':LocationStateSenate,
-#             }
-                        
-#             if new_van_id > "":
-#                 update_person, person_created = Person.objects.get_or_create(vb_voter_id=new_van_id)
-#                 write_person=False
-#                 if person_created:
-#                     write_person=True
-#                 else:
-#                     if 'overwrite' in request.POST and request.POST.get('overwrite'):
-#                         write_person=True
-                
-#                 if update_person is not None:
-#                     if write_person:
-#                         lazy_set = {}
-#                         voting_address = None
-#                         for col_name, col_num in data_columns.items():
-#                             row[col_num]=row[col_num].strip()
-#                             if(row[col_num])>"":
-#                                 if col_name == 'full_name':
-#                                     name_parts = row[col_num].split(', ')
-#                                     setattr(update_person,'name_last',name_parts[0])
-#                                     name_parts = name_parts[1].split(' ')
-#                                     setattr(update_person, 'name_first', name_parts[0])
-#                                     if len(name_parts) > 1:
-#                                         setattr(update_person, 'name_middles', name_parts[1])
-#                                 elif col_name == 'voting_address':
-#                                     voting_address,created = VotingAddress.objects.get_or_create(street_address=row[col_num])
-#                                     setattr(update_person, 'voting_address', voting_address)
-#                                     for key, value in lazy_set:
-#                                         if key[:8]=='location':
-#                                             setattr(voting_address,key,value)
-#                                             lazy_set.pop(key)
-#                                 elif col_name in location_models:
-#                                     print('tp228ck16', col_name)
-#                                     try:
-#                                         location_object = location_models[col_name].objects.get(name=row[col_num])
-#                                         print('tp228ck17', location_object)
-#                                         if voting_address is not None:
-#                                             setattr(voting_address,'location'+col_name,location_object)
-#                                         else:
-#                                             lazy_set['location'+col_name] = location_object
-#                                     except location_models[col_name].DoesNotExist:
-#                                         print('tp228ck20', 'passing on '+col_name)
-#                                         pass
-
-
-#                                 else:
-#                                     setattr(update_person, col_name, row[col_num])
-
-                            
-#                         print('tp228cf03', update_person)
-#                         if voting_address is not None:
-#                             print('tp228ck24', voting_address)
-#                             voting_address.save()
-#                         update_person.save()
-
-
-# 	# 	file_data = csv_file.read().decode("utf-8")		
-
-# 	# 	lines = file_data.split("\n")
-# 	# 	#loop over the lines and save them in db. If error , store as string and then display
-# 	# 	for line in lines:						
-# 	# 		fields = line.split(",")
-# 	# 		data_dict = {}
-# 	# 		data_dict["name"] = fields[0]
-# 	# 		data_dict["start_date_time"] = fields[1]
-# 	# 		data_dict["end_date_time"] = fields[2]
-# 	# 		data_dict["notes"] = fields[3]
-# 	# 		try:
-# 	# 			form = EventsForm(data_dict)
-# 	# 			if form.is_valid():
-# 	# 				form.save()					
-# 	# 			else:
-# 	# 				logging.getLogger("error_logger").error(form.errors.as_json())												
-# 	# 		except Exception as e:
-# 	# 			logging.getLogger("error_logger").error(repr(e))					
-# 	# 			pass
-
-#     except Exception as e:
-#         print("Unable to upload file. "+repr(e))
-#         messages.error(request,"Unable to upload file. "+repr(e))
-
-#     return HttpResponseRedirect(reverse("sdcpeople:person-csvupload"))

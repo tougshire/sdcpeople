@@ -9,6 +9,7 @@ from .models import (
     EventType,
     Event,
     History,
+    RecordactPerson,
     Link,
     LocationCity,
     LocationBorough,
@@ -64,6 +65,7 @@ admin.site.register(LocationStateSenate)
 
 admin.site.register(History)
 
+
 admin.site.register(Participation)
 
 admin.site.register(ParticipationLevel)
@@ -105,3 +107,5 @@ admin.site.register(SubMembership)
 admin.site.register(VotingAddress)
 
 admin.site.register(PersonUser)
+
+admin.site.register(RecordactPerson)

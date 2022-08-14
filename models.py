@@ -1,5 +1,6 @@
 from bdb import effective
 import datetime
+from tkinter import CASCADE
 from django.apps import apps
 from xmlrpc.client import Boolean
 from django.db import models
@@ -793,6 +794,63 @@ class PersonUser(models.Model):
 
         return '%s : %s' % (person, user)
 
+class RecordAction(models.Model):
+
+    model_name = models.CharField(
+        'model_name',
+        max_length=100,
+        help_text='The name of the model for which this action applies'
+    )
+    object_name = models.CharField(
+        'object_name',
+        max_length=100,
+        blank=True,
+        help_text='The name of the object to which this action applies'
+    )
+    when = models.DateTimeField(
+        'when',
+        auto_now_add=True,
+        help_text='The date this change was made'
+    )
+    details = models.TextField(
+        'details',
+        help_text='The details of this action'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text='The user who made this change'
+    )
+    action_label = models.CharField(
+        'recordset action',
+        max_length=100,
+        blank=True,
+        help_text='A flag to be set for certain actions, such as a CSV Upload event'    
+    )
+
+    class Meta:
+        ordering = ['-when',]
+
+    def __str__(self):
+
+        details_trunc = self.details[:97:]+'...' if len(self.details) > 100 else self.details
+        when = self.when if self.when is not None else datetime.datetime.now()
+
+        return f"{when.date().isoformat()} {self.object_name} {details_trunc}"
+
+class RecordactPerson(models.Model):
+    object = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text = 'The person for which this action applies'
+    )
+    recordact = models.ForeignKey(
+        RecordAction,
+        on_delete=models.CASCADE,
+        help_text='The recordaction which applies to this object'
+    )
+
 class History(models.Model):
 
     when = models.DateTimeField(
@@ -833,6 +891,12 @@ class History(models.Model):
         null=True,
         help_text='The user who made this change'
     )
+    # recordset_action = models.CharField(
+    #     'recordset action',
+    #     max_length=100,
+    #     blank=True,
+    #     help_text='A flag to be set for certain actions, such as a CSV Upload event'    
+    # )
 
     class Meta:
         ordering = ['-when', 'modelname', 'objectid']
