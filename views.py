@@ -1761,8 +1761,6 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
             csv_file.seek(0)
             data = list(csv.reader(io.StringIO(csv_file.read().decode('utf-8')), delimiter=","))
 
-            print('tp228cl22')
-
             columns_available=[
                 'full_name',
                 'name_prefix',
@@ -1825,7 +1823,7 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                             write_person=True
                             recordact_details='CSV Updated. '
                 else:
-                    person = Person()
+                    person = Person.objects.create()
                     write_person=True
 
                 recordact_details=''

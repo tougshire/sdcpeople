@@ -2,6 +2,9 @@ from sys import displayhook
 from django.contrib import admin
 
 from .models import (
+    BulkRecordAction,
+    CommunicationEvent,
+    CommunicationResult,
     ContactEmail,
     ContactText,
     ContactVoice,
@@ -9,6 +12,7 @@ from .models import (
     EventType,
     Event,
     History,
+    RecordAction,
     RecordactPerson,
     Link,
     LocationCity,
@@ -32,8 +36,18 @@ from .models import (
     SubCommittee,
     SubMembership,
     VotingAddress,
+    BulkCommunication,
 )
 
+admin.site.register(BulkCommunication)
+
+admin.site.register(CommunicationResult)
+
+admin.site.register(CommunicationEvent)
+
+admin.site.register(BulkRecordAction)
+
+admin.site.register(RecordAction)
 
 admin.site.register(ContactText)
 

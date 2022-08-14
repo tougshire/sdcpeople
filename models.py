@@ -8,6 +8,7 @@ from django.forms import CharField
 from datetime import date
 from django.conf import settings
 
+
 class MembershipType(models.Model):
 
     name = models.CharField(
@@ -775,6 +776,85 @@ class Participation(models.Model):
 
         return '%s %s %s' % (person, action_phrase, event)
 
+class BulkCommunication(models.Model):
+    name = models.CharField(
+        'bulk action name',
+        max_length=100,
+        blank=True,
+        help_text='The name of the bulk action'
+    )
+    when = models.DateTimeField(
+        'when',
+        auto_now_add=True,
+        help_text='The date this action occured'
+    )
+
+    def __str__(self):
+        return f'{self.name} of {self.when}'
+
+class CommunicationResult(models.Model):
+    name = models.CharField(
+        'name',
+        max_length=100,
+        blank=True,
+        help_text='The name of the bulk action'
+    )
+
+    def __str__(self):
+        return self.name
+
+class CommunicationEvent(models.Model):
+
+    target = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        help_text = 'The person who was contacted',
+        related_name='communication_as_target'
+    )
+    volunteer = models.ForeignKey(
+        Person,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text = 'The person made the contact',
+        related_name='communication_as_volunteer'
+
+    )
+    when = models.DateTimeField(
+        'when',
+        auto_now_add=True,
+        help_text='The date this communication was made'
+    )
+    details = models.TextField(
+        'details',
+        help_text='The details of this communication'
+    )
+    bulk_communication = models.ForeignKey(
+        BulkCommunication,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="The bulk communication of which this communication is a part, such as an invitation to an event"
+    )
+
+    class Meta:
+        ordering = ['-when',]
+
+    def __str__(self):
+
+        details_trunc = self.details[:97:]+'...' if len(self.details) > 100 else self.details
+        when = self.when if self.when is not None else datetime.datetime.now()
+
+        if hasattr(self, 'target'):
+            return f"{self.target} {when.date().isoformat()} {details_trunc}"
+        else:
+            return "<ininitiated Communication Event>"
+
+
+    class Meta:
+        ordering = ('-when',)
+
+
 class PersonUser(models.Model):
     user=models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -915,12 +995,6 @@ class History(models.Model):
         null=True,
         help_text='The user who made this change'
     )
-    # recordset_action = models.CharField(
-    #     'recordset action',
-    #     max_length=100,
-    #     blank=True,
-    #     help_text='A flag to be set for certain actions, such as a CSV Upload event'    
-    # )
 
     class Meta:
         ordering = ['-when', 'modelname', 'objectid']

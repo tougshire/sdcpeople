@@ -31,8 +31,7 @@ class TestGeneralModelParams(TestCase):
         for label, model in apps.all_models[app_label].items():
             if not model in exempted_models:
                 m = model()
-                print('2285c46', m.Meta.ordering)
-                self.assertTrue(hasattr(m.Meta, "ordering"))
+                self.assertTrue(hasattr(m._meta, "ordering"))
 
 
 
