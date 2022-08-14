@@ -58,9 +58,7 @@ class MembershipStatus(models.Model):
 
     def __str__(self):
         membership_type_str = self.membership_type if hasattr(self, 'membership_type') else ''
-        if self.name > '':
-            return '{}: {}'.format(membership_type_str, self.name)
-        return membership_type_str
+        return f'{self.name} {membership_type_str}'.strip()
 
     class Meta:
         ordering = ['-is_quorum', 'membership_type', 'name']
