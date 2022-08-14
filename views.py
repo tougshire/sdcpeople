@@ -27,30 +27,27 @@ from .forms import (EventForm, EventParticipationFormset, LocationBoroughForm, L
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
-from .models import (ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
+from .models import (BulkRecordAction, ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
                      LocationStateHouse, LocationStateSenate, MembershipStatus, Participation,
                      Person, PersonUser, Position, RecordAction, RecordactPerson, SubCommittee, SubMembership, VotingAddress)
 
 
-def create_recordact(action_label, action_details, recordactmodel_class, object, user, recordact=None):
+def create_recordact(action_details, recordactmodel_class, object, user, bulk_recordact):
 
-    if recordact is None:
-        recordact = RecordAction.objects.create(
-            model_name=recordactmodel_class.__name__[len('Recordact'):],  
-            action_label=action_label, 
-            details=action_details,
-            user=user)
+    recordact = RecordAction.objects.create(
+        model_name=recordactmodel_class.__name__[len('Recordact'):],  
+        details=action_details,
+        user=user,
+        bulk_recordact=bulk_recordact
+    )
 
     recordact_model = recordactmodel_class.objects.create(
         object=object,
         recordact=recordact,
     )
 
-    recordact_model.save()
-
-    return recordact
-
+    return recordact_model
 
 def update_history(form, modelname, object, user):
     for fieldname in form.changed_data:
@@ -105,15 +102,8 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
 
         response = super().form_valid(form)
 
-        update_history(form, 'Person', form.instance, self.request.user)
-
         self.object = form.save()
 
-        details=''
-        for field in form.changed_data:
-            details = details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
-
-        create_recordact('Created', details,RecordactPerson,self.object,self.request.user)
 
         formset_data = {
             'participations':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
@@ -126,6 +116,9 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
 
         }
+        recordact_details='Created. '
+        for field in form.changed_data:
+            recordact_details = recordact_details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
         for formset_name in formset_data.keys():
 
@@ -135,6 +128,12 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
                 messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
                 print('error saving ' + formset_name + ': ' )
                 print(formset_data[formset_name].errors)
+
+            if formset_data[formset_name].has_changed:
+                for field in formset_data[formset_name].changed_data:
+                    recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+
+        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user)
 
         return response
 
@@ -198,6 +197,11 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
 
         }
 
+        recordact_details='Person Updated. '
+        for field in form.changed_data:
+            recordact_details = recordact_details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+
+
         for formset_name in formset_data.keys():
 
             if(formset_data[formset_name]).is_valid():
@@ -207,8 +211,13 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
                 print('error saving ' + formset_name + ': ')
                 print(formset_data[formset_name].errors)
 
-        return response
+            if formset_data[formset_name].has_changed:
+                for field in formset_data[formset_name].changed_data:
+                    recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
+        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user)
+
+        return response
 
     def get_success_url(self):
         if 'popup' in self.kwargs:
@@ -271,11 +280,14 @@ class PersonList(PermissionRequiredMixin, ListView):
             'membership_status__is_member',
             'membership_status__is_quorum',
             'positions',
-            'is_deleted',
             'participation__event',
+            'recordactperson__recordact__bulk_recordact',
+            'is_deleted',
+
         ])
 
         self.vista_settings['fields']['participation__event']['label']="Participation in Event"
+        self.vista_settings['fields']['recordactperson__recordact__bulk_recordact']['label']="Bulk Record Action"
 
         print('tp228d753', kwargs.get('by_value'))
         print('tp228d754', kwargs.get('by_parameter'))
@@ -1739,6 +1751,7 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
     form_class=PersonCSVUploadForm
     template_name="sdcpeople/person_csvupload.html"
     form_data = {}
+    bulk_recordact=None
 
     def form_valid(self, form):
 
@@ -1782,6 +1795,10 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
             print('tp228cf06', data_columns)
             data.pop(0)
 
+            self.bulk_recordact = BulkRecordAction.objects.create(
+                name='CSV Upload '
+            )
+
             for row in data:
                 update_person = None
                 new_van_id = row[0]
@@ -1794,16 +1811,21 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                     'statehouse':LocationStateHouse,
                     'statesenate':LocationStateSenate,
                 }
+                membership_statusses={f'{mstatus.membership_type.name} {mstatus.name}':mstatus for mstatus in MembershipStatus.objects.all() }             
                             
                 if new_van_id > "":
                     update_person, person_created = Person.objects.get_or_create(vb_voter_id=new_van_id)
                     write_person=False
+                    recordact_details=''
                     if person_created:
                         write_person=True
+                        recordact_details='CSV Created. '
                     else:
+                        recordact_details='CSV Noted Not Changed. '
                         if form.cleaned_data['overwrite']:
                             write_person=True
-                    
+                            recordact_details='CSV Updated. '
+
                     if update_person is not None:
                         if write_person:
                             lazy_set = {}
@@ -1812,6 +1834,7 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                             for col_name, col_num in data_columns.items():
                                 row[col_num]=row[col_num].strip()
                                 if(row[col_num])>"":
+                                    recordact_details = recordact_details + col_name + ': ' + str(row[col_num]) + '; '
                                     if col_name == 'full_name':
                                         name_parts = row[col_num].split(', ')
                                         setattr(update_person,'name_last',name_parts[0])
@@ -1840,10 +1863,9 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                                         except location_models[col_name].DoesNotExist:
                                             print('tp228ck20', 'passing on '+col_name)
                                             pass
-
-
-                                    else:
-                                        setattr(update_person, col_name, row[col_num])
+                                    elif col_name == 'membership_status':
+                                        if row['col_num'].lower() in membership_statusses:
+                                            setattr(update_person, col_name, membership_statusses[row[col_num]])
 
                                 
                             print('tp228cf03', update_person)
@@ -1852,17 +1874,21 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                                 voting_address.save()
                             update_person.save()
 
+                            #tp22814729
 
-                            self.recordact = create_recordact_from_action('csv_upload',RecordactPerson, )
-
-            
+                            create_recordact(recordact_details,RecordactPerson,update_person,self.request.user,self.bulk_recordact)
+                            
         except Exception as e:
             print("Unable to upload file. "+repr(e))
-            messages.error(request,"Unable to upload file. "+repr(e))
+            messages.error(self.request,"Unable to upload file. "+repr(e))
 
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('sdcpeople:person-csvupload-success', 1)
+        bulk_recordact_pk = 0
+        if self.bulk_recordact is not None:
+            bulk_recordact_pk = self.bulk_recordact.pk
+
+        return reverse('sdcpeople:person-list-by', kwargs={'by_value':bulk_recordact_pk, 'by_parameter':'recordactperson__recordact__bulk_recordact'})
 
 

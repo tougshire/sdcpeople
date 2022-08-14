@@ -794,15 +794,31 @@ class PersonUser(models.Model):
 
         return '%s : %s' % (person, user)
 
+class BulkRecordAction(models.Model):
+    name = models.CharField(
+        'bulk action name',
+        max_length=100,
+        blank=True,
+        help_text='The name of the bulk action'
+    )
+    when = models.DateTimeField(
+        'when',
+        auto_now_add=True,
+        help_text='The date this action occured'
+    )
+
+    def __str__(self):
+        return f'{self.name} of {self.when}'
+
 class RecordAction(models.Model):
 
     model_name = models.CharField(
-        'model_name',
+        'model name',
         max_length=100,
         help_text='The name of the model for which this action applies'
     )
     object_name = models.CharField(
-        'object_name',
+        'object name',
         max_length=100,
         blank=True,
         help_text='The name of the object to which this action applies'
@@ -822,11 +838,12 @@ class RecordAction(models.Model):
         null=True,
         help_text='The user who made this change'
     )
-    action_label = models.CharField(
-        'recordset action',
-        max_length=100,
+    bulk_recordact = models.ForeignKey(
+        BulkRecordAction,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
-        help_text='A flag to be set for certain actions, such as a CSV Upload event'    
+        help_text="The bulk action of which this record action is a part, such as a CSV Upload"
     )
 
     class Meta:
@@ -850,6 +867,15 @@ class RecordactPerson(models.Model):
         on_delete=models.CASCADE,
         help_text='The recordaction which applies to this object'
     )
+
+    def __str__(self):
+        if hasattr(self, 'object') and hasattr(self, 'recordact'):
+            return f'{self.object}: {self.recordact}'
+        else:
+            return '<uninitiated RecordactPeson>'
+
+    class Meta:
+        ordering = ('recordact',)
 
 class History(models.Model):
 
