@@ -1800,8 +1800,8 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
             )
 
             for row in data:
-                update_person = None
-                new_van_id = row[0]
+                person = None
+                van_id = row[0]
                 location_models={
                     'city':LocationCity,
                     'borough':LocationBorough,
@@ -1811,12 +1811,11 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                     'statehouse':LocationStateHouse,
                     'statesenate':LocationStateSenate,
                 }
-                membership_statusses={f'{mstatus.membership_type.name} {mstatus.name}':mstatus for mstatus in MembershipStatus.objects.all() }             
+                membership_statusses={f'{mstatus.name} {mstatus.membership_type.name}'.lower():mstatus for mstatus in MembershipStatus.objects.all() }             
                             
-                if new_van_id > "":
-                    update_person, person_created = Person.objects.get_or_create(vb_voter_id=new_van_id)
+                if van_id > "":
+                    person, person_created = Person.objects.get_or_create(vb_voter_id=van_id)
                     write_person=False
-                    recordact_details=''
                     if person_created:
                         write_person=True
                         recordact_details='CSV Created. '
@@ -1825,62 +1824,68 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                         if form.cleaned_data['overwrite']:
                             write_person=True
                             recordact_details='CSV Updated. '
+                else:
+                    person = Person()
+                    write_person=True
 
-                    if update_person is not None:
-                        if write_person:
-                            lazy_set = {}
-                            voting_address = None
-                            phone = None
-                            for col_name, col_num in data_columns.items():
-                                row[col_num]=row[col_num].strip()
-                                if(row[col_num])>"":
-                                    recordact_details = recordact_details + col_name + ': ' + str(row[col_num]) + '; '
-                                    if col_name == 'full_name':
-                                        name_parts = row[col_num].split(', ')
-                                        setattr(update_person,'name_last',name_parts[0])
-                                        name_parts = name_parts[1].split(' ')
-                                        setattr(update_person, 'name_first', name_parts[0])
-                                        if len(name_parts) > 1:
-                                            setattr(update_person, 'name_middles', name_parts[1])
-                                    elif col_name == 'voting_address':
-                                        voting_address,created = VotingAddress.objects.get_or_create(street_address=row[col_num])
-                                        setattr(update_person, 'voting_address', voting_address)
-                                        for key, value in lazy_set:
-                                            if key[:8]=='location':
-                                                setattr(voting_address,key,value)
-                                                lazy_set.pop(key)
-                                    elif col_name == 'phone':
-                                        contact_voice,created = ContactVoice.objects.get_or_create(number=row[col_num], person=update_person)
-                                    elif col_name in location_models:
-                                        print('tp228ck16', col_name)
-                                        try:
-                                            location_object = location_models[col_name].objects.get(name=row[col_num])
-                                            print('tp228ck17', location_object)
-                                            if voting_address is not None:
-                                                setattr(voting_address,'location'+col_name,location_object)
-                                            else:
-                                                lazy_set['location'+col_name] = location_object
-                                        except location_models[col_name].DoesNotExist:
-                                            print('tp228ck20', 'passing on '+col_name)
-                                            pass
-                                    elif col_name == 'membership_status':
-                                        if row['col_num'].lower() in membership_statusses:
-                                            setattr(update_person, col_name, membership_statusses[row[col_num]])
+                recordact_details=''
 
-                                
-                            print('tp228cf03', update_person)
-                            if voting_address is not None:
-                                print('tp228ck24', voting_address)
-                                voting_address.save()
-                            update_person.save()
+                if person is not None:
+                    if write_person:
+                        lazy_set = {}
+                        voting_address = None
+                        phone = None
 
-                            #tp22814729
+                        for col_name, col_num in data_columns.items():
+                            row[col_num]=row[col_num].strip()
+                            if(row[col_num])>"":
+                                recordact_details = recordact_details + col_name + ': ' + str(row[col_num]) + '; '
+                                if col_name == 'full_name':
+                                    name_parts = row[col_num].split(', ')
+                                    setattr(person,'name_last',name_parts[0])
+                                    name_parts = name_parts[1].split(' ')
+                                    setattr(person, 'name_first', name_parts[0])
+                                    if len(name_parts) > 1:
+                                        setattr(person, 'name_middles', name_parts[1])
+                                elif col_name == 'voting_address':
+                                    voting_address,created = VotingAddress.objects.get_or_create(street_address=row[col_num])
+                                    setattr(person, 'voting_address', voting_address)
+                                    for key, value in lazy_set:
+                                        if key[:8]=='location':
+                                            setattr(voting_address,key,value)
+                                            lazy_set.pop(key)
+                                elif col_name == 'phone':
+                                    contact_voice,created = ContactVoice.objects.get_or_create(number=row[col_num], person=person)
+                                elif col_name in location_models:
+                                    print('tp228ck16', col_name)
+                                    try:
+                                        location_object = location_models[col_name].objects.get(name=row[col_num])
+                                        print('tp228ck17', location_object)
+                                        if voting_address is not None:
+                                            setattr(voting_address,'location'+col_name,location_object)
+                                        else:
+                                            lazy_set['location'+col_name] = location_object
+                                    except location_models[col_name].DoesNotExist:
+                                        print('tp228ck20', 'passing on '+col_name)
+                                        pass
+                                elif col_name == 'membership_status':
+                                    if row[col_num].lower() in membership_statusses:
+                                        setattr(person, col_name, membership_statusses[row[col_num].lower()])
 
-                            create_recordact(recordact_details,RecordactPerson,update_person,self.request.user,self.bulk_recordact)
+                            
+                        print('tp228cf03', person)
+                        if voting_address is not None:
+                            print('tp228ck24', voting_address)
+                            voting_address.save()
+                        person.save()
+
+                        #tp22814729
+
+                        create_recordact(recordact_details,RecordactPerson,person,self.request.user,self.bulk_recordact)
                             
         except Exception as e:
-            print("Unable to upload file. "+repr(e))
-            messages.error(self.request,"Unable to upload file. "+repr(e))
+            print("Unable to upload file. " + repr(e), sys.exc_info()[2].tb_lineno)
+            messages.error(self.request,"Unable to upload file. " + repr(e))
 
         return super().form_valid(form)
 
