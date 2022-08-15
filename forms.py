@@ -25,7 +25,7 @@ from .models import (
     MembershipType,
     Participation,
     PaymentMethod,
-    PeopleList,
+    SavedList,
     Person,
     Position,
     SubCommittee,
@@ -200,9 +200,9 @@ class SubCommitteeForm(forms.ModelForm):
             'rank_number',
         ]
 
-class PeopleListForm(forms.ModelForm):
+class SavedListForm(forms.ModelForm):
     class Meta:
-        model=PeopleList
+        model=SavedList
         fields = [
             'name',
         ]
@@ -256,7 +256,7 @@ class ListMembershipForm(forms.ModelForm):
         model=ListMembership
         fields = [
             'person',
-            'peoplelist',
+            'savedlist',
         ]
 
 
@@ -307,7 +307,7 @@ PersonListMembershipFormset = forms.inlineformset_factory(Person, ListMembership
 
 EventParticipationFormset = forms.inlineformset_factory(Event, Participation, form=ParticipationForm, extra=10)
 
-PeopleListListMembershipFormset = forms.inlineformset_factory(PeopleList, ListMembership, form=ListMembershipForm, extra=10)
+SavedListListMembershipFormset = forms.inlineformset_factory(SavedList, ListMembership, form=ListMembershipForm, extra=10)
 
 
 SubCommitteeSubMembershipFormset = forms.inlineformset_factory(SubCommittee, SubMembership, form=SubMembershipForm, extra=10)

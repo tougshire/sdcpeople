@@ -35,13 +35,13 @@ urlpatterns = [
     path('event/list/', views.EventList.as_view(), name='event-list'),
     path('event/<int:pk>/close/', views.EventClose.as_view(), name="event-close"),
 
-    path('peoplelist/', RedirectView.as_view(url=reverse_lazy('sdcpeople:peoplelist-list'))),
-    path('peoplelist/create/', views.PeopleListCreate.as_view(), name='peoplelist-create'),
-    path('peoplelist/<int:pk>/update/', views.PeopleListUpdate.as_view(), name='peoplelist-update'),
-    path('peoplelist/<int:pk>/detail/', views.PeopleListDetail.as_view(), name='peoplelist-detail'),
-    path('peoplelist/<int:pk>/delete/', views.PeopleListDelete.as_view(), name='peoplelist-delete'),
-    path('peoplelist/list/', views.PeopleListList.as_view(), name='peoplelist-list'),
-    path('peoplelist/<int:pk>/close/', views.PeopleListClose.as_view(), name="peoplelist-close"),
+    path('savedlist/', RedirectView.as_view(url=reverse_lazy('sdcpeople:savedlist-list'))),
+    path('savedlist/create/', views.SavedListCreate.as_view(), name='savedlist-create'),
+    path('savedlist/<int:pk>/update/', views.SavedListUpdate.as_view(), name='savedlist-update'),
+    path('savedlist/<int:pk>/detail/', views.SavedListDetail.as_view(), name='savedlist-detail'),
+    path('savedlist/<int:pk>/delete/', views.SavedListDelete.as_view(), name='savedlist-delete'),
+    path('savedlist/list/', views.SavedListList.as_view(), name='savedlist-list'),
+    path('savedlist/<int:pk>/close/', views.SavedListClose.as_view(), name="savedlist-close"),
 
 
     path('bulkcommunication/', RedirectView.as_view(url=reverse_lazy('sdcpeople:bulkcommunication-list'))),

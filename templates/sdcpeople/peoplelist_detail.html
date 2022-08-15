@@ -1,17 +1,17 @@
 {% extends './_base.html' %}
 {% block content %}
 
-  {% include './peoplelist_detail_include.html' %}
+  {% include './savedlist_detail_include.html' %}
 
   <div class="menu menu-bottom">
-    {% if perms.sdcpeople.change_peoplelist or is_this_user %}
+    {% if perms.sdcpeople.change_savedlist or is_this_user %}
       <div class="menu-item">
-      <a href="{% url 'sdcpeople:peoplelist-update' object.pk %}">Edit</a>
+      <a href="{% url 'sdcpeople:savedlist-update' object.pk %}">Edit</a>
       </div>
     {% endif %}
-    {% if perms.sdcpeople.delete_peoplelist %}
+    {% if perms.sdcpeople.delete_savedlist %}
       <div class="menu-item">
-      <a href="{% url 'sdcpeople:peoplelist-delete' object.pk %}">Delete</a>
+      <a href="{% url 'sdcpeople:savedlist-delete' object.pk %}">Delete</a>
       </div>
     {% endif %}
     <div class="menu-item">
@@ -22,15 +22,15 @@
   <div style="display:hidden">
     <form id="form_list_people" method="POST" action="{% url 'sdcpeople:person-list' %}">
       {% csrf_token %}
-      <input type="hidden" name="filter__fieldname__0" value="participation__peoplelist">
+      <input type="hidden" name="filter__fieldname__0" value="participation__savedlist">
       <input type="hidden" name="filter__op__0" value="in">
       <input type="hidden" name="filter__value__0" value="{{ object.pk }}">
       <input type="hidden" name="vista_query_submitted" value="True">
     </form>
   </div>
   <script>
-    document.getElementById("a_list_people").addEventListener ("click", function(peoplelist){
-      peoplelist.preventDefault();
+    document.getElementById("a_list_people").addEventListener ("click", function(savedlist){
+      savedlist.preventDefault();
      document.getElementById('form_list_people').submit();
     })
   </script>

@@ -13,7 +13,7 @@ from .models import (
     Event,
     History,
     ListMembership,
-    PeopleList,
+    SavedList,
     RecordAction,
     RecordactPerson,
     Link,
@@ -126,6 +126,6 @@ admin.site.register(PersonUser)
 
 admin.site.register(RecordactPerson)
 
-admin.site.register(PeopleList)
+admin.site.register(SavedList)
 
 admin.site.register(ListMembership)

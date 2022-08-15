@@ -857,7 +857,7 @@ class CommunicationEvent(models.Model):
 
 ###### list
 
-class PeopleList(models.Model):
+class SavedList(models.Model):
 
     name = models.CharField(
         'name',
@@ -883,19 +883,19 @@ class ListMembership(models.Model):
         on_delete = models.CASCADE,
         help_text = "The person who is on the list"
     )
-    peoplelist = models.ForeignKey(
-        PeopleList,
+    savedlist = models.ForeignKey(
+        SavedList,
         on_delete = models.CASCADE,
         help_text = "The kust on which the person is"
     )
 
     def __str__(self):
-        if not (hasattr(self, 'person') and hasattr(self, peoplelist)):
+        if not (hasattr(self, 'person') and hasattr(self, savedlist)):
             return '<uninitiated ListMembership>'
-        return f'{self.person} on {self.peoplelist}' 
+        return f'{self.person} on {self.savedlist}' 
 
     class Meta:
-        ordering = ('peoplelist', )
+        ordering = ('savedlist', )
         
 class PersonUser(models.Model):
     user=models.ForeignKey(

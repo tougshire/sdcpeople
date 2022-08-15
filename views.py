@@ -22,14 +22,14 @@ from tougshire_vistas.views import (default_vista, delete_vista,
 
 from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, ParticipationForm, PeopleListForm, PeopleListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
+                    LocationStateSenateForm, ParticipationForm, SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
 from .models import (BulkCommunication, BulkRecordAction, CommunicationEvent, ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
-                     LocationStateHouse, LocationStateSenate, MembershipStatus, Participation, PeopleList,
+                     LocationStateHouse, LocationStateSenate, MembershipStatus, Participation, SavedList,
                      Person, PersonUser, Position, RecordAction, RecordactPerson, SubCommittee, SubMembership, VotingAddress)
 
 
@@ -894,20 +894,20 @@ class EventClose(PermissionRequiredMixin, DetailView):
     template_name = 'sdcpeople/event_closer.html'
 
 
-class PeopleListCreate(PermissionRequiredMixin, CreateView):
-    permission_required = 'sdcpeople.add_peoplelist'
-    model = PeopleList
-    form_class = PeopleListForm
+class SavedListCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_savedlist'
+    model = SavedList
+    form_class = SavedListForm
 
     def get_context_data(self, **kwargs):
 
         context_data = super().get_context_data(**kwargs)
 
         if self.request.POST:
-            context_data['listmemberships'] = PeopleListListMembershipFormset(self.request.POST)
+            context_data['listmemberships'] = SavedListListMembershipFormset(self.request.POST)
 
         else:
-            context_data['listmemberships'] = PeopleListListMembershipFormset()
+            context_data['listmemberships'] = SavedListListMembershipFormset()
 
         return context_data
 
@@ -915,12 +915,12 @@ class PeopleListCreate(PermissionRequiredMixin, CreateView):
 
         response = super().form_valid(form)
 
-        update_history(form, 'PeopleList', form.instance, self.request.user)
+        update_history(form, 'SavedList', form.instance, self.request.user)
 
         self.object = form.save()
 
         formset_data = {
-            'listmemberships':PeopleListListMembershipFormset( self.request.POST, instance=self.object ),
+            'listmemberships':SavedListListMembershipFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -938,39 +938,39 @@ class PeopleListCreate(PermissionRequiredMixin, CreateView):
     def get_success_url(self):
 
         if 'popup' in self.kwargs:
-            return reverse_lazy('sdcpeople:peoplelist-close', kwargs={'pk': self.object.pk})
+            return reverse_lazy('sdcpeople:savedlist-close', kwargs={'pk': self.object.pk})
         else:
-            return reverse_lazy('sdcpeople:peoplelist-detail', kwargs={'pk': self.object.pk})
+            return reverse_lazy('sdcpeople:savedlist-detail', kwargs={'pk': self.object.pk})
 
-class PeopleListUpdate(PermissionRequiredMixin, UpdateView):
-    permission_required = 'sdcpeople.change_peoplelist'
-    model = PeopleList
-    form_class = PeopleListForm
+class SavedListUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_savedlist'
+    model = SavedList
+    form_class = SavedListForm
 
     def has_permission(self):
-        return super().has_permission() or PeopleListUser.objects.filter(user=self.request.user, peoplelist=self.get_object()).exists()
+        return super().has_permission() or SavedListUser.objects.filter(user=self.request.user, savedlist=self.get_object()).exists()
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
         if self.request.POST:
-            context_data['listmemberships'] = PeopleListListMembershipFormset(self.request.POST, instance=self.object )
+            context_data['listmemberships'] = SavedListListMembershipFormset(self.request.POST, instance=self.object )
 
         else:
-            context_data['listmemberships'] = PeopleListListMembershipFormset( instance=self.object )
+            context_data['listmemberships'] = SavedListListMembershipFormset( instance=self.object )
 
         return context_data
 
     def form_valid(self, form):
 
-        update_history(form, 'PeopleList', form.instance, self.request.user)
+        update_history(form, 'SavedList', form.instance, self.request.user)
 
         response = super().form_valid(form)
 
         self.object = form.save()
 
         formset_data = {
-            'listmemberships':PeopleListListMembershipFormset( self.request.POST, instance=self.object ),
+            'listmemberships':SavedListListMembershipFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -989,29 +989,29 @@ class PeopleListUpdate(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self):
         if 'popup' in self.kwargs:
-            return reverse_lazy('sdcpeople:peoplelist-close', kwargs={'pk': self.object.pk})
+            return reverse_lazy('sdcpeople:savedlist-close', kwargs={'pk': self.object.pk})
         else:
-            return reverse_lazy('sdcpeople:peoplelist-detail', kwargs={'pk': self.object.pk})
+            return reverse_lazy('sdcpeople:savedlist-detail', kwargs={'pk': self.object.pk})
 
-class PeopleListDetail(PermissionRequiredMixin, DetailView):
-    permission_required = 'sdcpeople.view_peoplelist'
-    model = PeopleList
+class SavedListDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_savedlist'
+    model = SavedList
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['peoplelist_labels'] = { field.name: field.verbose_name.title() for field in SubCommittee._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        context_data['savedlist_labels'] = { field.name: field.verbose_name.title() for field in SubCommittee._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
         return context_data
 
-class PeopleListDelete(PermissionRequiredMixin, DeleteView):
-    permission_required = 'sdcpeople.delete_peoplelist'
-    model = PeopleList
-    template_name = 'sdcpeople/peoplelist_confirm_delete.html'
-    success_url = reverse_lazy('sdcpeople:peoplelist-list')
+class SavedListDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_savedlist'
+    model = SavedList
+    template_name = 'sdcpeople/savedlist_confirm_delete.html'
+    success_url = reverse_lazy('sdcpeople:savedlist-list')
 
 
-class PeopleListList(PermissionRequiredMixin, ListView):
-    permission_required = 'sdcpeople.view_peoplelist'
-    model = PeopleList
+class SavedListList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_savedlist'
+    model = SavedList
     paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
@@ -1021,7 +1021,7 @@ class PeopleListList(PermissionRequiredMixin, ListView):
             'fields':[],
         }
 
-        self.vista_settings['fields'] = make_vista_fields(PeopleList, field_names=[
+        self.vista_settings['fields'] = make_vista_fields(SavedList, field_names=[
             'name',
             'when',
             'listmembership__person',
@@ -1079,7 +1079,7 @@ class PeopleListList(PermissionRequiredMixin, ListView):
             self.vistaobj = retrieve_vista(
                 self.request.user,
                 queryset,
-                'sdcpeople.peoplelist',
+                'sdcpeople.savedlist',
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
@@ -1125,7 +1125,7 @@ class PeopleListList(PermissionRequiredMixin, ListView):
 
         return context_data
 
-class PeopleListCSV(PeopleListList):
+class SavedListCSV(SavedListList):
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
@@ -1246,10 +1246,10 @@ class PeopleListCSV(PeopleListList):
         return response
 
 
-class PeopleListClose(PermissionRequiredMixin, DetailView):
-    permission_required = 'sdcpeople.view_peoplelist'
-    model = PeopleList
-    template_name = 'sdcpeople/peoplelist_closer.html'
+class SavedListClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_savedlist'
+    model = SavedList
+    template_name = 'sdcpeople/savedlist_closer.html'
 
 
 class SubCommitteeCreate(PermissionRequiredMixin, CreateView):

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PeopleList',
+            name='SavedList',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='The committee name', max_length=100, verbose_name='name')),
@@ -26,11 +26,11 @@ class Migration(migrations.Migration):
             name='ListMembership',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('peoplelist', models.ForeignKey(help_text='The kust on which the person is', on_delete=django.db.models.deletion.CASCADE, to='sdcpeople.peoplelist')),
+                ('savedlist', models.ForeignKey(help_text='The kust on which the person is', on_delete=django.db.models.deletion.CASCADE, to='sdcpeople.savedlist')),
                 ('person', models.ForeignKey(help_text='The person who is on the list', on_delete=django.db.models.deletion.CASCADE, to='sdcpeople.person')),
             ],
             options={
-                'ordering': ('peoplelist',),
+                'ordering': ('savedlist',),
             },
         ),
     ]

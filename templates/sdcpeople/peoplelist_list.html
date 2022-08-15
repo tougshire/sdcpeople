@@ -5,8 +5,8 @@
   {% include 'tougshire_vistas/filter.html' %}
 
   <div class="list">
-    <div><a href="{% url 'sdcpeople:peoplelist-create' %}">create</a></div>
-    {% comment %}<div><a href="{% url 'sdcpeople:peoplelist-csv' %}">export</a></div>{% endcomment %}
+    <div><a href="{% url 'sdcpeople:savedlist-create' %}">create</a></div>
+    {% comment %}<div><a href="{% url 'sdcpeople:savedlist-csv' %}">export</a></div>{% endcomment %}
     <div class="row rowhead">
       {% include './_list_head.html' with field="" %}
 
@@ -19,14 +19,14 @@
 
       </div>
 
-      {% for peoplelist in object_list %}
+      {% for savedlist in object_list %}
         <div class="row">
-          <div class="listfield"><a href="{% url 'sdcpeople:peoplelist-detail' peoplelist.pk %}">view</a></div>
+          <div class="listfield"><a href="{% url 'sdcpeople:savedlist-detail' savedlist.pk %}">view</a></div>
           {% if 'name' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=peoplelist.name  %}
+            {% include './_list_field.html' with field=savedlist.name  %}
           {% endif %}
           {% if 'when' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=peoplelist.when %}
+            {% include './_list_field.html' with field=savedlist.when %}
           {% endif %}
 
         </div>
