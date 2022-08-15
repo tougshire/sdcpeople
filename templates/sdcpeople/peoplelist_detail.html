@@ -1,0 +1,38 @@
+{% extends './_base.html' %}
+{% block content %}
+
+  {% include './peoplelist_detail_include.html' %}
+
+  <div class="menu menu-bottom">
+    {% if perms.sdcpeople.change_peoplelist or is_this_user %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:peoplelist-update' object.pk %}">Edit</a>
+      </div>
+    {% endif %}
+    {% if perms.sdcpeople.delete_peoplelist %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:peoplelist-delete' object.pk %}">Delete</a>
+      </div>
+    {% endif %}
+    <div class="menu-item">
+    <a id="a_list_people" href="{% url 'sdcpeople:person-list' %}" >List People</a>
+    </div>
+
+  </div>
+  <div style="display:hidden">
+    <form id="form_list_people" method="POST" action="{% url 'sdcpeople:person-list' %}">
+      {% csrf_token %}
+      <input type="hidden" name="filter__fieldname__0" value="participation__peoplelist">
+      <input type="hidden" name="filter__op__0" value="in">
+      <input type="hidden" name="filter__value__0" value="{{ object.pk }}">
+      <input type="hidden" name="vista_query_submitted" value="True">
+    </form>
+  </div>
+  <script>
+    document.getElementById("a_list_people").addEventListener ("click", function(peoplelist){
+      peoplelist.preventDefault();
+     document.getElementById('form_list_people').submit();
+    })
+  </script>
+
+  {% endblock %}

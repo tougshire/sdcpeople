@@ -1,0 +1,9 @@
+  <h2>{{ object }}</h2>
+
+  <div class="detail">
+    {% include 'touglates/detail_field.html' with label=bulkcommunication_labels.name field=object.name %}
+    {% include 'touglates/detail_field.html' with label=bulkcommunication_labels.when field=object.when %}
+
+
+
+  </div>

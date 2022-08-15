@@ -8,7 +8,6 @@ from django.forms import CharField
 from datetime import date
 from django.conf import settings
 
-
 class MembershipType(models.Model):
 
     name = models.CharField(
@@ -790,7 +789,7 @@ class BulkCommunication(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name} of {self.when}'
+        return f'{self.name} of {self.when.date().isoformat()}'
 
 class CommunicationResult(models.Model):
     name = models.CharField(
@@ -818,7 +817,6 @@ class CommunicationEvent(models.Model):
         blank=True,
         help_text = 'The person made the contact',
         related_name='communication_as_volunteer'
-
     )
     when = models.DateTimeField(
         'when',
@@ -836,6 +834,12 @@ class CommunicationEvent(models.Model):
         blank=True,
         help_text="The bulk communication of which this communication is a part, such as an invitation to an event"
     )
+    result = models.ForeignKey(
+        CommunicationResult,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text='The result of this communication'
+    )
 
     class Meta:
         ordering = ['-when',]
@@ -851,10 +855,48 @@ class CommunicationEvent(models.Model):
             return "<ininitiated Communication Event>"
 
 
+###### list
+
+class PeopleList(models.Model):
+
+    name = models.CharField(
+        'name',
+        max_length=100,
+        help_text="The committee name"
+    )
+    when = models.DateTimeField(
+        'when',
+        auto_now_add=True,
+        help_text='The date this action occured'
+    )
+
+    def __str__(self):
+        return self.name
+
     class Meta:
-        ordering = ('-when',)
+        ordering = ['-when', 'name']
 
+class ListMembership(models.Model):
 
+    person = models.ForeignKey(
+        Person,
+        on_delete = models.CASCADE,
+        help_text = "The person who is on the list"
+    )
+    peoplelist = models.ForeignKey(
+        PeopleList,
+        on_delete = models.CASCADE,
+        help_text = "The kust on which the person is"
+    )
+
+    def __str__(self):
+        if not (hasattr(self, 'person') and hasattr(self, peoplelist)):
+            return '<uninitiated ListMembership>'
+        return f'{self.person} on {self.peoplelist}' 
+
+    class Meta:
+        ordering = ('peoplelist', )
+        
 class PersonUser(models.Model):
     user=models.ForeignKey(
         settings.AUTH_USER_MODEL,

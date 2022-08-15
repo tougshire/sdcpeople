@@ -1,0 +1,18 @@
+{% extends './_base.html' %}
+{% block content %}
+
+  {% include './bulkcommunication_detail_include.html' %}
+
+  <div class="menu menu-bottom">
+    {% if perms.sdcpeople.change_bulkcommunication or is_this_user %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:bulkcommunication-update' object.pk %}">Edit</a>
+      </div>
+    {% endif %}
+    {% if perms.sdcpeople.delete_bulkcommunication %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:bulkcommunication-delete' object.pk %}">Delete</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

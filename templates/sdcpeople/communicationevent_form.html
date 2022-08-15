@@ -1,0 +1,54 @@
+{% extends './_form.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>{{ object }}</h2>
+  {{ form.errors }}
+  <form method="POST">
+
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+
+      <input type="hidden" name='opener' id="input_opener">
+
+      <div id="div_name_prefix">
+        {% include 'touglates/form_field.html' with field=form.target %}
+      </div>
+      <div id="div_name_first">
+        {% include 'touglates/form_field.html' with field=form.volunteer %}
+      </div>
+      <div id="div_name_middles">
+        {% include 'touglates/form_field.html' with field=form.details %}
+      </div>
+      <div id="div_name_last">
+        {% include 'touglates/form_field.html' with field=form.bulk_communication %}
+      </div>
+      <div id="div_name_common">
+        {% include 'touglates/form_field.html' with field=form.result %}
+      </div>
+
+
+      {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
+
+    </div>
+
+  </form>
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+    addRelatedPopupButton( 'id_bulk_communication', 'BulkCommunication', '{% url "sdcpeople:bulkcommunication-create-popup" %}', '{% url "sdcpeople:bulkcommunication-update-popup" 0 %}')
+    function getControlIdsForPopups(modelName) {
+      controlIds={
+        'BulkCommunication': ['id_bulk_communication'],
+      }
+      return controlIds[modelName]
+    }
+  </script>
+
+
+{% endblock %}
+

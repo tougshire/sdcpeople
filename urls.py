@@ -35,6 +35,35 @@ urlpatterns = [
     path('event/list/', views.EventList.as_view(), name='event-list'),
     path('event/<int:pk>/close/', views.EventClose.as_view(), name="event-close"),
 
+    path('peoplelist/', RedirectView.as_view(url=reverse_lazy('sdcpeople:peoplelist-list'))),
+    path('peoplelist/create/', views.PeopleListCreate.as_view(), name='peoplelist-create'),
+    path('peoplelist/<int:pk>/update/', views.PeopleListUpdate.as_view(), name='peoplelist-update'),
+    path('peoplelist/<int:pk>/detail/', views.PeopleListDetail.as_view(), name='peoplelist-detail'),
+    path('peoplelist/<int:pk>/delete/', views.PeopleListDelete.as_view(), name='peoplelist-delete'),
+    path('peoplelist/list/', views.PeopleListList.as_view(), name='peoplelist-list'),
+    path('peoplelist/<int:pk>/close/', views.PeopleListClose.as_view(), name="peoplelist-close"),
+
+
+    path('bulkcommunication/', RedirectView.as_view(url=reverse_lazy('sdcpeople:bulkcommunication-list'))),
+    path('bulkcommunication/create/', views.BulkCommunicationCreate.as_view(), name='bulkcommunication-create'),
+    path('bulkcommunication/<int:pk>/update/', views.BulkCommunicationUpdate.as_view(), name='bulkcommunication-update'),
+    path('bulkcommunication/<int:pk>/detail/', views.BulkCommunicationDetail.as_view(), name='bulkcommunication-detail'),
+    path('bulkcommunication/<int:pk>/delete/', views.BulkCommunicationDelete.as_view(), name='bulkcommunication-delete'),
+    path('bulkcommunication/list/', views.BulkCommunicationList.as_view(), name='bulkcommunication-list'),
+    path('bulkcommunication/<int:pk>/close/', views.BulkCommunicationClose.as_view(), name="bulkcommunication-close"),
+    path('bulkcommunication/create/_/', views.BulkCommunicationCreate.as_view(), {'popup':True }, name='bulkcommunication-create-popup'),
+    path('bulkcommunication/<int:pk>/update/_/', views.BulkCommunicationUpdate.as_view(), {'popup':True }, name='bulkcommunication-update-popup'),
+
+
+    path('communicationevent/', RedirectView.as_view(url=reverse_lazy('sdcpeople:communicationevent-list'))),
+    path('communicationevent/create/', views.CommunicationEventCreate.as_view(), name='communicationevent-create'),
+    path('communicationevent/<int:pk>/update/', views.CommunicationEventUpdate.as_view(), name='communicationevent-update'),
+    path('communicationevent/<int:pk>/detail/', views.CommunicationEventDetail.as_view(), name='communicationevent-detail'),
+    path('communicationevent/<int:pk>/delete/', views.CommunicationEventDelete.as_view(), name='communicationevent-delete'),
+    path('communicationevent/list/', views.CommunicationEventList.as_view(), name='communicationevent-list'),
+    path('communicationevent/<int:pk>/close/', views.CommunicationEventClose.as_view(), name="communicationevent-close"),
+    path('communicationevent/csv/', views.CommunicationEventCSV.as_view(), name='communicationevent-csv'),
+
     path('locationcity/', RedirectView.as_view(url=reverse_lazy('sdcpeople:locationcity-list'))),
     path('locationcity/create/', views.LocationCityCreate.as_view(), name='locationcity-create'),
     path('locationcity/<int:pk>/update/', views.LocationCityUpdate.as_view(), name='locationcity-update'),
@@ -92,8 +121,6 @@ urlpatterns = [
     path('participation/<int:pk>/delete/', views.ParticipationDelete.as_view(), name='participation-delete'),
     path('participation/list/', views.ParticipationList.as_view(), name='participation-list'),
     path('participation/<int:pk>/close/', views.ParticipationClose.as_view(), name="participation-close"),
-
-
 
     path('votingaddress/', RedirectView.as_view(url=reverse_lazy('sdcpeople:votingaddress-list'))),
     path('votingaddress/create/', views.VotingAddressCreate.as_view(), name='votingaddress-create'),

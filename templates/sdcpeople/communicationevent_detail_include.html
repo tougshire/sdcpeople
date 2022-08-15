@@ -1,0 +1,10 @@
+  <h2>{{ object }}</h2>
+
+  <div class="detail">
+    {% include 'touglates/detail_field.html' with label=communicationevent_labels.target field=object.target %}
+    {% include 'touglates/detail_field.html' with label=communicationevent_labels.volunteer field=object.volunteer %}
+    {% include 'touglates/detail_field.html' with label=communicationevent_labels.details field=object.details %}
+    {% include 'touglates/detail_field.html' with label=communicationevent_labels.bulk_communication field=object.bulk_communication %}
+    {% include 'touglates/detail_field.html' with label=communicationevent_labels.result field=object.result %}
+
+  </div>

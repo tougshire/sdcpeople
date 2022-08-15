@@ -1,0 +1,12 @@
+  <h2>{{ object }}</h2>
+
+  <div class="detail">
+    {% include 'touglates/detail_field.html' with label=peoplelist_labels.name field=object.name %}
+    {% include 'touglates/detail_field.html' with label=peoplelist_labels.when field=object.when %}
+
+    {% include 'touglates/detail_field.html' with label="Members" field="" %}
+    {% for member in object.listmembership_set.all %}
+      {% include 'touglates/detail_fields.html' with label="Member" field_1=listmembership.person  %}
+    {% endfor %}
+
+  </div>

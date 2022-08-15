@@ -20,16 +20,16 @@ from tougshire_vistas.views import (default_vista, delete_vista,
                                     make_vista, retrieve_vista,
                                     vista_context_data, make_vista_fields)
 
-from .forms import (EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
+from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, ParticipationForm, PersonCSVUploadForm, PersonContactEmailFormset,
+                    LocationStateSenateForm, ParticipationForm, PeopleListForm, PeopleListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
-from .models import (BulkRecordAction, ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
+from .models import (BulkCommunication, BulkRecordAction, CommunicationEvent, ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
-                     LocationStateHouse, LocationStateSenate, MembershipStatus, Participation,
+                     LocationStateHouse, LocationStateSenate, MembershipStatus, Participation, PeopleList,
                      Person, PersonUser, Position, RecordAction, RecordactPerson, SubCommittee, SubMembership, VotingAddress)
 
 
@@ -893,6 +893,363 @@ class EventClose(PermissionRequiredMixin, DetailView):
     model = Event
     template_name = 'sdcpeople/event_closer.html'
 
+
+class PeopleListCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_peoplelist'
+    model = PeopleList
+    form_class = PeopleListForm
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        if self.request.POST:
+            context_data['listmemberships'] = PeopleListListMembershipFormset(self.request.POST)
+
+        else:
+            context_data['listmemberships'] = PeopleListListMembershipFormset()
+
+        return context_data
+
+    def form_valid(self, form):
+
+        response = super().form_valid(form)
+
+        update_history(form, 'PeopleList', form.instance, self.request.user)
+
+        self.object = form.save()
+
+        formset_data = {
+            'listmemberships':PeopleListListMembershipFormset( self.request.POST, instance=self.object ),
+
+        }
+
+        for formset_name in formset_data.keys():
+
+            if(formset_data[formset_name]).is_valid():
+                formset_data[formset_name].save()
+            else:
+                messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
+                print('error saving ' + formset_name + ': ' )
+                print(formset_data[formset_name].errors)
+
+        return response
+
+    def get_success_url(self):
+
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:peoplelist-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:peoplelist-detail', kwargs={'pk': self.object.pk})
+
+class PeopleListUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_peoplelist'
+    model = PeopleList
+    form_class = PeopleListForm
+
+    def has_permission(self):
+        return super().has_permission() or PeopleListUser.objects.filter(user=self.request.user, peoplelist=self.get_object()).exists()
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        if self.request.POST:
+            context_data['listmemberships'] = PeopleListListMembershipFormset(self.request.POST, instance=self.object )
+
+        else:
+            context_data['listmemberships'] = PeopleListListMembershipFormset( instance=self.object )
+
+        return context_data
+
+    def form_valid(self, form):
+
+        update_history(form, 'PeopleList', form.instance, self.request.user)
+
+        response = super().form_valid(form)
+
+        self.object = form.save()
+
+        formset_data = {
+            'listmemberships':PeopleListListMembershipFormset( self.request.POST, instance=self.object ),
+
+        }
+
+        for formset_name in formset_data.keys():
+
+            if(formset_data[formset_name]).is_valid():
+                formset_data[formset_name].save()
+            else:
+                messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
+                print('error saving ' + formset_name + ': ')
+                print(formset_data[formset_name].errors)
+                print('tp228bc40', formset_data[formset_name])
+
+        return response
+
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:peoplelist-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:peoplelist-detail', kwargs={'pk': self.object.pk})
+
+class PeopleListDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_peoplelist'
+    model = PeopleList
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['peoplelist_labels'] = { field.name: field.verbose_name.title() for field in SubCommittee._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        return context_data
+
+class PeopleListDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_peoplelist'
+    model = PeopleList
+    template_name = 'sdcpeople/peoplelist_confirm_delete.html'
+    success_url = reverse_lazy('sdcpeople:peoplelist-list')
+
+
+class PeopleListList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_peoplelist'
+    model = PeopleList
+    paginate_by = 30
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':5,
+            'fields':[],
+        }
+
+        self.vista_settings['fields'] = make_vista_fields(PeopleList, field_names=[
+            'name',
+            'when',
+            'listmembership__person',
+        ])
+
+        self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname__0', ['membership_status__is_member']),
+            ('filter__op__0', ['exact']),
+            ('filter__value__0', ['True']),
+            ('order_by', ['name_last', 'name_common', ]),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        if 'delete_vista' in self.request.POST:
+            delete_vista(self.request)
+
+        if 'query' in self.request.session:
+            print('tp 224bc49', 'query in self.request.session')
+            querydict = QueryDict(self.request.session.get('query'))
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                querydict,
+                '',
+                False,
+                self.vista_settings
+            )
+            del self.request.session['query']
+
+        elif 'vista_query_submitted' in self.request.POST:
+            print('tp 224bc50', 'vista_query_submitted')
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
+        elif 'retrieve_vista' in self.request.POST:
+            print('tp 224bc51', 'retrieve_vista')
+
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'sdcpeople.peoplelist',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
+
+            )
+        elif 'default_vista' in self.request.POST:
+            print('tp 224bc52', 'default_vista')
+
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+        else:
+            self.vistaobj = get_latest_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+        return self.vistaobj['queryset']
+
+    def get_paginate_by(self, queryset):
+
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        context_data = {**context_data, **vista_data}
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
+
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
+
+        context_data['count'] = self.object_list.count()
+
+        return context_data
+
+class PeopleListCSV(PeopleListList):
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="sdcvirginia_people.csv"'},
+        )
+
+        writer = csv.writer(response)
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        row=[]
+
+        if not 'show_columns' in vista_data or 'name_last' in vista_data['show_columns']:
+            row.append(context["labels"]["name_last"])
+        if not 'show_columns' in vista_data or 'name_first' in vista_data['show_columns']:
+            row.append(context["labels"]["name_first"])
+        if not 'show_columns' in vista_data or 'is_quorum' in vista_data['show_columns']:
+            row.append("Quorum")
+        if not 'show_columns' in vista_data or 'membership_status' in vista_data['show_columns']:
+            row.append(context["labels"]["membership_status"])
+        if not 'show_columns' in vista_data or 'positions' in vista_data['show_columns']:
+            row.append("Positions")
+        if not 'show_columns' in vista_data or 'submemberships' in vista_data['show_columns']:
+            row.append("SubCommittees")
+        if not 'show_columns' in vista_data or 'contactvoice' in vista_data['show_columns']:
+            row.append("Voice")
+        if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
+            row.append("Text")
+        if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+            row.append("Email")
+        if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
+            row.append("voting address")
+        if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+            row.append("City")
+        if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
+            row.append("Congress")
+        if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
+            row.append("Senate")
+        if not 'show_columns' in vista_data or 'voting_address.locationstatehouse' in vista_data['show_columns']:
+            row.append("house")
+        if not 'show_columns' in vista_data or 'voting_address.locationmagistrate' in vista_data['show_columns']:
+            row.append("Magistrate")
+        if not 'show_columns' in vista_data or 'voting_address.locationborough' in vista_data['show_columns']:
+            row.append("Borough")
+        if not 'show_columns' in vista_data or 'voting_address.locationprecinct' in vista_data['show_columns']:
+            row.append("precinct")
+
+        writer.writerow(row)
+
+        for object in self.object_list:
+
+            row=[]
+
+            if not 'show_columns' in vista_data or 'name_last' in vista_data['show_columns']:
+                row.append(object.name_last)
+            if not 'show_columns' in vista_data or 'name_first' in vista_data['show_columns']:
+                row.append(object.name_first)
+            if not 'show_columns' in vista_data or 'is_quorum' in vista_data['show_columns']:
+                row.append(object.membership_status.is_quorum)
+            if not 'show_columns' in vista_data or 'membership_status' in vista_data['show_columns']:
+                row.append(object.membership_status)
+            if not 'show_columns' in vista_data or 'positions' in vista_data['show_columns']:
+                positions=''
+                if object.positions.all().exists():
+                    for position in object.positions.all():
+                        positions = positions + position.title + ', '
+                    positions = positions[:-2]
+                row.append(positions)
+            if not 'show_columns' in vista_data or 'submemberships' in vista_data['show_columns']:
+                submemberships=''
+                if object.submembership_set.all().exists():
+                    for submembership in object.submembership_set.all():
+                        submemberships = submemberships + str(submembership.subcommittee) + ', '
+                    submemberships=submemberships[:-2]
+                row.append(submemberships)
+            if not 'show_columns' in vista_data or 'contactvoice' in vista_data['show_columns']:
+                contactvoices=''
+                if object.contactvoice_set.all().exists():
+                    for contactvoice in object.contactvoice_set.all():
+                        contactvoices = contactvoices + str(contactvoice.number) + ', '
+                    contactvoices=contactvoices[:-2]
+                row.append(contactvoices)
+            if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
+                contacttexts=''
+                if object.contacttext_set.all().exists():
+                    for contacttext in object.contacttext_set.all():
+                        contacttexts = contacttexts + str(contacttext.number) + ', '
+                    contacttexts=contacttexts[:-2]
+                row.append(contacttexts)
+            if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+                contactemails=''
+                if object.contactemail_set.all().exists():
+                    for contactemail in object.contactemail_set.all():
+                        contactemails = contactemails + str(contactemail.address) + ', '
+                    contactemails=contactemails[:-2]
+                row.append(contactemails)
+            if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
+                row.append(str(object.voting_address).replace("\n", " "))
+            if not 'show_columns' in vista_data or 'voting_address.locationcity' in vista_data['show_columns']:
+                row.append(object.voting_address.locationcity)
+            if not 'show_columns' in vista_data or 'voting_address.locationcongress' in vista_data['show_columns']:
+                row.append(object.voting_address.locationcongress)
+            if not 'show_columns' in vista_data or 'voting_address.locationstatesenate' in vista_data['show_columns']:
+                row.append(object.voting_address.locationstatesenate)
+            if not 'show_columns' in vista_data or 'voting_address.locationstatehouse' in vista_data['show_columns']:
+                row.append(object.voting_address.locationstatehouse)
+            if not 'show_columns' in vista_data or 'voting_address.locationmagistrate' in vista_data['show_columns']:
+                row.append(object.voting_address.locationmagistrate)
+            if not 'show_columns' in vista_data or 'voting_address.locationborough' in vista_data['show_columns']:
+                row.append(object.voting_address.locationborough)
+            if not 'show_columns' in vista_data or 'voting_address.locationprecinct' in vista_data['show_columns']:
+                row.append(object.voting_address.locationprecinct)
+
+            writer.writerow(row)
+
+        return response
+
+
+class PeopleListClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_peoplelist'
+    model = PeopleList
+    template_name = 'sdcpeople/peoplelist_closer.html'
 
 
 class SubCommitteeCreate(PermissionRequiredMixin, CreateView):
@@ -1895,3 +2252,358 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
         return reverse('sdcpeople:person-list-by', kwargs={'by_value':bulk_recordact_pk, 'by_parameter':'recordactperson__recordact__bulk_recordact'})
 
 
+class CommunicationEventCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_communicationevent'
+    model = CommunicationEvent
+    form_class = CommunicationEventForm
+
+    def get_success_url(self):
+
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:communicationevent-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:communicationevent-detail', kwargs={'pk': self.object.pk})
+
+class CommunicationEventUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_communicationevent'
+    model = CommunicationEvent
+    form_class = CommunicationEventForm
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:communicationevent-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:communicationevent-detail', kwargs={'pk': self.object.pk})
+
+class CommunicationEventDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_communicationevent'
+    model = CommunicationEvent
+
+
+class CommunicationEventDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_communicationevent'
+    model = CommunicationEvent
+    template_name = 'sdcpeople/communicationevent_confirm_delete.html'
+    success_url = reverse_lazy('sdcpeople:communicationevent-list')
+
+
+class CommunicationEventList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_communicationevent'
+    model = CommunicationEvent
+    paginate_by = 30
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':5,
+            'fields':[],
+        }
+
+        self.vista_settings['fields'] = make_vista_fields(CommunicationEvent, field_names=[
+            "target",
+            "volunteer",
+            "details",
+            "bulk_communication",
+            "result",
+        ])
+
+        self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname__0', []),
+            ('filter__op__0', []),
+            ('filter__value__0', []),
+            ('order_by', ['-when', 'person', ]),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        if 'delete_vista' in self.request.POST:
+            delete_vista(self.request)
+
+        if 'query' in self.request.session:
+            print('tp 224bc49', 'query in self.request.session')
+            querydict = QueryDict(self.request.session.get('query'))
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                querydict,
+                '',
+                False,
+                self.vista_settings
+            )
+            del self.request.session['query']
+
+        elif 'vista_query_submitted' in self.request.POST:
+            print('tp 224bc50', 'vista_query_submitted')
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
+        elif 'retrieve_vista' in self.request.POST:
+            print('tp 224bc51', 'retrieve_vista')
+
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'sdcpeople.CommunicationEvent',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
+
+            )
+        elif 'default_vista' in self.request.POST:
+            print('tp 224bc52', 'default_vista')
+
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+        else:
+            self.vistaobj = get_latest_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+        return self.vistaobj['queryset']
+
+    def get_paginate_by(self, queryset):
+
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        context_data = {**context_data, **vista_data}
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
+
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
+
+        context_data['count'] = self.object_list.count()
+
+        return context_data
+
+class CommunicationEventCSV(CommunicationEventList):
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="sdcvirginia_people.csv"'},
+        )
+
+        writer = csv.writer(response)
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        row=[]
+
+        if not 'show_columns' in vista_data or 'target' in vista_data['show_columns']:
+            row.append(context["labels"]["target"])
+        if not 'show_columns' in vista_data or 'volunteer' in vista_data['show_columns']:
+            row.append(context["labels"]["volunteer"])
+        if not 'show_columns' in vista_data or 'details' in vista_data['show_columns']:
+            row.append("Quorum")
+        if not 'show_columns' in vista_data or 'bulk_communication' in vista_data['show_columns']:
+            row.append(context["labels"]["bulk_communication"])
+        if not 'show_columns' in vista_data or 'result' in vista_data['show_columns']:
+            row.append("Positions")
+
+        writer.writerow(row)
+
+        for object in self.object_list:
+
+            row=[]
+
+            if not 'show_columns' in vista_data or 'target' in vista_data['show_columns']:
+                row.append(object.target)
+            if not 'show_columns' in vista_data or 'volunteer' in vista_data['show_columns']:
+                row.append(object.volunteer)
+            if not 'show_columns' in vista_data or 'bulk_communication' in vista_data['show_columns']:
+                row.append(object.bulk_communication)
+
+            writer.writerow(row)
+
+        return response
+
+
+class CommunicationEventClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_communicationevent'
+    model = CommunicationEvent
+    template_name = 'sdcpeople/communicationevent_closer.html'
+
+class BulkCommunicationCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'sdcpeople.add_bulkcommunication'
+    model = BulkCommunication
+    form_class = BulkCommunicationForm
+
+    def get_success_url(self):
+
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:bulkcommunication-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:bulkcommunication-detail', kwargs={'pk': self.object.pk})
+
+class BulkCommunicationUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'sdcpeople.change_bulkcommunication'
+    model = BulkCommunication
+    form_class = BulkCommunicationForm
+
+    def get_success_url(self):
+        if 'popup' in self.kwargs:
+            return reverse_lazy('sdcpeople:bulkcommunication-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('sdcpeople:bulkcommunication-detail', kwargs={'pk': self.object.pk})
+
+class BulkCommunicationDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_bulkcommunication'
+    model = BulkCommunication
+
+
+class BulkCommunicationDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'sdcpeople.delete_bulkcommunication'
+    model = BulkCommunication
+    template_name = 'sdcpeople/bulkcommunication_confirm_delete.html'
+    success_url = reverse_lazy('sdcpeople:bulkcommunication-list')
+
+
+class BulkCommunicationList(PermissionRequiredMixin, ListView):
+    permission_required = 'sdcpeople.view_bulkcommunication'
+    model = BulkCommunication
+    paginate_by = 30
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':5,
+            'fields':[],
+        }
+
+        self.vista_settings['fields'] = make_vista_fields(BulkCommunication, field_names=[
+            "name",
+            "when",
+        ])
+
+        self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname__0', []),
+            ('filter__op__0', []),
+            ('filter__value__0', []),
+            ('order_by', ['-when', 'person', ]),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        if 'delete_vista' in self.request.POST:
+            delete_vista(self.request)
+
+        if 'query' in self.request.session:
+            print('tp 224bc49', 'query in self.request.session')
+            querydict = QueryDict(self.request.session.get('query'))
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                querydict,
+                '',
+                False,
+                self.vista_settings
+            )
+            del self.request.session['query']
+
+        elif 'vista_query_submitted' in self.request.POST:
+            print('tp 224bc50', 'vista_query_submitted')
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
+        elif 'retrieve_vista' in self.request.POST:
+
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'sdcpeople.BulkCommunication',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
+
+            )
+        elif 'default_vista' in self.request.POST:
+
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+        else:
+            self.vistaobj = get_latest_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+        return self.vistaobj['queryset']
+
+    def get_paginate_by(self, queryset):
+
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
+        context_data = {**context_data, **vista_data}
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
+
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
+
+        context_data['count'] = self.object_list.count()
+
+        return context_data
+
+
+class BulkCommunicationClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'sdcpeople.view_bulkcommunication'
+    model = BulkCommunication
+    template_name = 'sdcpeople/bulkcommunication_closer.html'

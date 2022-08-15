@@ -1,0 +1,18 @@
+{% extends './_base.html' %}
+{% block content %}
+
+  {% include './communicationevent_detail_include.html' %}
+
+  <div class="menu menu-bottom">
+    {% if perms.sdcpeople.change_communicationevent or is_this_user %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:communicationevent-update' object.pk %}">Edit</a>
+      </div>
+    {% endif %}
+    {% if perms.sdcpeople.delete_communicationevent %}
+      <div class="menu-item">
+      <a href="{% url 'sdcpeople:communicationevent-delete' object.pk %}">Delete</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

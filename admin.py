@@ -12,6 +12,8 @@ from .models import (
     EventType,
     Event,
     History,
+    ListMembership,
+    PeopleList,
     RecordAction,
     RecordactPerson,
     Link,
@@ -123,3 +125,7 @@ admin.site.register(VotingAddress)
 admin.site.register(PersonUser)
 
 admin.site.register(RecordactPerson)
+
+admin.site.register(PeopleList)
+
+admin.site.register(ListMembership)

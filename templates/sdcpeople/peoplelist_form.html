@@ -1,0 +1,108 @@
+{% extends './_form.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>{{ object }}</h2>
+  {{ form.errors }}
+  <form method="POST">
+
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+
+      <input type="hidden" name='opener' id="input_opener">
+
+      <div id="div_name">
+        {% include 'touglates/form_field.html' with field=form.name %}
+      </div>
+
+      <h4>Members</h4>
+
+      {{ listmemberships.management_form }}
+      {% for listmembershipform in listmemberships.forms %}
+        {% if listmembershipform.id.value > 0 %}
+          <div id="div_listmembershipform_{{ listmembershipform.id.value }}" class="listmembershipformsetform"  >
+            {% for hiddenfield in listmembershipform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=listmembershipform.person %}
+          </div>
+        {% else %}
+          <div class="listmembershipformsetform listmembershipnewform" >
+            {% for hiddenfield in listmembershipform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include 'touglates/form_field.html' with field=listmembershipform.person %}
+            {% include 'touglates/form_field.html' with field=listmembershipform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addlistmembership">add</button>' %}
+      {% for listmembership in object.listmembership_set.all %}
+        {% with listmembershipid=listmembership.id|stringformat:"s" %}
+          {% with button_as_label='<button type="button" id="button_editlistmembership_'|add:listmembershipid|add:'" data-formid="div_listmembershipform_'|add:listmembershipid|add:'" data-displayid="tr_listmembership_'|add:listmembershipid|add:'" class="listmembership_edit_button">edit</button>'|safe %}
+            {% include 'touglates/detail_fields.html' with label=button_as_label field_1=listmembership.person field_2="listmembership.listmembership_level"  %}
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
+
+
+      {% include 'touglates/form_field.html' with label="Submit Form" field='<button type="submit">Submit</button>' %}
+
+    </div>
+
+  </form>
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+
+  <script>
+    function enableFormsetForm(formid, displayid) {
+      let form = document.getElementById(formid)
+      document.getElementById(formid).style.display="block"
+      document.getElementById(displayid).style.display="none"
+    }
+    function enableAddFormsetForm(formclass) {
+      let newforms = document.getElementsByClassName(formclass)
+      if( newforms.length > 0) {
+        let newform = newforms[0]
+        newform.style.display="block"
+        newform.classList.remove(formclass)
+      } else {
+        alert('please save before adding more')
+      }
+    }
+  </script>
+
+  <script>
+
+    let listmembershipEditButtons = document.getElementsByClassName('listmembership_edit_button')
+    for( listmembershipEditButton of listmembershipEditButtons){
+      listmembershipEditButton.addEventListener ('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+
+    document.getElementById('button_addlistmembership').addEventListener ('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('listmembershipnewform')
+    })
+    let listmembershipforms = document.getElementsByClassName("listmembershipformsetform")
+    for( listmembershipform of listmembershipforms ){
+      listmembershipform.style.display="none"
+    }
+
+  </script>
+
+
+
+  <script>
+    addFilterInput("{{ form.voting_address.id_for_label }}")
+
+  </script>
+
+{% endblock %}
+

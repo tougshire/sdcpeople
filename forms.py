@@ -4,12 +4,15 @@ from django.core.validators import FileExtensionValidator
 from dataclasses import field
 from os import link
 from .models import (
+    BulkCommunication,
+    CommunicationEvent,
     ContactEmail,
     ContactText,
     ContactVoice,
     DuesPayment,
     Event,
     Link,
+    ListMembership,
     LocationCity,
     LocationBorough,
     LocationCongress,
@@ -22,6 +25,7 @@ from .models import (
     MembershipType,
     Participation,
     PaymentMethod,
+    PeopleList,
     Person,
     Position,
     SubCommittee,
@@ -85,6 +89,24 @@ class EventForm(forms.ModelForm):
             'name',
             'event_type',
             'when'
+        ]
+
+class CommunicationEventForm(forms.ModelForm):
+    class Meta:
+        model=CommunicationEvent
+        fields = [
+            "target",
+            "volunteer",
+            "details",
+            "bulk_communication",
+            "result",
+        ]
+
+class BulkCommunicationForm(forms.ModelForm):
+    class Meta:
+        model=BulkCommunication
+        fields = [
+            "name",
         ]
 
 class LocationCityForm(forms.ModelForm):
@@ -178,6 +200,13 @@ class SubCommitteeForm(forms.ModelForm):
             'rank_number',
         ]
 
+class PeopleListForm(forms.ModelForm):
+    class Meta:
+        model=PeopleList
+        fields = [
+            'name',
+        ]
+
 
 class PersonForm(forms.ModelForm):
     class Meta:
@@ -222,6 +251,15 @@ class SubMembershipForm(forms.ModelForm):
             'position',
         ]
 
+class ListMembershipForm(forms.ModelForm):
+    class Meta:
+        model=ListMembership
+        fields = [
+            'person',
+            'peoplelist',
+        ]
+
+
 class MembershipApplicationForm(forms.ModelForm):
     class Meta:
         model=MembershipApplication
@@ -264,7 +302,12 @@ PersonDuesPaymentFormset = forms.inlineformset_factory(Person, DuesPayment, form
 PersonSubMembershipFormset = forms.inlineformset_factory(Person, SubMembership, form=SubMembershipForm, extra=10)
 PersonLinkFormset = forms.inlineformset_factory(Person, Link, form=LinkForm, extra=10)
 PersonParticipationFormset = forms.inlineformset_factory(Person, Participation, form=ParticipationForm, extra=10)
+PersonListMembershipFormset = forms.inlineformset_factory(Person, ListMembership, form=ListMembershipForm, extra=10)
+
 
 EventParticipationFormset = forms.inlineformset_factory(Event, Participation, form=ParticipationForm, extra=10)
+
+PeopleListListMembershipFormset = forms.inlineformset_factory(PeopleList, ListMembership, form=ListMembershipForm, extra=10)
+
 
 SubCommitteeSubMembershipFormset = forms.inlineformset_factory(SubCommittee, SubMembership, form=SubMembershipForm, extra=10)
