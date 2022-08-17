@@ -862,7 +862,7 @@ class SavedList(models.Model):
     name = models.CharField(
         'name',
         max_length=100,
-        help_text="The committee name"
+        help_text="The name of the saved list"
     )
     when = models.DateTimeField(
         'when',

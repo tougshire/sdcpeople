@@ -21,22 +21,33 @@
       <h4>Members</h4>
 
       {{ listmemberships.management_form }}
-      {% for listmembershipform in listmemberships.forms %}
-        {% if listmembershipform.id.value > 0 %}
+      {% for listmembershipform in listmemberships.forms %} 
+        {% if listmembershipform.id.value > 0  %}
           <div id="div_listmembershipform_{{ listmembershipform.id.value }}" class="listmembershipformsetform"  >
             {% for hiddenfield in listmembershipform.hidden_fields %}
-              {{ hiddenfield }}
             {% endfor %}
-            {% include 'touglates/form_field.html' with field=listmembershipform.person %}
-          </div>
-        {% else %}
-          <div class="listmembershipformsetform listmembershipnewform" >
-            {% for hiddenfield in listmembershipform.hidden_fields %}
-              {{ hiddenfield }}
-            {% endfor %}
-            {% include 'touglates/form_field.html' with field=listmembershipform.person %}
+            {% include 'touglates/form_field.html' with field=listmembershipform.person href=person_url %}
             {% include 'touglates/form_field.html' with field=listmembershipform.DELETE %}
           </div>
+        {% else %}
+          {% if listmembershipform.person.value > 0  %}
+            <div class="listmembershippreform listmembershipnewform" >
+              {% for hiddenfield in listmembershipform.hidden_fields %}
+                {{ hiddenfield }}
+              {% endfor %}
+              {% include 'touglates/form_field.html' with field=listmembershipform.person %}
+              {% include 'touglates/form_field.html' with field=listmembershipform.DELETE %}
+            </div>
+          {% else %}
+            <div class="listmembershipformsetform listmembershipnewform" >
+              {% for hiddenfield in listmembershipform.hidden_fields %}
+                {{ hiddenfield }}
+              {% endfor %}
+              {% include 'touglates/form_field.html' with field=listmembershipform.person %}
+              {% include 'touglates/form_field.html' with field=listmembershipform.DELETE %}
+            </div>
+          {% endif %}
+
         {% endif %}
       {% endfor %}
       {% include 'touglates/detail_field.html' with label='<button type="button" id="button_addlistmembership">add</button>' %}
@@ -91,6 +102,7 @@
       enableAddFormsetForm('listmembershipnewform')
     })
     let listmembershipforms = document.getElementsByClassName("listmembershipformsetform")
+
     for( listmembershipform of listmembershipforms ){
       listmembershipform.style.display="none"
     }

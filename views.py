@@ -27,7 +27,7 @@ from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, Ev
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
-from .models import (BulkCommunication, BulkRecordAction, CommunicationEvent, ContactText, ContactVoice, Event, History, LocationBorough,LocationCity,
+from .models import (BulkCommunication, BulkRecordAction, CommunicationEvent, ContactText, ContactVoice, Event, History, ListMembership, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
                      LocationStateHouse, LocationStateSenate, MembershipStatus, Participation, SavedList,
                      Person, PersonUser, Position, RecordAction, RecordactPerson, SubCommittee, SubMembership, VotingAddress)
@@ -325,7 +325,6 @@ class PersonList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -338,7 +337,6 @@ class PersonList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -349,7 +347,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif hasattr(self,'vista_get_by'):
-            print('tp228d804', 'has vista_get_by')
             self.vistaobj = make_vista(
                 self.request.user,
                 queryset,
@@ -357,7 +354,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
-            print('tp 224bc51', 'retrieve_vista')
 
             self.vistaobj = retrieve_vista(
                 self.request.user,
@@ -368,7 +364,6 @@ class PersonList(PermissionRequiredMixin, ListView):
 
             )
         elif 'default_vista' in self.request.POST:
-            print('tp 224bc52', 'default_vista')
 
             self.vistaobj = default_vista(
                 self.request.user,
@@ -408,6 +403,7 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return context_data
 
+    
 class PersonCSV(PersonList):
 
     def get(self, request, *args, **kwargs):
@@ -899,23 +895,31 @@ class SavedListCreate(PermissionRequiredMixin, CreateView):
     model = SavedList
     form_class = SavedListForm
 
+
     def get_context_data(self, **kwargs):
 
         context_data = super().get_context_data(**kwargs)
 
+        self.person_list = get_latest_vista(self.request.user, Person.objects.all())
+        formset_initial=[]
+        for person in self.person_list['queryset']:
+
+            print('tp228fa32', person)
+#            formset_initial.append(item.Person'])
+            formset_initial.append({'person':person})
+        
         if self.request.POST:
             context_data['listmemberships'] = SavedListListMembershipFormset(self.request.POST)
 
         else:
-            context_data['listmemberships'] = SavedListListMembershipFormset()
+            context_data['listmemberships'] = SavedListListMembershipFormset(initial=formset_initial)
+            context_data['listmemberships'].extra = len(formset_initial)
 
         return context_data
 
     def form_valid(self, form):
 
         response = super().form_valid(form)
-
-        update_history(form, 'SavedList', form.instance, self.request.user)
 
         self.object = form.save()
 

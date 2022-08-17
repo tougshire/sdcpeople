@@ -9,6 +9,8 @@
     <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>
     <div><a href="{% url 'sdcpeople:person-csv' %}">export</a></div>
     {% if perms.sdcpeople.add_person %}<div><a href="{% url 'sdcpeople:person-csvupload' %}">Upload CSV</a></div>{% endif %}
+    {% if perms.sdcpeople.add_savedlist %}<div><a href="{% url 'sdcpeople:savedlist-create' %}">Save List</a></div>{% endif %}
+    
     <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
         

@@ -26,4 +26,17 @@
     {% endif %}
   {% endif %}
 
+  {% if perms.sdcpeople.view_savedlist %}
+  {% url 'sdcpeople:savedlist-list' as savedlist_url %}
+  {% if savedlist_url == url_here %}
+    <div class="menu-item menu-here">
+      Lists
+    </div>
+  {% else %}
+    <div class="menu-item">
+      <a href="{{ savedlist_url }}">Lists</a>
+    </div>
+  {% endif %}
+{% endif %}
+
 </div>

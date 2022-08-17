@@ -6,7 +6,8 @@
 
     {% include 'touglates/detail_field.html' with label="Members" field="" %}
     {% for member in object.listmembership_set.all %}
-      {% include 'touglates/detail_fields.html' with label="Member" field_1=listmembership.person  %}
+    {% url 'sdcpeople:person-detail' member.person.pk as person_url %}
+      {% include 'touglates/detail_fields.html' with label="Member" field_1=member.person href_1=person_url field_2=member.person.contactvoice_set.all.0 before_fields='<table width="100%"><tr><td width="50%">' between_fields='</td><td>' after_fields='</td></tr></table>' %}
     {% endfor %}
 
   </div>
