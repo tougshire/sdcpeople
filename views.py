@@ -22,7 +22,7 @@ from tougshire_vistas.views import (default_vista, delete_vista,
 
 from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, ParticipationForm, SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
+                    LocationStateSenateForm, ParticipationForm, PersonCommunicationEventFormset, PersonCommunicationEventFormset, SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
                     PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
                     PersonMembershipApplicationFormset, PersonParticipationFormset,
@@ -85,6 +85,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST)
             context_data['links'] = PersonLinkFormset(self.request.POST)
             context_data['participatins'] = PersonParticipationFormset(self.request.POST)
+            context_data['communications'] = PersonCommunicationEventFormset(self.request.POST)
 
         else:
             context_data['participations'] = PersonContactVoiceFormset()
@@ -95,6 +96,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             context_data['duespayments'] = PersonDuesPaymentFormset()
             context_data['links'] = PersonLinkFormset()
             context_data['participations'] = PersonParticipationFormset()
+            context_data['communications'] = PersonCommunicationEventFormset()
 
         return context_data
 
@@ -114,6 +116,7 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
             'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
+            'communications':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
 
         }
         recordact_details='Created. '
@@ -164,6 +167,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
             context_data['links'] = PersonLinkFormset(self.request.POST, instance=self.object )
             context_data['participations]'] = PersonParticipationFormset(self.request.POST, instance=self.object )
+            context_data['communications]'] = PersonCommunicationEventFormset(self.request.POST, instance=self.object )
 
         else:
             context_data['participations'] = PersonContactVoiceFormset( instance=self.object )
@@ -174,6 +178,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
             context_data['links'] = PersonLinkFormset( instance=self.object )
             context_data['participations'] = PersonParticipationFormset( instance=self.object )
+            context_data['communications'] = PersonCommunicationEventFormset( instance=self.object )
 
         return context_data
 
@@ -194,6 +199,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
             'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
+            'participations':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -283,16 +289,16 @@ class PersonList(PermissionRequiredMixin, ListView):
             'participation__event',
             'recordactperson__recordact__bulk_recordact',
             'is_deleted',
+            'listmembership__savedlist',
 
         ])
 
         self.vista_settings['fields']['participation__event']['label']="Participation in Event"
         self.vista_settings['fields']['recordactperson__recordact__bulk_recordact']['label']="Bulk Record Action"
-
-        print('tp228d753', kwargs.get('by_value'))
-        print('tp228d754', kwargs.get('by_parameter'))
+        self.vista_settings['fields']['listmembership__savedlist']['label']="Saved List"
 
         if 'by_value' in kwargs and 'by_parameter' in kwargs:
+            print ('tp228ic11')
             self.vista_get_by = QueryDict(urlencode([
                 ('filter__fieldname__0', [kwargs.get('by_parameter')]),
                 ('filter__op__0', ['exact']),
@@ -665,13 +671,13 @@ class EventList(PermissionRequiredMixin, ListView):
             'participation__person',
         ])
 
-        self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname__0', ['membership_status__is_member']),
-            ('filter__op__0', ['exact']),
-            ('filter__value__0', ['True']),
-            ('order_by', ['name_last', 'name_common', ]),
-            ('paginate_by',self.paginate_by),
-        ],doseq=True) )
+        # self.vista_defaults = QueryDict(urlencode([
+        #     ('filter__fieldname__0', ['membership_status__is_member']),
+        #     ('filter__op__0', ['exact']),
+        #     ('filter__value__0', ['True']),
+        #     ('order_by', ['name_last', 'name_common', ]),
+        #     ('paginate_by',self.paginate_by),
+        # ],doseq=True) )
 
         return super().setup(request, *args, **kwargs)
 
@@ -1032,11 +1038,11 @@ class SavedListList(PermissionRequiredMixin, ListView):
         ])
 
         self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname__0', ['membership_status__is_member']),
-            ('filter__op__0', ['exact']),
-            ('filter__value__0', ['True']),
-            ('order_by', ['name_last', 'name_common', ]),
-            ('paginate_by',self.paginate_by),
+        #     ('filter__fieldname__0', ['membership_status__is_member']),
+        #     ('filter__op__0', ['exact']),
+        #     ('filter__value__0', ['True']),
+        #     ('order_by', ['name_last', 'name_common', ]),
+        #     ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
         return super().setup(request, *args, **kwargs)
