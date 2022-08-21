@@ -7,30 +7,32 @@
   <div class="list">
     <div><a href="{% url 'sdcpeople:savedlist-create' %}">create</a></div>
     {% comment %}<div><a href="{% url 'sdcpeople:savedlist-csv' %}">export</a></div>{% endcomment %}
-    <div class="row rowhead">
-      {% include './_list_head.html' with field="" %}
+    <table>
+      <tr class="row rowhead">
+        {% include 'touglates/list_head.html' with field="" tag="th" extra_classes="width_020" %}
 
-      {% if 'name' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field="Name" %}
+        {% if 'name' in show_columns or not show_columns %}
+          {% include 'touglates/list_head.html' with field="Name" tag="th" %}
         {% endif %}
         {% if 'when' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field="Date" %}
+          {% include 'touglates/list_head.html' with field="Date" tag="th" extra_classes="width_020" %}
         {% endif %}
 
-      </div>
+      </tr>
 
       {% for savedlist in object_list %}
-        <div class="row">
-          <div class="listfield"><a href="{% url 'sdcpeople:savedlist-detail' savedlist.pk %}">view</a></div>
+        <tr class="row">
+          {% url 'sdcpeople:savedlist-detail' savedlist.pk as detail_url %}
+          {% include 'touglates/list_field.html' with field="view" href=detail_url tag="td" %}
           {% if 'name' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=savedlist.name  %}
+            {% include 'touglates/list_field.html' with field=savedlist.name tag="td" %}
           {% endif %}
           {% if 'when' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=savedlist.when %}
+            {% include 'touglates/list_field.html' with field=savedlist.when tag="td" %}
           {% endif %}
-
-        </div>
+        </tr>
       {% endfor %}
+    </table>
         <div>Count: {{ count }}</div>
     </div>
   </div>
