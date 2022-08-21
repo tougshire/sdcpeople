@@ -15,24 +15,9 @@
       </div>
     {% endif %}
     <div class="menu-item">
-    <a id="a_list_people" href="{% url 'sdcpeople:person-list' %}" >List People</a>
+    <a id="a_list_people" href="{% url 'sdcpeople:person-list-by' object.pk 'listmembership__savedlist' %}" >List People</a>
     </div>
 
   </div>
-  <div style="display:hidden">
-    <form id="form_list_people" method="POST" action="{% url 'sdcpeople:person-list' %}">
-      {% csrf_token %}
-      <input type="hidden" name="filter__fieldname__0" value="participation__savedlist">
-      <input type="hidden" name="filter__op__0" value="in">
-      <input type="hidden" name="filter__value__0" value="{{ object.pk }}">
-      <input type="hidden" name="vista_query_submitted" value="True">
-    </form>
-  </div>
-  <script>
-    document.getElementById("a_list_people").addEventListener ("click", function(savedlist){
-      savedlist.preventDefault();
-     document.getElementById('form_list_people').submit();
-    })
-  </script>
 
   {% endblock %}
