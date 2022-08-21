@@ -303,9 +303,10 @@ PersonSubMembershipFormset = forms.inlineformset_factory(Person, SubMembership, 
 PersonLinkFormset = forms.inlineformset_factory(Person, Link, form=LinkForm, extra=10)
 PersonParticipationFormset = forms.inlineformset_factory(Person, Participation, form=ParticipationForm, extra=10)
 PersonListMembershipFormset = forms.inlineformset_factory(Person, ListMembership, form=ListMembershipForm, extra=10)
-
+PersonCommunicationEventFormset = forms.inlineformset_factory(Person, CommunicationEvent, form=CommunicationEventForm, extra=10, fk_name='target')
 
 EventParticipationFormset = forms.inlineformset_factory(Event, Participation, form=ParticipationForm, extra=10)
+
 
 SavedListListMembershipFormset = forms.inlineformset_factory(SavedList, ListMembership, form=ListMembershipForm, extra=5)
 
