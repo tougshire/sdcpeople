@@ -1,3 +1,9 @@
-<div class="field column">
+{% if tag %}
+<{{ tag }} class="field column {{ extra_classes }}">
+  {{ field }}
+</{{ tag }}>
+{% else %}
+<div class="field column {{ extra_classes }}">
   {{ field }}
 </div>
+{% endif %}
