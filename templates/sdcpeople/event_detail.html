@@ -19,20 +19,6 @@
     </div>
 
   </div>
-  <div style="display:hidden">
-    <form id="form_list_people" method="POST" action="{% url 'sdcpeople:person-list' %}">
-      {% csrf_token %}
-      <input type="hidden" name="filter__fieldname__0" value="participation__event">
-      <input type="hidden" name="filter__op__0" value="in">
-      <input type="hidden" name="filter__value__0" value="{{ object.pk }}">
-      <input type="hidden" name="vista_query_submitted" value="True">
-    </form>
-  </div>
-  <script>
-    document.getElementById("a_list_people").addEventListener("click", function(event){
-      event.preventDefault();
-     document.getElementById('form_list_people').submit();
-    })
-  </script>
+
 
   {% endblock %}
