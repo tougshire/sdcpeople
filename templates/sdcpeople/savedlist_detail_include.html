@@ -2,12 +2,17 @@
 
   <div class="detail">
     {% include 'touglates/detail_field.html' with label=savedlist_labels.name field=object.name %}
-    {% include 'touglates/detail_field.html' with label=savedlist_labels.when field=object.when %}
+    {% include 'touglates/detail_field.html' with label="Date" field=object.when %}
 
     {% include 'touglates/detail_field.html' with label="Members" field="" %}
+    <table width="100%">
     {% for member in object.listmembership_set.all %}
-    {% url 'sdcpeople:person-detail' member.person.pk as person_url %}
-      {% include 'touglates/detail_fields.html' with label="Member" field_1=member.person href_1=person_url field_2=member.person.contactvoice_set.all.0 before_fields='<table width="100%"><tr><td width="50%">' between_fields='</td><td>' after_fields='</td></tr></table>' %}
+    <tr>
+      {% url 'sdcpeople:person-detail' member.person.pk as person_url %}
+      {% include 'touglates/list_field.html' with field="Member" tag="th" %} 
+      {% include 'touglates/list_field.html' with field=member.person href_1=person_url tag="td" %}
+      {% include 'touglates/list_field.html' with field=member.person.contactvoice_set.all.0 tag="td" %}
+    </tr>
     {% endfor %}
-
+    </table>
   </div>
