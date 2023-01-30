@@ -1,6 +1,5 @@
 from bdb import effective
 import datetime
-from tkinter import CASCADE
 from django.apps import apps
 from xmlrpc.client import Boolean
 from django.db import models
