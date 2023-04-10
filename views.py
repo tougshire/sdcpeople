@@ -20,12 +20,19 @@ from tougshire_vistas.views import (default_vista, delete_vista,
                                     make_vista, retrieve_vista,
                                     vista_context_data, make_vista_fields)
 
-from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, EventParticipationFormset, LocationBoroughForm, LocationCityForm, LocationCongressForm,
+from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm, 
+                    EventParticipationFormset, 
+                    LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
-                    LocationStateSenateForm, ParticipationForm, PersonCommunicationEventFormset, PersonCommunicationEventFormset, SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
+                    LocationStateSenateForm, 
+                    ParticipationForm, 
+                    #PersonCommunicationEventFormset, PersonCommunicationEventFormset, 
+                    SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
-                    PersonDuesPaymentFormset, PersonForm, PersonLinkFormset,
-                    PersonMembershipApplicationFormset, PersonParticipationFormset,
+                    #PersonDuesPaymentFormset, 
+                    PersonForm, PersonLinkFormset,
+                    # PersonMembershipApplicationFormset, 
+                    #PersonParticipationFormset,
                     PersonSubMembershipFormset, SubCommitteeForm, SubCommitteeSubMembershipFormset, VotingAddressForm)
 from .models import (BulkCommunication, BulkRecordAction, CommunicationEvent, ContactText, ContactVoice, Event, History, ListMembership, LocationBorough,LocationCity,
                      LocationCongress, LocationMagistrate, LocationPrecinct,
@@ -77,26 +84,26 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
         context_data = super().get_context_data(**kwargs)
 
         if self.request.POST:
-            context_data['participations'] = PersonContactVoiceFormset(self.request.POST)
             context_data['contacttexts'] = PersonContactTextFormset(self.request.POST)
+            context_data['contactvoices'] = PersonContactVoiceFormset(self.request.POST)
             context_data['contactemails'] = PersonContactEmailFormset(self.request.POST)
-            context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST)
+            # context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST)
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST )
-            context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST)
+            # context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST)
             context_data['links'] = PersonLinkFormset(self.request.POST)
-            context_data['participatins'] = PersonParticipationFormset(self.request.POST)
-            context_data['communications'] = PersonCommunicationEventFormset(self.request.POST)
+            # context_data['participations'] = PersonParticipationFormset(self.request.POST)
+            # context_data['communications'] = PersonCommunicationEventFormset(self.request.POST)
 
         else:
-            context_data['participations'] = PersonContactVoiceFormset()
             context_data['contacttexts'] = PersonContactTextFormset()
+            context_data['contactvoices'] = PersonContactVoiceFormset()
             context_data['contactemails'] = PersonContactEmailFormset()
-            context_data['membershipapplications'] = PersonMembershipApplicationFormset()
+            # context_data['membershipapplications'] = PersonMembershipApplicationFormset()
             context_data['submemberships'] = PersonSubMembershipFormset()
-            context_data['duespayments'] = PersonDuesPaymentFormset()
+            # context_data['duespayments'] = PersonDuesPaymentFormset()
             context_data['links'] = PersonLinkFormset()
-            context_data['participations'] = PersonParticipationFormset()
-            context_data['communications'] = PersonCommunicationEventFormset()
+            # context_data['participations'] = PersonParticipationFormset()
+            # context_data['communications'] = PersonCommunicationEventFormset()
 
         return context_data
 
@@ -108,15 +115,15 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
 
 
         formset_data = {
-            'participations':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contacttexts':PersonContactTextFormset( self.request.POST, instance=self.object ),
+            'contactvoices':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contactemails':PersonContactEmailFormset( self.request.POST, instance=self.object ),
-            'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
+            # 'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
-            'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
+            # 'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
-            'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
-            'communications':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
+            # 'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
+            # 'communications':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
 
         }
         recordact_details='Created. '
@@ -124,6 +131,8 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             recordact_details = recordact_details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
         for formset_name in formset_data.keys():
+            print('tp234ai56', formset_name)
+            print('tp234ai57', formset_data[formset_name])
 
             if(formset_data[formset_name]).is_valid():
                 formset_data[formset_name].save()
@@ -133,10 +142,11 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
                 print(formset_data[formset_name].errors)
 
             if formset_data[formset_name].has_changed:
-                for field in formset_data[formset_name].changed_data:
-                    recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+                for form in formset_data[formset_name].changed_objects:
+                    for field in form.changed_data:
+                        recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
-        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user)
+        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user,None)
 
         return response
 
@@ -159,26 +169,26 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
         context_data = super().get_context_data(**kwargs)
 
         if self.request.POST:
-            context_data['participations'] = PersonContactVoiceFormset(self.request.POST, instance=self.object )
             context_data['contacttexts'] = PersonContactTextFormset(self.request.POST, instance=self.object )
+            context_data['contactvoices'] = PersonContactVoiceFormset(self.request.POST, instance=self.object )
             context_data['contactemails'] = PersonContactEmailFormset(self.request.POST, instance=self.object )
-            context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST, instance=self.object )
+#            context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST, instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST, instance=self.object )
-            context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
+            # context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
             context_data['links'] = PersonLinkFormset(self.request.POST, instance=self.object )
-            context_data['participations]'] = PersonParticipationFormset(self.request.POST, instance=self.object )
-            context_data['communications]'] = PersonCommunicationEventFormset(self.request.POST, instance=self.object )
+            # context_data['participations]'] = PersonParticipationFormset(self.request.POST, instance=self.object )
+            # context_data['communications]'] = PersonCommunicationEventFormset(self.request.POST, instance=self.object )
 
         else:
-            context_data['participations'] = PersonContactVoiceFormset( instance=self.object )
             context_data['contacttexts'] = PersonContactTextFormset( instance=self.object )
+            context_data['contactvoices'] = PersonContactVoiceFormset( instance=self.object )
             context_data['contactemails'] = PersonContactEmailFormset( instance=self.object )
-            context_data['membershipapplications'] = PersonMembershipApplicationFormset( instance=self.object )
+            # context_data['membershipapplications'] = PersonMembershipApplicationFormset( instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset( instance=self.object )
-            context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
+            # context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
             context_data['links'] = PersonLinkFormset( instance=self.object )
-            context_data['participations'] = PersonParticipationFormset( instance=self.object )
-            context_data['communications'] = PersonCommunicationEventFormset( instance=self.object )
+            # context_data['participations'] = PersonParticipationFormset( instance=self.object )
+            # context_data['communications'] = PersonCommunicationEventFormset( instance=self.object )
 
         return context_data
 
@@ -191,15 +201,15 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
         self.object = form.save()
 
         formset_data = {
-            'participations':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contacttexts':PersonContactTextFormset( self.request.POST, instance=self.object ),
+            'contactvoices':PersonContactVoiceFormset( self.request.POST, instance=self.object ),
             'contactemails':PersonContactEmailFormset( self.request.POST, instance=self.object ),
-            'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
+            # 'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
-            'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
+            # 'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
-            'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
-            'participations':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
+            # 'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
+            # 'communications':PersonCommunicationEventFormset( self.request.POST, instance=self.object ),
 
         }
 
@@ -218,8 +228,9 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
                 print(formset_data[formset_name].errors)
 
             if formset_data[formset_name].has_changed:
-                for field in formset_data[formset_name].changed_data:
-                    recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+                for form in formset_data[formset_name].changed_objects:
+                    for field in form.changed_data:
+                        recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
         create_recordact(recordact_details,RecordactPerson,self.object,self.request.user)
 
@@ -441,7 +452,7 @@ class PersonCSV(PersonList):
             row.append("Voice")
         if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
             row.append("Text")
-        if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+        if not 'show_columns' in vista_data or 'contactemail' in vista_data['show_columns']:
             row.append("Email")
         if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
             row.append("voting address")
@@ -800,7 +811,7 @@ class EventCSV(EventList):
             row.append("Voice")
         if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
             row.append("Text")
-        if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+        if not 'show_columns' in vista_data or 'contactemail' in vista_data['show_columns']:
             row.append("Email")
         if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
             row.append("voting address")
@@ -1166,7 +1177,7 @@ class SavedListCSV(SavedListList):
             row.append("Voice")
         if not 'show_columns' in vista_data or 'contacttext' in vista_data['show_columns']:
             row.append("Text")
-        if not 'show_columns' in vista_data or 'contacemail' in vista_data['show_columns']:
+        if not 'show_columns' in vista_data or 'contactemail' in vista_data['show_columns']:
             row.append("Email")
         if not 'show_columns' in vista_data or 'voting_address' in vista_data['show_columns']:
             row.append("voting address")
