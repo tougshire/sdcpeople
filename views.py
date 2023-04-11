@@ -232,7 +232,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
                     for field in form.changed_data:
                         recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
-        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user)
+        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user, None)
 
         return response
 
