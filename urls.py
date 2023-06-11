@@ -37,6 +37,7 @@ urlpatterns = [
 
     path('savedlist/', RedirectView.as_view(url=reverse_lazy('sdcpeople:savedlist-list'))),
     path('savedlist/create/', views.SavedListCreate.as_view(), name='savedlist-create'),
+    path('savedlist/create/', views.SavedListCreate.as_view(), kwargs={'from-person-list':True}, name='savedlist-from-person-list'), 
     path('savedlist/<int:pk>/update/', views.SavedListUpdate.as_view(), name='savedlist-update'),
     path('savedlist/<int:pk>/detail/', views.SavedListDetail.as_view(), name='savedlist-detail'),
     path('savedlist/<int:pk>/delete/', views.SavedListDelete.as_view(), name='savedlist-delete'),

@@ -2,7 +2,21 @@
 {% load static %}
 {% block content %}
 
-  {% include 'tougshire_vistas/filter.html' %}
+<div class="menu object-list-menu">
+
+  {% if perms.libtekin.view_savedlist %}
+    <div class="menu-item">
+      <a href="#" id='btn_showvista' class="show" data-showtext="Show the Sort Filter Form" data-hidetext="Hide the Sort Filter Form">Show Sort/Filter form</a>
+    </div>
+  {% endif %}
+  {% if perms.libtekin.add_savedlist %}
+    <div class="menu-item">
+      <a href="{% url 'sdcpeople:savedlist-create' %}">Create</a>
+    </div>
+  {% endif %}
+</div>
+
+  {% include 'tougshire_vistas/filter.html' with hide_button=1 %}
 
   <div class="list">
     <div><a href="{% url 'sdcpeople:savedlist-create' %}">create</a></div>

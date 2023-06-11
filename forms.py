@@ -205,6 +205,7 @@ class SavedListForm(forms.ModelForm):
         model=SavedList
         fields = [
             'name',
+            'shared',
         ]
 
 
@@ -250,6 +251,7 @@ class SubMembershipForm(forms.ModelForm):
             'subcommittee',
             'position',
         ]
+
 
 class ListMembershipForm(forms.ModelForm):
     class Meta:

@@ -25,7 +25,7 @@ from .forms import (BulkCommunicationForm, CommunicationEventForm, EventForm,
                     LocationBoroughForm, LocationCityForm, LocationCongressForm,
                     LocationPrecinctForm, LocationStateHouseForm,
                     LocationStateSenateForm, 
-                    ParticipationForm, 
+                    ParticipationForm, PersonListMembershipFormset, 
                     #PersonCommunicationEventFormset, PersonCommunicationEventFormset, 
                     SavedListForm, SavedListListMembershipFormset, PersonCSVUploadForm, PersonContactEmailFormset,
                     PersonContactTextFormset, PersonContactVoiceFormset,
@@ -57,6 +57,7 @@ def create_recordact(action_details, recordactmodel_class, object, user, bulk_re
     return recordact_model
 
 def update_history(form, modelname, object, user):
+    print ('tp235ki52', form)
     for fieldname in form.changed_data:
         try:
             old_value=str(form.initial[fieldname]),
@@ -131,8 +132,6 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
             recordact_details = recordact_details + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
         for formset_name in formset_data.keys():
-            print('tp234ai56', formset_name)
-            print('tp234ai57', formset_data[formset_name])
 
             if(formset_data[formset_name]).is_valid():
                 formset_data[formset_name].save()
@@ -141,12 +140,12 @@ class PersonCreate(PermissionRequiredMixin, CreateView):
                 print('error saving ' + formset_name + ': ' )
                 print(formset_data[formset_name].errors)
 
-            if formset_data[formset_name].has_changed:
-                for form in formset_data[formset_name].changed_objects:
-                    for field in form.changed_data:
-                        recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+        #     if formset_data[formset_name].has_changed:
+        #         for form in formset_data[formset_name].changed_objects:
+        #             for field in form.changed_data:
+        #                 recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
 
-        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user,None)
+        # create_recordact(recordact_details,RecordactPerson,self.object,self.request.user,None)
 
         return response
 
@@ -174,6 +173,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['contactemails'] = PersonContactEmailFormset(self.request.POST, instance=self.object )
 #            context_data['membershipapplications'] = PersonMembershipApplicationFormset(self.request.POST, instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset(self.request.POST, instance=self.object )
+            context_data['listmemberships'] = PersonListMembershipFormset(self.request.POST, instance=self.object )
             # context_data['duespayments'] = PersonDuesPaymentFormset(self.request.POST, instance=self.object )
             context_data['links'] = PersonLinkFormset(self.request.POST, instance=self.object )
             # context_data['participations]'] = PersonParticipationFormset(self.request.POST, instance=self.object )
@@ -185,6 +185,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             context_data['contactemails'] = PersonContactEmailFormset( instance=self.object )
             # context_data['membershipapplications'] = PersonMembershipApplicationFormset( instance=self.object )
             context_data['submemberships'] = PersonSubMembershipFormset( instance=self.object )
+            context_data['listmemberships'] = PersonListMembershipFormset( instance=self.object )
             # context_data['duespayments'] = PersonDuesPaymentFormset( instance=self.object )
             context_data['links'] = PersonLinkFormset( instance=self.object )
             # context_data['participations'] = PersonParticipationFormset( instance=self.object )
@@ -206,6 +207,7 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             'contactemails':PersonContactEmailFormset( self.request.POST, instance=self.object ),
             # 'membershipapplications':PersonMembershipApplicationFormset( self.request.POST, instance=self.object ),
             'submemberships':PersonSubMembershipFormset(self.request.POST, instance=self.object ),
+            'listmemberships':PersonListMembershipFormset(self.request.POST, instance=self.object ),
             # 'duespayments':PersonDuesPaymentFormset( self.request.POST, instance=self.object ),
             'links':PersonLinkFormset( self.request.POST, instance=self.object ),
             # 'participations':PersonParticipationFormset( self.request.POST, instance=self.object ),
@@ -225,14 +227,18 @@ class PersonUpdate(PermissionRequiredMixin, UpdateView):
             else:
                 messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
                 print('error saving ' + formset_name + ': ')
-                print(formset_data[formset_name].errors)
+                print('tp235kj03', formset_data[formset_name])
 
-            if formset_data[formset_name].has_changed:
-                for form in formset_data[formset_name].changed_objects:
-                    for field in form.changed_data:
-                        recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+#                print(formset_data[formset_name].errors)
+                for form in formset_data[formset_name]:
+                    print(form.errors)
 
-        create_recordact(recordact_details,RecordactPerson,self.object,self.request.user, None)
+            # if formset_data[formset_name].has_changed():
+            #     for form in formset_data[formset_name].changed_objects:
+            #         for field in form.cleaned_data:
+            #             recordact_details = recordact_details + formset_name + '.' + field  + ': ' + str(form.cleaned_data[field]) + ';  '
+
+        # create_recordact(recordact_details,RecordactPerson,self.object,self.request.user, None)
 
         return response
 
@@ -309,7 +315,7 @@ class PersonList(PermissionRequiredMixin, ListView):
         self.vista_settings['fields']['listmembership__savedlist']['label']="Saved List"
 
         if 'by_value' in kwargs and 'by_parameter' in kwargs:
-            print ('tp228ic11')
+
             self.vista_get_by = QueryDict(urlencode([
                 ('filter__fieldname__0', [kwargs.get('by_parameter')]),
                 ('filter__op__0', ['exact']),
@@ -636,7 +642,7 @@ class EventUpdate(PermissionRequiredMixin, UpdateView):
                 messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
                 print('error saving ' + formset_name + ': ')
                 print(formset_data[formset_name].errors)
-                print('tp228bc40', formset_data[formset_name])
+
 
         return response
 
@@ -705,7 +711,7 @@ class EventList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
+
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -718,7 +724,6 @@ class EventList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -729,7 +734,6 @@ class EventList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
-            print('tp 224bc51', 'retrieve_vista')
 
             self.vistaobj = retrieve_vista(
                 self.request.user,
@@ -740,7 +744,6 @@ class EventList(PermissionRequiredMixin, ListView):
 
             )
         elif 'default_vista' in self.request.POST:
-            print('tp 224bc52', 'default_vista')
 
             self.vistaobj = default_vista(
                 self.request.user,
@@ -906,23 +909,23 @@ class EventClose(PermissionRequiredMixin, DetailView):
     model = Event
     template_name = 'sdcpeople/event_closer.html'
 
-
 class SavedListCreate(PermissionRequiredMixin, CreateView):
     permission_required = 'sdcpeople.add_savedlist'
     model = SavedList
     form_class = SavedListForm
 
-
     def get_context_data(self, **kwargs):
 
         context_data = super().get_context_data(**kwargs)
 
-        self.person_list = get_latest_vista(self.request.user, Person.objects.all())
+        if 'from-person-list' in self.kwargs and self.kwargs['from-person-list']:
+            self.person_list = get_latest_vista(self.request.user, Person.objects.all())
+        else:
+            self.person_list = {'querydict': {}, 'queryset':{}}
+
         formset_initial=[]
         for person in self.person_list['queryset']:
 
-            print('tp228fa32', person)
-#            formset_initial.append(item.Person'])
             formset_initial.append({'person':person})
         
         if self.request.POST:
@@ -936,13 +939,14 @@ class SavedListCreate(PermissionRequiredMixin, CreateView):
 
     def form_valid(self, form):
 
+        form.instance.owner = self.request.user
+
         response = super().form_valid(form)
 
         self.object = form.save()
 
         formset_data = {
             'listmemberships':SavedListListMembershipFormset( self.request.POST, instance=self.object ),
-
         }
 
         for formset_name in formset_data.keys():
@@ -962,7 +966,7 @@ class SavedListCreate(PermissionRequiredMixin, CreateView):
             return reverse_lazy('sdcpeople:savedlist-close', kwargs={'pk': self.object.pk})
         else:
             return reverse_lazy('sdcpeople:savedlist-detail', kwargs={'pk': self.object.pk})
-
+        
 class SavedListUpdate(PermissionRequiredMixin, UpdateView):
     permission_required = 'sdcpeople.change_savedlist'
     model = SavedList
@@ -1003,7 +1007,6 @@ class SavedListUpdate(PermissionRequiredMixin, UpdateView):
                 messages.add_message(self.request, messages.WARNING, 'There was a problem with ' + formset_name + ', ' + formset_name + ' was not saved')
                 print('error saving ' + formset_name + ': ')
                 print(formset_data[formset_name].errors)
-                print('tp228bc40', formset_data[formset_name])
 
         return response
 
@@ -1071,7 +1074,7 @@ class SavedListList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
+
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -1084,7 +1087,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -1095,7 +1097,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
-            print('tp 224bc51', 'retrieve_vista')
 
             self.vistaobj = retrieve_vista(
                 self.request.user,
@@ -1106,7 +1107,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
 
             )
         elif 'default_vista' in self.request.POST:
-            print('tp 224bc52', 'default_vista')
 
             self.vistaobj = default_vista(
                 self.request.user,
@@ -1440,7 +1440,7 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
+
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -1453,7 +1453,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -1464,7 +1463,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
-            print('tp 224bc51', 'retrieve_vista')
 
             self.vistaobj = retrieve_vista(
                 self.request.user,
@@ -1475,7 +1473,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
 
             )
         elif 'default_vista' in self.request.POST:
-            print('tp 224bc52', 'default_vista')
 
             self.vistaobj = default_vista(
                 self.request.user,
@@ -1490,8 +1487,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
                 self.vista_defaults,
                 self.vista_settings
             )
-
-            print('tp 224bc53', 'else')
 
         return self.vistaobj['queryset']
 
@@ -2168,7 +2163,6 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                 if data[0][col] in columns_available:
                     data_columns[data[0][col]]=col
 
-            print('tp228cf06', data_columns)
             data.pop(0)
 
             self.bulk_recordact = BulkRecordAction.objects.create(
@@ -2233,29 +2227,23 @@ class PersonCSVUpload(PermissionRequiredMixin, FormView):
                                 elif col_name == 'phone':
                                     contact_voice,created = ContactVoice.objects.get_or_create(number=row[col_num], person=person)
                                 elif col_name in location_models:
-                                    print('tp228ck16', col_name)
                                     try:
                                         location_object = location_models[col_name].objects.get(name=row[col_num])
-                                        print('tp228ck17', location_object)
+                                    
                                         if voting_address is not None:
                                             setattr(voting_address,'location'+col_name,location_object)
                                         else:
                                             lazy_set['location'+col_name] = location_object
                                     except location_models[col_name].DoesNotExist:
-                                        print('tp228ck20', 'passing on '+col_name)
                                         pass
                                 elif col_name == 'membership_status':
                                     if row[col_num].lower() in membership_statusses:
                                         setattr(person, col_name, membership_statusses[row[col_num].lower()])
 
                             
-                        print('tp228cf03', person)
                         if voting_address is not None:
-                            print('tp228ck24', voting_address)
                             voting_address.save()
                         person.save()
-
-                        #tp22814729
 
                         create_recordact(recordact_details,RecordactPerson,person,self.request.user,self.bulk_recordact)
                             
@@ -2351,7 +2339,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -2364,7 +2351,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,
@@ -2375,7 +2361,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
-            print('tp 224bc51', 'retrieve_vista')
 
             self.vistaobj = retrieve_vista(
                 self.request.user,
@@ -2386,7 +2371,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
 
             )
         elif 'default_vista' in self.request.POST:
-            print('tp 224bc52', 'default_vista')
 
             self.vistaobj = default_vista(
                 self.request.user,
@@ -2550,7 +2534,6 @@ class BulkCommunicationList(PermissionRequiredMixin, ListView):
             delete_vista(self.request)
 
         if 'query' in self.request.session:
-            print('tp 224bc49', 'query in self.request.session')
             querydict = QueryDict(self.request.session.get('query'))
             self.vistaobj = make_vista(
                 self.request.user,
@@ -2563,7 +2546,6 @@ class BulkCommunicationList(PermissionRequiredMixin, ListView):
             del self.request.session['query']
 
         elif 'vista_query_submitted' in self.request.POST:
-            print('tp 224bc50', 'vista_query_submitted')
 
             self.vistaobj = make_vista(
                 self.request.user,

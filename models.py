@@ -866,14 +866,29 @@ class SavedList(models.Model):
     when = models.DateTimeField(
         'when',
         auto_now_add=True,
-        help_text='The date this action occured'
+        help_text='The date this list was created'
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text='The user who ownes this list'
+    )
+    shared = models.IntegerField(
+        choices=[
+            (0, 'Private'),
+            (1, 'Public (Readable)'),
+        ],
+        default = 1,
+        help_text='If this list can be viewed by others'
     )
 
     def __str__(self):
         return self.name
-
+    
     class Meta:
-        ordering = ['-when', 'name']
+        ordering = ['owner', 'name', '-when']
 
 class ListMembership(models.Model):
 
@@ -885,11 +900,11 @@ class ListMembership(models.Model):
     savedlist = models.ForeignKey(
         SavedList,
         on_delete = models.CASCADE,
-        help_text = "The kust on which the person is"
+        help_text = "The list on which the person is"
     )
 
     def __str__(self):
-        if not (hasattr(self, 'person') and hasattr(self, savedlist)):
+        if not (hasattr(self, 'person') and hasattr(self, 'savedlist')):
             return '<uninitiated ListMembership>'
         return f'{self.person} on {self.savedlist}' 
 

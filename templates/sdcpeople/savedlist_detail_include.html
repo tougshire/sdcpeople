@@ -4,15 +4,139 @@
     {% include 'touglates/detail_field.html' with label=savedlist_labels.name field=object.name %}
     {% include 'touglates/detail_field.html' with label="Date" field=object.when %}
 
+    <div class="list">
+    
+      <div class="row rowhead">
+          {% include './_list_head.html' with field='' %}
+          
+          {% if 'vb_voter_id' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="VAN ID" %}
+          {% endif %}
+          {% if 'name' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Name" %}
+          {% endif %}
+          {% if 'is_quorum' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Quorum" %}
+          {% endif %}
+          {% if 'membership_status' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Status" %}
+          {% endif %}
+          {% if 'positions' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field=person_labels.positions %}
+          {% endif %}
+          {% if 'submemberships' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Committees" %}
+          {% endif %}
+          {% if 'contactvoice' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Voice Phones" %}
+          {% endif %}
+          {% if 'contacttext' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Text" %}
+          {% endif %}
+          {% if 'contactemail' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Emails" %}
+          {% endif %}
+          {% if 'voting_address' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field=person_labels.voting_address %}
+          {% endif %}
+          {% if 'voting_address.locationcity' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="City" %}
+          {% endif %}
+          {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Cong" %}
+          {% endif %}
+          {% if 'voting_address.locationstatesenate' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="SSen" %}
+          {% endif %}
+          {% if 'voting_address.locationstatehouse' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="HOD" %}
+          {% endif %}
+          {% if 'voting_address.locationmagistrate' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Mag" %}
+          {% endif %}
+          {% if 'voting_address.locationborough' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Bor" %}
+          {% endif %}
+          {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
+            {% include './_list_head.html' with field="Pct" %}
+          {% endif %}
+        </div>
+  
+        {% for membership in object.listmembership_set.all %}
+
+          <div class="row">
+            <div class="listfield"><a href="{% url 'sdcpeople:person-detail' membership.person.pk %}">view</a></div>
+          
+            {% if 'vb_voter_id' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.vb_voter_id  %}
+            {% endif %}
+            {% if 'name_last' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person  %}
+            {% endif %}
+            {% if 'is_quorum' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.membership_status.is_quorum|yesno:"Y,N" %}
+            {% endif %}
+            {% if 'membership_status' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.membership_status %}
+            {% endif %}
+            {% if 'positions' in show_columns or not show_columns %}
+              {% include 'touglates/list_fields.html' with field_1=membership.person.positions.all.0 field_2=membership.person.positions.all.1 field_3=membership.person.positions.all.2 between_fields=','%}
+            {% endif %}
+            {% if 'submemberships' in show_columns or not show_columns %}
+              {% include 'touglates/list_fields.html' with field_1=membership.person.submembership_set.all.0.subcommittee field_2=membership.person.submembership_set.all.1.subcommittee field_3=membership.person.submembership_set.all.2.subcommittee between_fields=','%}
+            {% endif %}
+            {% if 'contactvoice' in show_columns or not show_columns %}
+                {% include 'touglates/list_fields.html' with field_1=membership.person.contactvoice_set.all.0.number field_2=membership.person.contactvoice_set.all.1.number between_fields="," %}
+            {% endif %}
+            {% if 'contacttext' in show_columns or not show_columns %}
+                {% include 'touglates/list_fields.html' with field_1=membership.person.contacttext_set.all.0.number field_2=membership.person.contacttext_set.all.1.number between_fields="," %}
+            {% endif %}
+            {% if 'contactemail' in show_columns or not show_columns %}
+                {% include 'touglates/list_fields.html' with field_1=membership.person.contactemail_set.all.0.address field_2=membership.person.contactemail_set.all.1.address between_fields="," %}
+            {% endif %}
+            {% if 'voting_address' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address %}
+            {% endif %}
+            {% if 'voting_address.locationcity' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationcity %}
+            {% endif %}
+            {% if 'voting_address.locationcongress' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationcongress %}
+            {% endif %}
+            {% if 'voting_address.locationstatesenate' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationstatesenate %}
+            {% endif %}
+            {% if 'voting_address.locationstatehouse' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationstatehouse %}
+            {% endif %}
+            {% if 'voting_address.locationmagistrate' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationmagistrate %}
+            {% endif %}
+            {% if 'voting_address.locationborough' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationborough %}
+            {% endif %}
+            {% if 'voting_address.locationprecinct' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=membership.person.voting_address.locationprecinct %}
+            {% endif %}
+  
+          </div>
+        {% endfor %}
+          <div>Count: {{ count }}</div>
+      </div>
+    </div>
+
+
+
+    <!-- 
     {% include 'touglates/detail_field.html' with label="Members" field="" %}
     <table width="100%">
     {% for member in object.listmembership_set.all %}
     <tr>
       {% url 'sdcpeople:person-detail' member.person.pk as person_url %}
-      {% include 'touglates/list_field.html' with field="Member" tag="th" %} 
       {% include 'touglates/list_field.html' with field=member.person href_1=person_url tag="td" %}
       {% include 'touglates/list_field.html' with field=member.person.contactvoice_set.all.0 tag="td" %}
     </tr>
     {% endfor %}
-    </table>
+    </table> 
+  -->
   </div>

@@ -57,7 +57,7 @@
     width:100%;
 }
 
-.menu-top, .app-menu {
+.menu-top, .app-menu, .object-list-menu {
     display: flex;
     justify-content: space-around;
     width: 100%;
@@ -161,6 +161,10 @@
 
 .app-menu {
     background-color:cadetblue
+}
+
+.object-list-menu {
+    background-color:aquamarine
 }
 
 .menu a:link, .menu a:visited {

@@ -2,14 +2,35 @@
 {% load static %}
 {% block content %}
 
-  {% url 'sdcpeople:person-list' as vista_form_action %}
-  {% include 'tougshire_vistas/filter.html' with vista_form_action=vista_form_action %}
+  <div class="menu object-list-menu">
 
+    {% if perms.libtekin.view_person %}
+      <div class="menu-item">
+        <a href="#" id='btn_showvista' class="show" data-showtext="Show the Sort Filter Form" data-hidetext="Hide the Sort Filter Form">Show Sort/Filter form</a>
+      </div>
+    {% endif %}
+    {% if perms.libtekin.add_person %}
+      <div class="menu-item">
+        <a href="{% url 'sdcpeople:person-create' %}">Create</a>
+      </div>
+    {% endif %}
+    {% if perms.libtekin.view_person %}
+      <div class="menu-item">
+        <a href="{% url 'sdcpeople:person-csv' %}">Export</a>
+      </div>
+    {% endif %}
+    {% if perms.libtekin.add_savedlist %}
+      <div class="menu-item">
+        <a href="{% url ' sdcpeople:savedlist-from-person-list' %}">Create List</a>
+      </div>
+    {% endif %}
+
+  </div>
+  {% url 'sdcpeople:person-list' as vista_form_action %}
+  {% include 'tougshire_vistas/filter.html' with vista_form_action=vista_form_action hide_button=1 %}
+
+  
   <div class="list">
-    <div><a href="{% url 'sdcpeople:person-create' %}">create</a></div>
-    <div><a href="{% url 'sdcpeople:person-csv' %}">export</a></div>
-    {% if perms.sdcpeople.add_person %}<div><a href="{% url 'sdcpeople:person-csvupload' %}">Upload CSV</a></div>{% endif %}
-    {% if perms.sdcpeople.add_savedlist %}<div><a href="{% url 'sdcpeople:savedlist-create' %}">Save List</a></div>{% endif %}
     
     <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
