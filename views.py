@@ -15,7 +15,7 @@ from django.views.generic.edit import (CreateView, DeleteView, FormView,
                                        UpdateView,)
 from django.views.generic.list import ListView
 from tougshire_vistas.models import Vista
-from tougshire_vistas.views import (default_vista, delete_vista,
+from tougshire_vistas.views import (delete_vista,
                                     get_latest_vista,
                                     make_vista, retrieve_vista,
                                     vista_context_data, make_vista_fields)
@@ -354,7 +354,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 queryset,
                 querydict,
                 '',
-                False,
                 self.vista_settings
             )
             del self.request.session['query']
@@ -366,7 +365,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif hasattr(self,'vista_get_by'):
@@ -385,14 +383,6 @@ class PersonList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
         else:
             self.vistaobj = get_latest_vista(
@@ -415,9 +405,11 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
 
-        context_data = {**context_data, **vista_data}
 
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.item').all() # for choosing saved vistas
+        context_data = {**context_data, **vista_data}
+        context_data['vista_default'] = dict(self.vista_defaults)
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
 
         if self.request.POST.get('vista_name'):
             context_data['vista_name'] = self.request.POST.get('vista_name')
@@ -730,7 +722,6 @@ class EventList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -742,14 +733,6 @@ class EventList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
         else:
             self.vistaobj = get_latest_vista(
@@ -1093,7 +1076,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -1105,14 +1087,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
         else:
             self.vistaobj = get_latest_vista(
@@ -1459,7 +1433,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -1471,14 +1444,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
         else:
             self.vistaobj = get_latest_vista(
@@ -2034,7 +1999,6 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -2045,13 +2009,6 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                QueryDict(urllib.parse.urlencode(self.vista_defaults)),
-                self.vista_settings
             )
 
         return self.vistaobj['queryset']
@@ -2357,7 +2314,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -2369,14 +2325,6 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        elif 'default_vista' in self.request.POST:
-
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
         else:
             self.vistaobj = get_latest_vista(
@@ -2552,7 +2500,6 @@ class BulkCommunicationList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -2565,14 +2512,7 @@ class BulkCommunicationList(PermissionRequiredMixin, ListView):
                 self.vista_settings
 
             )
-        elif 'default_vista' in self.request.POST:
 
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
-            )
         else:
             self.vistaobj = get_latest_vista(
                 self.request.user,
