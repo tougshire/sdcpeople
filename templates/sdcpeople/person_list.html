@@ -4,10 +4,9 @@
 
   <div class="menu object-list-menu">
 
-
     {% if perms.libtekin.add_person %}
       <div class="menu-item">
-        <a href="{% url 'sdcpeople:person-create' %}">Create</a>
+        <a href="{% url 'sdcpeople:person-create' %}">Add</a>
       </div>
     {% endif %}
     {% if perms.libtekin.view_person %}
