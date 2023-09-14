@@ -346,76 +346,6 @@ class PersonList(PermissionRequiredMixin, ListView):
 
         return get_vista_queryset( self )
 
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-        if 'query' in self.request.session:
-            print('tp239d901', 'query in session')
-            querydict = QueryDict(self.request.session.get('query'))
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                querydict,
-                {},
-                '',
-                self.vista_settings
-            )
-            del self.request.session['query']
-
-        elif 'vista_default' in self.request.POST:
-
-            print('tp239d902 vista_default')
-            self.vista_defaults['combined_text_search'] = self.request.POST['combined_text_search']
-             
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.request.POST,
-                '',
-                self.vista_settings,
-                False,
-            )
-
-        elif 'vista_advanced' in self.request.POST:
-            print('tp239d729 advanced')
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                {},
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.vista_settings,
-                True,
-            )
-        elif hasattr(self,'vista_get_by'):
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.vista_get_by,
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'sdcpeople.person',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-        else:
-            self.vistaobj = get_latest_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
-            )
-
-        return self.vistaobj['queryset']
-
     def get_paginate_by(self, queryset):
 
         if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
@@ -722,52 +652,6 @@ class EventList(PermissionRequiredMixin, ListView):
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
         return get_vista_queryset( self )
-
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-
-        if 'query' in self.request.session:
-
-            querydict = QueryDict(self.request.session.get('query'))
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                querydict,
-                '',
-                False,
-                self.vista_settings
-            )
-            del self.request.session['query']
-
-        elif 'vista_query_submitted' in self.request.POST:
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'sdcpeople.event',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-        else:
-            self.vistaobj = get_latest_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
-            )
-
-        return self.vistaobj['queryset']
 
     def get_paginate_by(self, queryset):
 
@@ -1079,56 +963,6 @@ class SavedListList(PermissionRequiredMixin, ListView):
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
         return get_vista_queryset( self )
-
-
-        queryset = super().get_queryset()
-
-        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
-
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-        if 'query' in self.request.session:
-
-            querydict = QueryDict(self.request.session.get('query'))
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                querydict,
-                '',
-                False,
-                self.vista_settings
-            )
-            del self.request.session['query']
-
-        elif 'vista_query_submitted' in self.request.POST:
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'sdcpeople.savedlist',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-        else:
-            self.vistaobj = get_latest_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
-            )
-
-        return self.vistaobj['queryset']
 
     def get_paginate_by(self, queryset):
 
@@ -1444,55 +1278,6 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
 
         return get_vista_queryset( self )
     
-        queryset = super().get_queryset()
-
-        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
-
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-        if 'query' in self.request.session:
-
-            querydict = QueryDict(self.request.session.get('query'))
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                querydict,
-                '',
-                False,
-                self.vista_settings
-            )
-            del self.request.session['query']
-
-        elif 'vista_query_submitted' in self.request.POST:
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'sdcpeople.subcommittee',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-        else:
-            self.vistaobj = get_latest_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
-            )
-
-        return self.vistaobj['queryset']
-
 
     def get_paginate_by(self, queryset):
 
