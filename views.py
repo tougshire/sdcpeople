@@ -16,7 +16,7 @@ from django.views.generic.edit import (CreateView, DeleteView, FormView,
 from django.views.generic.list import ListView
 from tougshire_vistas.models import Vista
 from tougshire_vistas.views import (delete_vista,
-                                    get_latest_vista,
+                                    get_latest_vista, get_vista_queryset,
                                     make_vista, retrieve_vista,
                                     vista_context_data, make_vista_fields)
 
@@ -343,6 +343,8 @@ class PersonList(PermissionRequiredMixin, ListView):
         queryset = super().get_queryset()
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        return get_vista_queryset( self )
 
         if 'delete_vista' in self.request.POST:
             delete_vista(self.request)
@@ -719,6 +721,8 @@ class EventList(PermissionRequiredMixin, ListView):
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
+        return get_vista_queryset( self )
+
         if 'delete_vista' in self.request.POST:
             delete_vista(self.request)
 
@@ -1069,6 +1073,13 @@ class SavedListList(PermissionRequiredMixin, ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        return get_vista_queryset( self )
+
 
         queryset = super().get_queryset()
 
@@ -1427,6 +1438,12 @@ class SubCommitteeList(PermissionRequiredMixin, ListView):
 
     def get_queryset(self, **kwargs):
 
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        return get_vista_queryset( self )
+    
         queryset = super().get_queryset()
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
@@ -1998,6 +2015,12 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
+        return get_vista_queryset( self )
+    
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
         if 'delete_vista' in self.request.POST:
             delete_vista(self.request)
 
@@ -2313,6 +2336,12 @@ class CommunicationEventList(PermissionRequiredMixin, ListView):
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
+        return get_vista_queryset( self )
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
         if 'delete_vista' in self.request.POST:
             delete_vista(self.request)
 
@@ -2495,6 +2524,12 @@ class BulkCommunicationList(PermissionRequiredMixin, ListView):
 
     def get_queryset(self, **kwargs):
 
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        return get_vista_queryset( self )
+    
         queryset = super().get_queryset()
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
