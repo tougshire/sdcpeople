@@ -1802,46 +1802,6 @@ class VotingAddressList(PermissionRequiredMixin, ListView):
 
         return get_vista_queryset( self )
     
-        queryset = super().get_queryset()
-
-        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
-
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-        if 'query' in self.request.session:
-            querydict = QueryDict(self.request.session.get('query'))
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                querydict,
-                '',
-                False,
-                self.vista_settings
-            )
-            del self.request.session['query']
-
-        elif 'vista_query_submitted' in self.request.POST:
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'sdcpeople.votingaddress',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-
-        return self.vistaobj['queryset']
-
     def get_paginate_by(self, queryset):
 
         if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
